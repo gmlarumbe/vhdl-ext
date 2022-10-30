@@ -404,7 +404,7 @@ Regex search bound to LIMIT."
    (list vhdl-ext-font-lock-curly-brackets-re 0 vhdl-ext-font-lock-curly-brackets-face)))
 
 ;; highlight everything together
-(defconst vhdl-ext-font-lock-keywords-6
+(defconst vhdl-ext-font-lock-keywords
   (append
    vhdl-ext-font-lock-keywords-6
    vhdl-ext-font-lock-keywords-0
