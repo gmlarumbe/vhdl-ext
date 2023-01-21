@@ -78,7 +78,7 @@ See URL `https://github.com/ghdl/ghdl'."
             source)
   :error-patterns
   ((error line-start (file-name) ":" line ":" column ": " (message) line-end))
-  :modes vhdl-mode)
+  :modes (vhdl-mode vhdl-ts-mode))
 
 
 (defun vhdl-ext-flycheck-ghdl-hook ()

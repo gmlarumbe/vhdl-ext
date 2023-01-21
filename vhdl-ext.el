@@ -34,6 +34,12 @@
 (require 'vhdl-flycheck)
 (require 'vhdl-font-lock)
 
+;; Requires Emacs 29 with tree-sitter support and VHDL grammar
+(when (and (treesit-available-p)
+           (treesit-language-available-p 'vhdl))
+  (require 'vhdl-tree-sitter))
+
+
 
 (provide 'vhdl-ext)
 
