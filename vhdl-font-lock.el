@@ -60,10 +60,10 @@
   "Face for braces []."
   :group 'vhdl-ext-font-lock-faces)
 
-(defvar vhdl-ext-font-lock-brackets-face 'vhdl-ext-font-lock-brackets-face)
-(defface vhdl-ext-font-lock-brackets-face
+(defvar vhdl-ext-font-lock-parenthesis-face 'vhdl-ext-font-lock-parenthesis-face)
+(defface vhdl-ext-font-lock-parenthesis-face
   '((t (:foreground "dark goldenrod")))
-  "Face for brackets ()."
+  "Face for parenthesis ()."
   :group 'vhdl-ext-font-lock-faces)
 
 (defvar vhdl-ext-font-lock-curly-brackets-face 'vhdl-ext-font-lock-curly-brackets-face)
@@ -110,7 +110,7 @@ portB => signalB
 ;;;; Constants
 (defconst vhdl-ext-font-lock-punctuation-re "\\([!,;:?'=<>]\\|\\*\\)")
 (defconst vhdl-ext-font-lock-punctuation-bold-re "\\([&^~+-]\\||\\|\\.\\|\\/\\)")
-(defconst vhdl-ext-font-lock-brackets-re "[()]")
+(defconst vhdl-ext-font-lock-parenthesis-re "[()]")
 (defconst vhdl-ext-font-lock-curly-brackets-re "[{}]")
 (defconst vhdl-ext-font-lock-braces-re "\\(\\[\\|\\]\\)")
 (defconst vhdl-ext-font-lock-common-constructs-re
@@ -400,7 +400,7 @@ Regex search bound to LIMIT."
          '(2 vhdl-ext-font-lock-braces-content-face))
    ;; Braces and brackets
    (list vhdl-ext-font-lock-braces-re 0 vhdl-ext-font-lock-braces-face)
-   (list vhdl-ext-font-lock-brackets-re 0 vhdl-ext-font-lock-brackets-face)
+   (list vhdl-ext-font-lock-parenthesis-re 0 vhdl-ext-font-lock-parenthesis-face)
    (list vhdl-ext-font-lock-curly-brackets-re 0 vhdl-ext-font-lock-curly-brackets-face)))
 
 ;; highlight everything together
