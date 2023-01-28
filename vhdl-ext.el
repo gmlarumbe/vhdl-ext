@@ -27,12 +27,18 @@
 
 ;;; Code:
 
+(defgroup vhdl-ext nil
+  "VHDL Extensions."
+  :group 'languages
+  :group 'vhdl-mode)
+
 (require 'vhdl-utils)
-(require 'vhdl-templates)
 (require 'vhdl-navigation)
 (require 'vhdl-imenu)
-(require 'vhdl-flycheck)
+(require 'vhdl-templates)
 (require 'vhdl-font-lock)
+(require 'vhdl-flycheck)
+(require 'vhdl-lsp)
 
 ;; Requires Emacs 29 with tree-sitter support and VHDL grammar
 (when (and (treesit-available-p)
