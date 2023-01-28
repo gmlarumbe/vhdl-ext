@@ -30,6 +30,16 @@
 (require 'vhdl-utils)
 (require 'ggtags)
 
+
+(defcustom vhdl-ext-jump-to-parent-module-engine "ag"
+  "Default program to find parent module instantiations.
+Either `rg' or `ag' are implemented."
+  :type '(choice (const :tag "silver searcher" "ag")
+                 (const :tag "ripgrep"         "rg"))
+  :group 'vhdl-ext)
+
+
+
 (defun vhdl-ext-find-entity-instance (&optional limit bwd interactive-p)
   "Search for a VHDL entity/instance.
 Optional LIMIT argument bounds the search.
@@ -107,6 +117,86 @@ If REF is non-nil show references instead."
             (xref-find-definitions entity))
           entity) ; Report entity name
       (user-error "Not inside a VHDL instance"))))
+
+
+;;;; Jump to parent module
+(defvar vhdl-ext-jump-to-parent-module-point-marker nil
+  "Point marker to save the state of the buffer where the search was started.
+Used in ag/rg end of search hooks to conditionally set the xref marker stack.")
+(defvar vhdl-ext-jump-to-parent-module-name nil)
+(defvar vhdl-ext-jump-to-parent-module-dir nil)
+(defvar vhdl-ext-jump-to-parent-trigger nil
+  "Variable to run the post ag/rg command hook only when the ag/rg search
+was triggered by `vhdl-ext-jump-to-parent-module' command.")
+
+(defun vhdl-ext-jump-to-parent-module ()
+  "Find current module/interface instantiations via `ag'/`rg'.
+Configuration should be done so that `vhdl-ext-navigation-ag-rg-hook' is run
+after the search has been done."
+  (interactive)
+  (let* ((proj-dir (vhdl-ext-project-root))
+         (entity-name (or (vhdl-ext-select-file-entity buffer-file-name)
+                          (error "No entity found @ %s" buffer-file-name)))
+         ;; Regexp fetched from `vhdl-ext-instance-re', replaced "\\s-" with "[ ]"
+         ;; and dismissing \n to allow for easy elisp to pcre conversion
+         (entity-instance-pcre (concat "^[ ]*(" vhdl-ext-identifier-re ")[ ]*:[ ]*" ; Instance name
+                                       "(((component)|(configuration)|(entity))[ ]+(" vhdl-ext-identifier-re ")\\.)?"
+                                       "\\b(" entity-name ")\\b")))
+    ;; Update variables used by the ag/rg search finished hooks
+    (setq vhdl-ext-jump-to-parent-module-name entity-name)
+    (setq vhdl-ext-jump-to-parent-module-dir proj-dir)
+    ;; Perform project based search
+    (cond
+     ;; Try ripgrep
+     ((and (string= vhdl-ext-jump-to-parent-module-engine "rg")
+           (executable-find "rg"))
+      (let ((rg-extra-args '("-t" "vhdl" "--pcre2" "--multiline" "--stats")))
+        (setq vhdl-ext-jump-to-parent-module-point-marker (point-marker))
+        (setq vhdl-ext-jump-to-parent-trigger t)
+        (ripgrep-regexp entity-instance-pcre proj-dir rg-extra-args)))
+     ;; Try ag
+     ((and (string= vhdl-ext-jump-to-parent-module-engine "ag")
+           (executable-find "ag"))
+      (let ((ag-arguments ag-arguments)
+            (extra-ag-args '("--vhdl" "--stats")))
+        (dolist (extra-ag-arg extra-ag-args)
+          (add-to-list 'ag-arguments extra-ag-arg :append))
+        (setq vhdl-ext-jump-to-parent-module-point-marker (point-marker))
+        (setq vhdl-ext-jump-to-parent-trigger t)
+        (ag-regexp entity-instance-pcre proj-dir)))
+     ;; Fallback
+     (t
+      (error "Did not find `rg' nor `ag' in $PATH")))))
+
+(defun vhdl-ext-navigation-ag-rg-hook ()
+  "Jump to the first result and push xref marker if there were any matches.
+Kill the buffer if there is only one match."
+  (when vhdl-ext-jump-to-parent-trigger
+    (let ((entity-name (propertize vhdl-ext-jump-to-parent-module-name 'face '(:foreground "green")))
+          (dir (propertize vhdl-ext-jump-to-parent-module-dir 'face '(:foreground "light blue")))
+          (num-matches))
+      (save-excursion
+        (goto-char (point-min))
+        (re-search-forward "^\\([0-9]+\\) matches\\s-*$" nil :noerror)
+        (setq num-matches (string-to-number (match-string-no-properties 1))))
+      (cond ((eq num-matches 1)
+             (xref-push-marker-stack vhdl-ext-jump-to-parent-module-point-marker)
+             (next-error)
+             (kill-buffer (current-buffer))
+             (message "Jump to only match for [%s] @ %s" entity-name dir))
+            ((> num-matches 1)
+             (xref-push-marker-stack vhdl-ext-jump-to-parent-module-point-marker)
+             (next-error)
+             (message "Showing matches for [%s] @ %s" entity-name dir))
+            (t
+             (kill-buffer (current-buffer))
+             (message "No matches found")))
+      (setq vhdl-ext-jump-to-parent-trigger nil))))
+
+
+;;; Setup
+(add-hook 'ag-search-finished-hook #'vhdl-ext-navigation-ag-rg-hook)
+(add-hook 'ripgrep-search-finished-hook #'vhdl-ext-navigation-ag-rg-hook)
 
 
 (provide 'vhdl-navigation)
