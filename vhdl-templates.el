@@ -3,7 +3,7 @@
 ;; Copyright (C) 2022-2023 Gonzalo Larumbe
 
 ;; Author: Gonzalo Larumbe <gonzalomlarumbe@gmail.com>
-;; URL: https://github.com/gmlarumbe/verilog-ext
+;; URL: https://github.com/gmlarumbe/vhdl-ext
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
