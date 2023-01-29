@@ -59,8 +59,7 @@ At some point tried with `with-temp-buffer' without success."
 
 (defun vhdl-ext-test-font-lock-test-file (file &optional tree-sitter)
   "Test that VHDL FILE fontifies as the .faceup file describes."
-  (let ((vhdl-align-typedef-regexp nil)
-        (mode (if tree-sitter
+  (let ((mode (if tree-sitter
                   'vhdl-ts-mode
                 'vhdl-mode)))
     (cl-letf (((symbol-function 'message)
@@ -79,7 +78,8 @@ At some point tried with `with-temp-buffer' without success."
   (should (vhdl-ext-test-font-lock-test-file "axi_if_converter.vhd"))
   (should (vhdl-ext-test-font-lock-test-file "tb_axi_if_converter.vhd"))
   (should (vhdl-ext-test-font-lock-test-file "global_pkg.vhd"))
-  (should (vhdl-ext-test-font-lock-test-file "global_sim.vhd")))
+  (should (vhdl-ext-test-font-lock-test-file "global_sim.vhd"))
+  (should (vhdl-ext-test-font-lock-test-file "instances.vhd")))
 
 (provide 'vhdl-ext-tests-font-lock)
 

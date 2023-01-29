@@ -89,11 +89,12 @@ Optional LIMIT argument bounds the search."
         point-instance-begin point-instance-end instance-type instance-name)
     (save-excursion
       (when (and (vhdl-re-search-forward ";" nil t)
-                 (setq point-instance-end (point))
-                 (vhdl-ext-find-entity-instance-bwd)) ; Sets match data
-        (setq instance-name (match-string-no-properties 1))
-        (setq instance-type (match-string-no-properties 6))
-        (setq point-instance-begin (match-beginning 1))
+                 (vhdl-ext-find-entity-instance-bwd) ; Sets match data
+                 (setq instance-name (match-string-no-properties 1))
+                 (setq instance-type (match-string-no-properties 6))
+                 (setq point-instance-begin (match-beginning 1))
+                 (vhdl-re-search-forward ";" nil t) ; Needed to avoid issues with last instance on a file
+                 (setq point-instance-end (1- (point))))
         (if (and (>= point-cur point-instance-begin)
                  (<= point-cur point-instance-end))
             (list instance-type instance-name)
