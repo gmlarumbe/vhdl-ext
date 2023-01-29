@@ -133,11 +133,22 @@ Auto-configure various VHDL language servers for `lsp-mode` and `eglot`:
 - [vhdl-tool](http://vhdltool.com)
 - [hdl_checker](https://github.com/suoto/hdl_checker)
 
-Functions:
+Make sure that Language Server binary is in the $PATH:
+```shell
+$ which vhdl_ls
+/usr/local/bin/vhdl_ls
+```
 
-* `vhdl-ext-lsp-set-server`
-* `vhdl-ext-eglot-set-server`
+Interactively:
+<kbd>M-x</kbd> `vhdl-ext-lsp-set-server`<kbd>RET</kbd> `ve-vhdl-ls`
 
+Programatically:
+```elisp
+;; For `lsp-mode':
+(vhdl-ext-lsp-set-server 've-vhdl-ls)
+;; For `eglot':
+(vhdl-ext-eglot-set-server 've-vhdl-ls)
+```
 
 ## Linting ##
 Enhanced version of [GHDL](https://github.com/ghdl/ghdl) flycheck checker.
