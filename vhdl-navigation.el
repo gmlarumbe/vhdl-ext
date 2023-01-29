@@ -138,9 +138,9 @@ Used in ag/rg end of search hooks to conditionally set the xref marker stack.")
 (defvar vhdl-ext-jump-to-parent-module-dir nil)
 (defvar vhdl-ext-jump-to-parent-trigger nil
   "Variable to run the post ag/rg command hook only when the ag/rg search
-was triggered by `vhdl-ext-jump-to-parent-module' command.")
+was triggered by `vhdl-ext-jump-to-parent-entity' command.")
 
-(defun vhdl-ext-jump-to-parent-module ()
+(defun vhdl-ext-jump-to-parent-entity ()
   "Find current module/interface instantiations via `ag'/`rg'.
 Configuration should be done so that `vhdl-ext-navigation-ag-rg-hook' is run
 after the search has been done."

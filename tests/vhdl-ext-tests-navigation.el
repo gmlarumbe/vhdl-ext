@@ -83,14 +83,14 @@
           (ag-arguments '("--smart-case" "--stats" "--nogroup")))
       ;; block0
       (vhdl-ext-test-navigation-file "jump-parent/block0.vhd"
-        (should (equal (vhdl-ext-jump-to-parent-module)
+        (should (equal (vhdl-ext-jump-to-parent-entity)
                        '("\33[1;32mtests/examples/instances.vhd\33[0m\33[K:\33[1;33m47\33[0m\33[K:1:\33[30;43m    I_BLOCK0_0 : block0\33[0m\33[K"
                          "\33[1;32mtests/examples/instances.vhd\33[0m\33[K:\33[1;33m54\33[0m\33[K:1:\33[30;43m    I_BLOCK0_1 : block0\33[0m\33[K"
                          "\33[1;32mtests/examples/instances.vhd\33[0m\33[K:\33[1;33m60\33[0m\33[K:1:\33[30;43m    I_BLOCK0_2 : block0\33[0m\33[K generic map ("
                          "3 matches" "1 files contained matches"))))
       ;; block1
       (vhdl-ext-test-navigation-file "jump-parent/block1.vhd"
-        (should (equal (vhdl-ext-jump-to-parent-module)
+        (should (equal (vhdl-ext-jump-to-parent-entity)
                        '("\33[1;32mtests/examples/instances.vhd\33[0m\33[K:\33[1;33m70\33[0m\33[K:1:\33[30;43m    I_BLOCK1_0 : entity work.block1\33[0m\33[K"
                          "\33[1;32mtests/examples/instances.vhd\33[0m\33[K:\33[1;33m77\33[0m\33[K:1:\33[30;43m    I_BLOCK1_1 : entity work.block1\33[0m\33[K"
                          "\33[1;32mtests/examples/instances.vhd\33[0m\33[K:\33[1;33m84\33[0m\33[K:1:\33[30;43m    I_BLOCK1_2 : entity work.block1\33[0m\33[K generic map ("
