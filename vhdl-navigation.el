@@ -119,6 +119,16 @@ If REF is non-nil show references instead."
           entity) ; Report entity name
       (user-error "Not inside a VHDL instance"))))
 
+(defun vhdl-ext-jump-to-entity-at-point-def ()
+  "Jump to definition of entity at point."
+  (interactive)
+  (vhdl-ext-jump-to-entity-at-point))
+
+(defun vhdl-ext-jump-to-entity-at-point-ref ()
+  "Show references of entity at point."
+  (interactive)
+  (vhdl-ext-jump-to-entity-at-point :ref))
+
 
 ;;;; Jump to parent module
 (defvar vhdl-ext-jump-to-parent-module-point-marker nil
