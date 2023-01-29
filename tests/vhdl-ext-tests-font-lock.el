@@ -32,7 +32,7 @@
   "Update .faceup files.
 INFO: Makes sure that additional settings that might change specific font-lock
 are disabled for the .faceup generation.
-E.g: disables `fic-mode', `untabify-trailing-ws', 'outshine-mode'.
+E.g: disables `fic-mode', `untabify-trailing-ws', `outshine-mode'.
 At some point tried with `with-temp-buffer' without success."
   (save-window-excursion
     (when (fboundp 'untabify-trailing-ws-mode)

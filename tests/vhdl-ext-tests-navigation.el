@@ -159,7 +159,7 @@
 
 (ert-deftest navigation::instance-at-point ()
   (let ((alist vhdl-ext-test-navigation-instance-at-point)
-        file data)
+        file data block)
     (dolist (elm alist)
       (setq file (car elm))
       (setq data (cadr elm))

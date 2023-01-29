@@ -149,7 +149,7 @@ Bound search by LIMIT."
 (defun vhdl-ext-font-lock-within-translate-off ()
   "Similar as analogous `vhdl-within-translate-off' function.
 Take `vhdl-ext-font-lock-directive-keywords-re' words into account instead of
-only 'pragma'."
+only pragma."
   (and (save-excursion
          (re-search-backward
           (concat
@@ -160,7 +160,7 @@ only 'pragma'."
 (defun vhdl-ext-font-lock-start-translate-off (limit)
   "Similar as analogous `vhdl-start-translate-off' function.
 Take `vhdl-ext-font-lock-directive-keywords-re' words into account instead of
-only 'pragma'.
+only pragma.
 Regex search bound to LIMIT."
   (when (re-search-forward
          (concat
@@ -170,7 +170,7 @@ Regex search bound to LIMIT."
 (defun vhdl-ext-font-lock-end-translate-off (limit)
   "Similar as analogous `vhdl-end-translate-off' function.
 Take `vhdl-ext-font-lock-directive-keywords-re' words into account instead of
-only 'pragma'.
+only pragma.
 Regex search bound to LIMIT."
   (re-search-forward
    (concat "^\\s-*--\\s-*" vhdl-ext-font-lock-directive-keywords-re "\\s-*translate_on\\s-*\n") limit t))
@@ -178,7 +178,7 @@ Regex search bound to LIMIT."
 (defun vhdl-ext-font-lock-match-translate-off (limit)
   "Similar as analogous `vhdl-match-translate-off' function.
 Take `vhdl-ext-font-lock-directive-keywords-re' words into account instead of
-only 'pragma'.
+only pragma.
 Regex search bound to LIMIT."
   (when (< (point) limit)
     (let ((start (or (vhdl-ext-font-lock-within-translate-off)
