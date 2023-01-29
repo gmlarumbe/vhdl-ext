@@ -32,7 +32,6 @@
 ;;;; Common
 (defcustom vhdl-ext-lsp-available-servers
   '((ve-hdl-checker . ("hdl_checker" "--lsp"))
-    ;; (ve-vhdl-ls     . ("vhdl_lang" "--config" vhdl-ls-config-file))
     (ve-vhdl-ls     . "vhdl_ls")
     (ve-ghdl-ls     . "ghdl-ls")
     (ve-vhdl-tool   . "vhdl-tool"))
