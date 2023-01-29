@@ -24,7 +24,7 @@ jobs:
           version: ${{ matrix.emacs_version }}
 
       # Checks-out repository under $GITHUB_WORKSPACE
-      - name: Clone verilog-ext
+      - name: Clone vhdl-ext
         uses: actions/checkout@v2
 
       - name: Install binaries

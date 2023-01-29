@@ -41,7 +41,8 @@
 (require 'vhdl-lsp)
 
 ;; Requires Emacs 29 with tree-sitter support and VHDL grammar
-(when (and (treesit-available-p)
+(when (and (>= emacs-major-version 29)
+           (treesit-available-p)
            (treesit-language-available-p 'vhdl))
   (require 'vhdl-tree-sitter))
 
