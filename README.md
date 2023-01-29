@@ -8,9 +8,9 @@ This package includes some extensions on top of the great Emacs `vhdl-mode`.
 * Improve syntax highlighting
 * LSP configuration for `lsp-mode` and `eglot`
 * Additional options for `flycheck` linters
-* Improve `imenu`: detect instances
-* Navigate through instances in a module
-* Jump to definition/reference of module at point via `ggtags` and `xref`
+* Improve `imenu`, detect instances
+* Navigate through instances in a entity
+* Jump to definition/reference of entity at point via `ggtags` and `xref`
 * Templates insertion via `hydra`
 
 ## Installation ##
@@ -23,7 +23,7 @@ This package includes some extensions on top of the great Emacs `vhdl-mode`.
 
 List of required binaries:
 - Definitions and references navigation: `global`, `gtags`, `universal-ctags`, `python`, `pygments`
-- Jump to parent module: `ag`, `ripgrep`
+- Jump to parent entity: `ag`, `ripgrep`
 - Linting: `ghdl`
 - LSP: `vhdl-ls`, `ghdl-ls`, `vhdl-tool`, `hdl_checker`
 
@@ -95,7 +95,7 @@ By default `vhdl-ext` does not create any keybindings. Following snippet shows a
   :bind (:map vhdl-mode-map
          ("C-M-d"   . vhdl-ext-find-entity-instance-fwd)
          ("C-M-u"   . vhdl-ext-find-entity-instance-bwd)
-         ("C-M-."   . vhdl-ext-jump-to-parent-module)
+         ("C-M-."   . vhdl-ext-jump-to-parent-entity)
          ("M-."     . vhdl-ext-jump-to-entity-at-point-def)
          ("M-?"     . vhdl-ext-jump-to-entity-at-point-ref)
          ("C-c C-t" . vhdl-ext-hydra/body))
@@ -119,8 +119,9 @@ Improved fontification via:
   * Tree-sitter: requires Emacs 29
   * Font-lock override
 
-For face customization: <kbd>M-x</kbd> `customize-group` <kbd>RET</kbd> `vhdl-ext-faces`
+<img src="https://user-images.githubusercontent.com/51021955/215353070-8a21f758-407d-4455-bdac-bf92310c59e4.gif" width=400 height=300>
 
+For face customization: <kbd>M-x</kbd> `customize-group` <kbd>RET</kbd> `vhdl-ext-faces`
 
 
 ## Language Server Protocol ##
@@ -139,7 +140,7 @@ Functions:
 
 
 ## Linting ##
-Enhanced version of [GHDL](https://github.com/ghdl/ghdl) `flycheck` checker.
+Enhanced version of [GHDL](https://github.com/ghdl/ghdl) flycheck checker.
 
 * Allows setting name of current work library name
 * Automatically include directories of open VHDL buffers
@@ -148,16 +149,19 @@ Enhanced version of [GHDL](https://github.com/ghdl/ghdl) `flycheck` checker.
 ## Imenu ##
 Support detection of instances
 
-* `imenu-list` is a recommended package to visualize different levels of nesting in the hierarchy.
+<img src="https://user-images.githubusercontent.com/51021955/215353082-9a187daf-7f76-4c9b-8563-7beba6e1aa6a.gif" width=400 height=300>
 
+* `imenu-list` is a recommended package to visualize different levels of nesting in the hierarchy.
 
 ## Navigation ##
 
 ### Instance navigation ###
 Navigate through instances inside a entity forward/backwards.
+
 Jump to parent entity via `ag`/`ripgrep`.
 
-<img src="https://user-images.githubusercontent.com/51021955/208782492-b2ff09b3-f662-4d22-a46c-64eb69f9f7b9.gif" width=400 height=300>
+<img src="https://user-images.githubusercontent.com/51021955/215353135-446b678b-e3be-42f3-8009-5d5bd7c5e5bd.gif" width=400 height=300>
+
 
 Functions:
 
@@ -178,6 +182,8 @@ Functions:
 
 ## Snippets ##
 Snippet selection via `hydra`.
+
+<img src="https://user-images.githubusercontent.com/51021955/215353124-7e374754-cd91-4924-9b4b-3c6a29cad921.gif" width=400 height=300>
 
 Functions:
 
