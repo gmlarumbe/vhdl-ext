@@ -230,7 +230,10 @@
     ;; Font-lock.
     (setq font-lock-defaults nil) ; Disable `vhdl-mode' font-lock/indent config
     (setq-local treesit-font-lock-feature-list
-                '((comment string all keyword operator punctuation function builtin types)))
+                '((comment string)
+                  (keyword operator punctuation function builtin types)
+                  (all)
+                  (nil)))
     (setq-local treesit-font-lock-settings vhdl--treesit-settings)
     ;; Setup
     (treesit-major-mode-setup)))
