@@ -30,11 +30,58 @@
 
 ;;; Code:
 
-
+;;; Requirements
 (require 'vhdl-mode)
 (require 'treesit)
 
+;;; Customization
+(defcustom vhdl-ts-mode-hook nil
+  "Hook run after VHDL Tree-sitter mode is loaded."
+  :type 'hook
+  :group 'vhdl-ext)
 
+(defcustom vhdl-ts-indent-level 4
+  "Tree-sitter indentation of VHDL statements with respect to containing block."
+  :group 'vhdl-ext
+  :type 'integer)
+(put 'vhdl-ts-indent-level 'safe-local-variable #'integerp)
+
+
+;;; Utils
+(defun vhdl-ts--node-at-point ()
+  "Return tree-sitter node at point."
+  (treesit-node-at (point) 'vhdl))
+
+(defun vhdl-ts--node-has-parent-recursive (node node-type)
+  "Return non-nil if NODE is part of NODE-TYPE in the hierarchy."
+  (treesit-parent-until
+   node
+   (lambda (node)
+     (string= (treesit-node-type node) node-type))))
+
+(defun vhdl-ts--node-at-bol ()
+  "Return node at first non-blank character of current line.
+Snippet fetched from `treesit--indent-1'."
+  (let* ((bol (save-excursion
+                (forward-line 0)
+                (skip-chars-forward " \t")
+                (point)))
+         (smallest-node
+          (cond ((null (treesit-parser-list)) nil)
+                ((eq 1 (length (treesit-parser-list)))
+                 (treesit-node-at bol))
+                ((treesit-language-at (point))
+                 (treesit-node-at bol (treesit-language-at (point))))
+                (t (treesit-node-at bol))))
+         (node (treesit-parent-while
+                smallest-node
+                (lambda (node)
+                  (eq bol (treesit-node-start node))))))
+    node))
+
+
+
+;;; Font-lock
 (defconst vhdl-ts-keywords (append vhdl-02-keywords vhdl-08-keywords))
 
 (defconst vhdl-ts-types (append vhdl-02-types vhdl-08-types vhdl-math-types))
@@ -220,8 +267,78 @@
    ))
 
 
+;;; Indent
+(defun vhdl-ts--generic-or-port (&rest _)
+  "A tree-sitter simple indent matcher.
+Matches if point is at generic/port declaration."
+  (let* ((node (vhdl-ts--node-at-bol))
+         (node-type (treesit-node-type node))
+         (entity-node (vhdl-ts--node-has-parent-recursive node "entity_declaration")))
+    (when (and entity-node
+               (or (string= "generic_clause" node-type)
+                   (string= "port_clause" node-type)
+                   (string= "entity_header" node-type)))
+      (treesit-node-start entity-node))))
 
-(define-derived-mode vhdl-ts-mode vhdl-mode "VHDLts"
+
+;; INFO: Testing with "axi_if_converter/src/axi_lite_master/rtl/axi_lite_master.vhd"
+(setq vhdl-ts--indent-rules
+  `((vhdl
+     ;; TODO: Still needs polishing
+     ((node-is "comment") parent-bol 4)
+
+     ((node-is "library_clause") parent-bol 0)
+     ((node-is "use_clause") parent-bol 0)
+     ((node-is "entity_declaration") parent-bol 0)
+     ((node-is "design_unit") parent-bol 0) ; architecture body
+
+     ((node-is "generic_clause") parent-bol 4) ; Generic keyword
+     ;; ((node-is "entity_header") parent-bol 4) ; Generic keyword
+     ((node-is "constant_interface_declaration") parent-bol 4) ; Generic ports
+     ((node-is "signal_interface_declaration") parent-bol 4) ; Signal ports
+     (vhdl-ts--generic-or-port grand-parent 4) ; Port keyword
+     ;; ((node-is "port_clause") parent-bol 4) ; Port keyword
+
+     ((node-is "declarative_part") parent-bol 4) ; First signal declaration of a declarative part
+     ((node-is "signal_declaration") grand-parent 4) ; Parent is declarative_part, first sentence
+     ((node-is "concurrent_statement_part") parent-bol 4) ; First signal declaration of a declarative part
+     ((node-is "simple_concurrent_signal_assignment") grand-parent 4) ; Parent is (concurrent_statement_part)
+     ((node-is "conditional_concurrent_signal_assignment") grand-parent 4)
+
+     ;; TODO: Still not working as expected
+     ((node-is "alternative_conditional_waveforms") parent-bol 4) ; Parent is conditional_waveforms
+    ;;      read_data <= m_axi_rdata when (m_axi_rvalid = '1' and axi_rready = '1')
+    ;;                   else (others => '0');
+
+     ((node-is "process_statement") grand-parent 4) ; Parent is architecture_body
+
+     ((node-is "sequence_of_statements") parent-bol 4) ; Statements inside process
+     ((node-is "simple_waveform_assignment") grand-parent 4) ; parent is "sequence_of_statements"
+     ((node-is "if_statement") parent-bol 4) ; parent is "sequence_of_statements"
+
+     ((or (node-is "else")
+          (node-is "elsif"))
+      prev-sibling 0)
+
+     ;; ((or (node-is "end if")
+     ;;      (node-is "end process"))
+     ;;  parent-bol 0)
+     ((node-is "end") parent-bol 0)
+
+     ;; Opening
+     ((node-is "begin") parent-bol 0)
+
+     ;; Closing
+     ((or (node-is "}")
+          (node-is ")")
+          (node-is "]"))
+      parent-bol 0)
+
+     )))
+
+
+;;; Major-mode
+(define-derived-mode vhdl-ts-mode vhdl-mode "VHDL-ts"
   "Major mode for editing VHDL files, using tree-sitter library."
   :syntax-table vhdl-mode-syntax-table
   ;; Treesit
@@ -235,12 +352,16 @@
                   (all)
                   (nil)))
     (setq-local treesit-font-lock-settings vhdl--treesit-settings)
+    ;; Indent.
+    (setq-local indent-line-function nil)
+    (setq-local comment-indent-function nil)
+    (setq-local treesit-simple-indent-rules vhdl-ts--indent-rules)
     ;; Setup
     (treesit-major-mode-setup)))
 
 
+;;; Provide
 (provide 'vhdl-tree-sitter)
 
 
 ;;; vhdl-tree-sitter.el ends here
-
