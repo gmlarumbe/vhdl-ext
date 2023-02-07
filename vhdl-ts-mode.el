@@ -1,4 +1,4 @@
-;;; vhdl-tree-sitter.el --- VHDL Extensions for Emacs  -*- lexical-binding: t -*-
+;;; vhdl-ts-mode.el --- VHDL Extensions for Emacs  -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2022-2023 Gonzalo Larumbe
 
@@ -338,6 +338,7 @@ Matches if point is at generic/port declaration."
 
 
 ;;; Major-mode
+;;;###autoload
 (define-derived-mode vhdl-ts-mode vhdl-mode "VHDL-ts"
   "Major mode for editing VHDL files, using tree-sitter library."
   :syntax-table vhdl-mode-syntax-table
@@ -361,7 +362,7 @@ Matches if point is at generic/port declaration."
 
 
 ;;; Provide
-(provide 'vhdl-tree-sitter)
+(provide 'vhdl-ts-mode)
 
 
-;;; vhdl-tree-sitter.el ends here
+;;; vhdl-ts-mode.el ends here

@@ -86,6 +86,8 @@
 (message "Installing and setting up vhdl-ext")
 (use-package vhdl-ext
   :straight (:host github :repo "gmlarumbe/vhdl-ext"))
+(vhdl-ext-mode-setup)
+(add-hook 'vhdl-mode-hook #'vhdl-ext-mode)
 
 
 
