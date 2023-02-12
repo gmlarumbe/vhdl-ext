@@ -169,8 +169,8 @@ Return nil if no entity was found."
   (let (vhdl-buffers vhdl-dirs)
     (dolist (buf (buffer-list (current-buffer)))
       (with-current-buffer buf
-        (when (or (string-equal major-mode "vhdl-mode")
-                  (string-equal major-mode "vhdl-ts-mode"))
+        (when (or (eq major-mode 'vhdl-mode)
+                  (eq major-mode 'vhdl-ts-mode))
           (push buf vhdl-buffers)
           (unless (member default-directory vhdl-dirs)
             (push default-directory vhdl-dirs)))))
@@ -992,7 +992,7 @@ Override any previous configuration for `vhdl-mode' and `vhdl-ts-mode'."
         (setq vhdl-ext-flycheck-ghdl-work-lib (vhdl-work-library))
         (add-hook 'kill-buffer-hook #'vhdl-ext-kill-buffer-hook nil :local)
         ;; `vhdl-mode'-only customization (exclude `vhdl-ts-mode')
-        (when (string= major-mode "vhdl-mode")
+        (when (eq major-mode 'vhdl-mode)
           ;; Imenu
           (advice-add 'vhdl-index-menu-init :override #'vhdl-ext-index-menu-init)
           ;; Font-lock
