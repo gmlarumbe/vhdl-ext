@@ -1,124 +1,102 @@
 [![Build Status](https://github.com/gmlarumbe/vhdl-ext/workflows/ERT/badge.svg)](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/build.yml)
+[![MELPA](https://melpa.org/packages/vhdl-ext-badge.svg)](https://melpa.org/#/vhdl-ext)
 [![Build Status](https://github.com/gmlarumbe/vhdl-ext/workflows/melpazoid/badge.svg)](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/melpazoid.yml)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
 
 # vhdl-ext.el - VHDL Extensions for Emacs #
 
 This package includes some extensions on top of the great Emacs `vhdl-mode`.
 
-* Tree-sitter support (requires Emacs 29)
+* Tree-sitter powered `vhdl-ts-mode`
 * Improve syntax highlighting
 * LSP configuration for `lsp-mode` and `eglot`
 * Additional options for `flycheck` linters
 * Improve `imenu`, detect instances
 * Navigate through instances in a entity
-* Jump to definition/reference of entity at point via `ggtags` and `xref`
+* Jump to definition/reference of entity at point
 * Templates insertion via `hydra`
 
 ## Installation ##
 
-### Requirements ###
+### MELPA ###
 
-#### Binaries and Emacs Lisp packages ####
+`vhdl-ext` is available on MELPA.
 
-`vhdl-ext` makes use of several binaries as backend engines to support IDE-like functionality. In addition, some third party Emacs Lisp packages serve as frontends for those binaries.
+See [Getting Started](https://melpa.org/partials/getting-started.html) for instructions on how to setup and download packages.
 
-List of required binaries:
-- Definitions and references navigation: `global`, `gtags`, `universal-ctags`, `python`, `pygments`
-- Jump to parent entity: `ag`, `ripgrep`
-- Linting: `ghdl`
-- LSP: `vhdl-ls`, `ghdl-ls`, `vhdl-tool`, `hdl_checker`
+`vhdl-ts-mode` is not yet available on MELPA. See [notes](https://github.com/gmlarumbe/vhdl-ext/wiki/Tree-sitter#notes) for more info.
 
-Installation of required Emacs-lisp packages:
-```emacs-lisp
-(use-package projectile)
-(use-package ggtags)
-(use-package ag)
-(use-package ripgrep)
-(use-package hydra)
-(use-package outshine)
-(use-package flycheck)
-(use-package lsp-mode)
-(use-package eglot)
-```
 
-### vhdl-ext ###
+### straight.el ###
 
-#### straight.el ####
-
-For the time being `vhdl-ext` is still work in progress and is not yet available at [MELPA](https://melpa.org/).
-To install it via [straight](https://github.com/radian-software/straight.el):
+To install it via [straight](https://github.com/radian-software/straight.el) with `use-package`:
 
 ```emacs-lisp
 (straight-use-package 'use-package)
-(use-package
-    :straight (:repo "gmlarumbe/vhdl-ext"))
+
+(use-package vhdl-ext
+  :straight (:host github :repo "gmlarumbe/vhdl-ext"
+             :files ("vhdl-ext.el" "vhdl-ts-mode.el"")))
 ```
 
-#### Manually ####
+### Manually ###
+
+First download `vhdl-ext` in the desired directory (e.g. `~/.emacs.d`):
+
 ```shell
 $ cd ~/.emacs.d
 $ git clone https://github.com/gmlarumbe/vhdl-ext
 ```
+
 And add the following snippet to your `.emacs` or `init.el`:
+
 ```emacs-lisp
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/vhdl-ext"))
 (require 'vhdl-ext)
 ```
 
-### tree-sitter ###
-Requires Emacs 29, installation of `tree-sitter` and VHDL grammar.
-
-To install `tree-sitter` there are different options:
-
-* Via [npm](https://www.npmjs.com/package/tree-sitter)
-* Manually:
-```shell
-$ git clone https://github.com/tree-sitter/tree-sitter.git
-$ cd tree-sitter
-$ make && sudo make install
-```
-
-Installation of grammar can be automated through the script:
-```shell
-$ .github/scripts/install-ts-grammar.sh
-```
-That will install `libtree-sitter-vhdl.so` at `$HOME/.emacs.d/tree-sitter`.
-
-
 ## Basic config ##
-By default `vhdl-ext` does not create any keybindings. Following snippet shows a configuration example with `use-package`:
-```emacs-lisp
+
+The most basic configuration just requires setup of the minor-mode and to add it as a hook for `vhdl-mode`:
+
+```elisp
+(vhdl-ext-mode-setup)
+(add-hook 'vhdl-mode-hook #'vhdl-ext-mode)
+```
+
+If installed and loaded via `use-package`:
+
+```elisp
 (use-package vhdl-ext
-  :straight (:host github :repo "gmlarumbe/vhdl-ext")
   :after vhdl-mode
   :demand
-  :mode (("\\.vhd\\'" . vhdl-ts-mode))
-  :bind (:map vhdl-mode-map
-         ("C-M-d"   . vhdl-ext-find-entity-instance-fwd)
-         ("C-M-u"   . vhdl-ext-find-entity-instance-bwd)
-         ("C-M-."   . vhdl-ext-jump-to-parent-entity)
-         ("M-."     . vhdl-ext-jump-to-entity-at-point-def)
-         ("M-?"     . vhdl-ext-jump-to-entity-at-point-ref)
-         ("C-c C-t" . vhdl-ext-hydra/body))
+  :hook ((vhdl-mode . vhdl-ext-mode))
   :config
-  ;; LSP
-  (vhdl-ext-lsp-set-server 'ghdl-ls)
-  (vhdl-ext-eglot-set-server 'ghdl-ls)
-  ;; Flycheck
-  (setq vhdl-ext-flycheck-ghdl-work-lib "~/my_ghdl_workdir"))
+  (vhdl-ext-mode-setup))
 ```
+
+## Keybindings ##
+
+Enabling of `verilog-ext-mode` minor-mode creates the following keybindings:
+
+  * <kbd>C-M-u</kbd> `vhdl-ext-find-entity-instance-bwd`
+  * <kbd>C-M-d</kbd> `vhdl-ext-find-entity-instance-fwd`
+  * <kbd>C-M-.</kbd> `vhdl-ext-jump-to-parent-entity`
+  * <kbd>C-c C-t</kbd> `vhdl-ext-hydra/body`
+
 
 # Features #
 
 ## Tree-sitter ##
-The package includes the major-mode `vhdl-ts-mode` for syntax highligting and indentation.
-There is some WIP, e.g. Imenu or navigation functions.
+The package provides the major-mode `vhdl-ts-mode` for syntax highligting and indentation. It is derived from `vhdl-mode` making all `vhdl-mode` functionality still available.
+
+`vhdl-ts-mode` is still work in progress and aims to provide the same functionality as `vhdl-ext` but much faster and efficiently.
+
+For more information see the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Tree-sitter).
+
 
 ## Syntax highlighting ##
-Improved fontification via:
-
-  * Tree-sitter: requires Emacs 29
-  * Font-lock override
 
 <img src="https://user-images.githubusercontent.com/51021955/215353070-8a21f758-407d-4455-bdac-bf92310c59e4.gif" width=400 height=300>
 
@@ -134,22 +112,8 @@ Auto-configure various VHDL language servers for `lsp-mode` and `eglot`:
 - [vhdl-tool](http://vhdltool.com)
 - [hdl_checker](https://github.com/suoto/hdl_checker)
 
-Make sure that Language Server binary is in the $PATH:
-```shell
-$ which vhdl_ls
-/usr/local/bin/vhdl_ls
-```
+For configuration instructions, see the [wiki](https://github.com/gmlarumbe/verilog-ext/wiki/Language-Server-Protocol)
 
-Interactively:
-<kbd>M-x</kbd> `vhdl-ext-lsp-set-server`<kbd>RET</kbd> `ve-vhdl-ls`
-
-Programatically:
-```elisp
-;; For `lsp-mode':
-(vhdl-ext-lsp-set-server 've-vhdl-ls)
-;; For `eglot':
-(vhdl-ext-eglot-set-server 've-vhdl-ls)
-```
 
 ## Linting ##
 Enhanced version of [GHDL](https://github.com/ghdl/ghdl) flycheck checker.
