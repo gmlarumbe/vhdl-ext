@@ -951,6 +951,8 @@ Override any previous configuration for `vhdl-mode' and `vhdl-ts-mode'."
     (define-key map (kbd "C-M-u") 'vhdl-ext-find-entity-instance-bwd)
     (define-key map (kbd "C-M-d") 'vhdl-ext-find-entity-instance-fwd)
     (define-key map (kbd "C-M-.") 'vhdl-ext-jump-to-parent-entity)
+    (define-key map (kbd "C-c M-.") 'vhdl-ext-jump-to-entity-at-point-def)
+    (define-key map (kbd "C-c M-?") 'vhdl-ext-jump-to-entity-at-point-ref)
     (define-key map (kbd "C-c C-t") 'vhdl-ext-hydra/body)
     map)
   "Key map for the `vhdl-ext'.")
