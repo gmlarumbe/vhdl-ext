@@ -6,7 +6,7 @@
 ;; URL: https://github.com/gmlarumbe/vhdl-ext
 ;; Version: 0.1.0
 ;; Keywords: VHDL, IDE, Tools
-;; Package-Requires: ((emacs "28.1") (eglot "1.9") (lsp-mode "8.0.1") (ag "0.48") (ripgrep "0.4.0") (ggtags "0.9.0") (hydra "0.15.0") (flycheck "33-cvs"))
+;; Package-Requires: ((emacs "28.1") (eglot "1.9") (lsp-mode "8.0.1") (ag "0.48") (ripgrep "0.4.0") (hydra "0.15.0") (flycheck "33-cvs"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 ;;  - Additional options for `flycheck' linters
 ;;  - Improve `imenu': detect instances
 ;;  - Navigate through instances in a module
-;;  - Jump to definition/reference of module at point via `ggtags' and `xref'
+;;  - Jump to definition/reference of module at point
 ;;  - Templates insertion via `hydra'
 
 ;;; Code:
@@ -40,7 +40,6 @@
 (require 'lsp-mode)
 (require 'lsp-vhdl)
 (require 'ag)
-(require 'ggtags)
 (require 'ripgrep)
 (require 'hydra)
 (require 'flycheck)
@@ -160,8 +159,6 @@ Return nil if no entity was found."
   "Find current project root, depending on available packages."
   (or (and (project-current)
            (project-root (project-current)))
-      (when (featurep 'ggtags)
-        (ggtags-current-project-root))
       default-directory))
 
 (defun vhdl-ext-update-buffer-and-dir-list ()
@@ -190,7 +187,7 @@ Return nil if no entity was found."
 
 ;;; Navigation
 ;;  - Find instances forward/backwards
-;;  - Jump to definition/reference of entity at point (requires gtags/xref)
+;;  - Jump to definition/reference of entity at point
 (defun vhdl-ext-find-entity-instance (&optional limit bwd interactive-p)
   "Search for a VHDL entity/instance.
 Optional LIMIT argument bounds the search.
@@ -255,12 +252,6 @@ Optional LIMIT argument bounds the search."
   "Jump to definition of instance at point.
 If REF is non-nil show references instead."
   (interactive)
-  (unless (executable-find "global")
-    (error "Couldn't find executable `global' in PATH"))
-  (unless (member 'ggtags--xref-backend xref-backend-functions)
-    (error "Error: ggtags not configured as an xref backend.  Is ggtags-mode enabled?"))
-  (unless ggtags-project-root
-    (error "Error: `ggtags-project-root' not set.  Are GTAGS/GRTAGS/GPATH files created?"))
   (let ((entity (car (vhdl-ext-instance-at-point))))
     (if entity
         (progn
