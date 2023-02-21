@@ -1,4 +1,4 @@
-[![Build Status](https://github.com/gmlarumbe/vhdl-ext/workflows/ERT/badge.svg)](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/build.yml)
+[![Build Status](https://github.com/gmlarumbe/vhdl-ext/workflows/ERT-straight/badge.svg)](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/build_straight.yml)
 [![MELPA](https://melpa.org/packages/vhdl-ext-badge.svg)](https://melpa.org/#/vhdl-ext)
 [![Build Status](https://github.com/gmlarumbe/vhdl-ext/workflows/melpazoid/badge.svg)](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/melpazoid.yml)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
@@ -78,11 +78,13 @@ If installed and loaded via `use-package`:
 
 ## Keybindings ##
 
-Enabling of `verilog-ext-mode` minor-mode creates the following keybindings:
+Enabling of `vhdl-ext-mode` minor-mode creates the following keybindings:
 
   * <kbd>C-M-u</kbd> `vhdl-ext-find-entity-instance-bwd`
   * <kbd>C-M-d</kbd> `vhdl-ext-find-entity-instance-fwd`
   * <kbd>C-M-.</kbd> `vhdl-ext-jump-to-parent-entity`
+  * <kbd>C-c M-.</kbd> `vhdl-ext-jump-to-entity-at-point-def`
+  * <kbd>C-c M-?</kbd> `vhdl-ext-jump-to-entity-at-point-ref`
   * <kbd>C-c C-t</kbd> `vhdl-ext-hydra/body`
 
 
@@ -112,14 +114,18 @@ Auto-configure various VHDL language servers for `lsp-mode` and `eglot`:
 - [vhdl-tool](http://vhdltool.com)
 - [hdl_checker](https://github.com/suoto/hdl_checker)
 
-For configuration instructions, see the [wiki](https://github.com/gmlarumbe/verilog-ext/wiki/Language-Server-Protocol)
+For configuration instructions, see the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Language-Server-Protocol).
 
 
 ## Linting ##
 Enhanced version of [GHDL](https://github.com/ghdl/ghdl) flycheck checker.
 
-* Allows setting name of current work library name
+* Allows setting name of current work library name, e.g:
+  ```elisp
+  (setq vhdl-ext-flycheck-ghdl-work-lib (vhdl-work-library))
+  ```
 * Automatically include directories of open VHDL buffers
+  * Variable `vhdl-ext-flycheck-ghdl-include-path` will be updated every time a new VHDL file is opened
 
 
 ## Imenu ##
@@ -127,33 +133,15 @@ Support detection of instances
 
 <img src="https://user-images.githubusercontent.com/51021955/215353082-9a187daf-7f76-4c9b-8563-7beba6e1aa6a.gif" width=400 height=300>
 
-* `imenu-list` is a recommended package to visualize different levels of nesting in the hierarchy.
-
 ## Navigation ##
-
-### Instance navigation ###
-Navigate through instances inside a entity forward/backwards.
-
-Jump to parent entity via `ag`/`ripgrep`.
 
 <img src="https://user-images.githubusercontent.com/51021955/215353135-446b678b-e3be-42f3-8009-5d5bd7c5e5bd.gif" width=400 height=300>
 
+* Navigate instances inside an entity
+* Jump to definition/references of entity at point
+* Jump to parent entity
 
-Functions:
-
-* `vhdl-ext-find-entity-instance-fwd`
-* `vhdl-ext-find-entity-instance-bwd`
-* `vhdl-ext-jump-to-parent-entity`
-* `vhdl-ext-instance-at-point`
-
-### Jump to definition/reference ###
-Jump to definition/reference of entity at point via `ggtags` and `xref`.
-
-Functions:
-
-* `vhdl-ext-jump-to-entity-at-point`
-* `vhdl-ext-jump-to-entity-at-point-def`
-* `vhdl-ext-jump-to-entity-at-point-ref`
+For detailed info see the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Navigation).
 
 
 ## Snippets ##
@@ -161,9 +149,7 @@ Snippet selection via `hydra`.
 
 <img src="https://user-images.githubusercontent.com/51021955/215353124-7e374754-cd91-4924-9b4b-3c6a29cad921.gif" width=400 height=300>
 
-Functions:
-
-* `vhdl-ext-hydra/body`
+* `vhdl-ext-hydra/body`: <kbd>C-c C-t</kbd>
 
 
 # Contributing #
@@ -174,15 +160,19 @@ For new functionality add new ERT tests if possible.
 
 ## ERT Tests setup ###
 
-To run the ERT test suite change directory to the `vhdl-ext` root and run the `ert-tests.sh` script:
+To run the whole ERT test suite change directory to the `vhdl-ext` root and run the `test` target:
 
 ```shell
 $ cd ~/.emacs.d/vhdl-ext
-$ .github/scripts/ert-tests.sh
+$ make test
 ```
 
-If there is a missing dependency, check the file `.github/scripts/setup-env.sh` used by GitHub Actions to configure your environment.
+To run a subset of tests (e.g. imenu):
 
+```shell
+$ cd ~/.emacs.d/vhdl-ext
+$ tests/scripts/ert-tests.sh recompile_run imenu::
+```
 
 ## Other packages
 
