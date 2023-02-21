@@ -1,4 +1,4 @@
-name: ERT
+name: ERT-package-el
 
 on:
   push:
@@ -36,4 +36,5 @@ jobs:
       - name: Run ERT tests
         run: |
           cd $GITHUB_WORKSPACE
-          make test
+          make test_package_el
+

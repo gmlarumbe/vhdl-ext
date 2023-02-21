@@ -6,10 +6,18 @@
 
 # * Utils
 run_elisp_cmd() {
+    local SETUP_FILE=
+
+    if [[ $# -ge 2 ]]; then
+        SETUP_FILE=vhdl-ext-tests-setup-package
+    else
+        SETUP_FILE=vhdl-ext-tests-setup-straight
+    fi
+
     emacs -Q -nw -batch \
           -L $PWD/test \
           -l ert \
-          -l vhdl-ext-tests-setup \
+          -l $SETUP_FILE \
           -l vhdl-ext-tests \
           --eval "$1"
 }
@@ -22,24 +30,30 @@ clean() {
 }
 
 compile() {
+    local PACKAGE_EL=$1
+
     echo "####################"
     echo "## Byte-compiling ##"
     echo "####################"
     echo ""
-    run_elisp_cmd "(byte-recompile-directory \"$PWD\" 0)"
+    run_elisp_cmd "(byte-recompile-directory \"$PWD\" 0)" $PACKAGE_EL
 }
 
 recompile() {
+    local PACKAGE_EL=$1
+
     clean
-    compile
+    compile $PACKAGE_EL
 }
 
-update_indent_dir () {
-    run_elisp_cmd "(vhdl-ext-test-indent-update-dir)"
+gen_indent_dir () {
+    run_elisp_cmd "(vhdl-ext-test-indent-gen-expected-files)"
 }
 
 run_tests () {
     local RC=
+    local SELECTOR=
+    local PACKAGE_EL=$2
 
     echo "#######################"
     echo "## Running ERT tests ##"
@@ -48,20 +62,29 @@ run_tests () {
 
     if [[ $# -ge 1 ]]; then
         SELECTOR=$1
-        CMD="(ert-run-tests-batch-and-exit \"$SELECTOR\")"
+
+        if [[ "$SELECTOR" == "t" ]]; then # Don't double-quote t symbol
+            CMD="(ert-run-tests-batch-and-exit t)"
+        else
+            CMD="(ert-run-tests-batch-and-exit \"$SELECTOR\")"
+        fi
+
     else
         CMD="(ert-run-tests-batch-and-exit)"
     fi
 
-    run_elisp_cmd "$CMD"
+    run_elisp_cmd "$CMD" $PACKAGE_EL
     RC=$?
     echo "Exiting with return code $RC"
     return $RC
 }
 
 recompile_run () {
-    recompile
-    run_tests $1
+    local SELECTOR=$1
+    local PACKAGE_EL=$2
+
+    recompile $PACKAGE_EL
+    run_tests $SELECTOR $PACKAGE_EL
 }
 
 # Main

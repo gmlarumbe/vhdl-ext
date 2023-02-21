@@ -1,4 +1,4 @@
-;;; vhdl-ext-tests-setup.el --- VHDL Tests Setup  -*- lexical-binding: t -*-
+;;; vhdl-ext-tests-setup-straight.el --- VHDL Tests Setup  -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2022-2023 Gonzalo Larumbe
 
@@ -50,47 +50,29 @@
 (setq straight-use-package-by-default t)
 
 
-;;;; Install dependencies
-(message "Installing ggtags")
-(use-package ggtags)
-(message "Installing ag")
-(use-package ag)
-(message "Installing ripgrep")
-(use-package ripgrep)
-(message "Installing hydra")
-(use-package hydra)
-(message "Installing outshine")
-(use-package outshine)
-(message "Installing flycheck")
-(use-package flycheck)
-(message "Installing faceup for font-lock ERT regressions")
-(use-package faceup)
-(message "Setting up align")
+;;;; Setup built-in dependencies
 (use-package align
   :straight nil
   :config
   (setq align-default-spacing 1)
   (setq align-to-tab-stop nil))
-(message "Installing lsp-mode")
-(use-package lsp-mode)
-(message "Installing eglot")
-(use-package eglot)
-(message "Setting up vhdl-mode")
+
 (use-package vhdl-mode
   :straight nil
   :config
   (setq vhdl-basic-offset 4))
 
-
 ;;;; Install package
 (message "Installing and setting up vhdl-ext")
 (use-package vhdl-ext
-  :straight (:host github :repo "gmlarumbe/vhdl-ext"))
-(vhdl-ext-mode-setup)
-(add-hook 'vhdl-mode-hook #'vhdl-ext-mode)
+  :straight (:host github :repo "gmlarumbe/vhdl-ext")
+  :after vhdl-mode
+  :hook ((vhdl-mode . vhdl-ext-mode))
+  :demand
+  :config
+  (vhdl-ext-mode-setup))
 
 
+(provide 'vhdl-ext-tests-setup-straight)
 
-(provide 'vhdl-ext-tests-setup)
-
-;;; vhdl-ext-tests-setup.el ends here
+;;; vhdl-ext-tests-setup-straight.el ends here

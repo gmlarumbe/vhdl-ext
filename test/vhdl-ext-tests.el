@@ -38,10 +38,9 @@
 ;;;; Tests
 (require 'vhdl-ext)
 
-(defvar vhdl-ext-tests-root-dir (file-name-directory (locate-library "vhdl-ext")))
-(defvar vhdl-ext-tests-test-dir (if (string-prefix-p (expand-file-name straight-base-dir) vhdl-ext-tests-root-dir)
-                                       (vhdl-ext-path-join (expand-file-name straight-base-dir) "straight/repos/vhdl-ext/test")
-                                     (vhdl-ext-path-join vhdl-ext-tests-root-dir "test")))
+(defvar vhdl-ext-tests-test-dir (if (bound-and-true-p straight-base-dir)
+                                    (vhdl-ext-path-join (expand-file-name straight-base-dir) "straight/repos/vhdl-ext/test")
+                                  (file-name-directory (or load-file-name (buffer-file-name)))))
 (defvar vhdl-ext-tests-examples-dir (vhdl-ext-path-join vhdl-ext-tests-test-dir "examples"))
 (defvar vhdl-ext-tests-faceup-dir (vhdl-ext-path-join vhdl-ext-tests-test-dir "examples/faceup"))
 
