@@ -38,7 +38,7 @@ At some point tried with `with-temp-buffer' without success."
     (when (fboundp 'untabify-trailing-ws-mode)
       (untabify-trailing-ws-mode -1)
       (message "Disabling untabify-trailing-ws-mode..."))
-    (dolist (file (directory-files vhdl-ext-tests-examples-dir t ".vhd$"))
+    (dolist (file (directory-files vhdl-ext-tests-common-dir t ".vhd$"))
       (find-file file)
       (if tree-sitter
           (vhdl-ts-mode)
@@ -50,36 +50,45 @@ At some point tried with `with-temp-buffer' without success."
         (outshine-mode -1)
         (message "Disabling outshine-mode for file %s" file))
       (message "Processing %s" file)
-      (faceup-write-file (concat (file-name-directory file)
-                                 "faceup/"
-                                 (file-name-nondirectory file)
-                                 (when tree-sitter
-                                   ".ts")
-                                 ".faceup")))))
+      ;; It is needed to explicitly fontify for batch-mode updates, since by
+      ;; default batch mode does not enable font-lock.  Initially tried with
+      ;; `font-lock-ensure' but gave different results for tree-sitter.  Plus,
+      ;; `faceup-write-file' calls internally `font-lock-fontify-region' so
+      ;; it's more consistent
+      (font-lock-fontify-region (point-min) (point-max))
+      (faceup-write-file (vhdl-ext-path-join vhdl-ext-tests-faceup-dir
+                                             (concat (file-name-nondirectory file)
+                                                     (when tree-sitter
+                                                       ".ts")
+                                                     ".faceup"))))))
 
 (defun vhdl-ext-test-font-lock-test-file (file &optional tree-sitter)
   "Test that VHDL FILE fontifies as the .faceup file describes."
   (let ((mode (if tree-sitter
                   'vhdl-ts-mode
-                'vhdl-mode)))
+                'vhdl-mode))
+        result)
     (cl-letf (((symbol-function 'message)
                (lambda (FORMAT-STRING &rest ARGS)
                  nil))) ; Mock `message' to silence VHDL version reporting
-      (faceup-test-font-lock-file mode
-                                  (vhdl-ext-path-join vhdl-ext-tests-examples-dir file)
-                                  (vhdl-ext-path-join vhdl-ext-tests-faceup-dir (concat file
-                                                                                        (when tree-sitter
-                                                                                          ".ts")
-                                                                                        ".faceup"))))))
-
-(faceup-defexplainer vhdl-ext-test-font-lock-test-file)
+      (setq result (faceup-test-font-lock-file mode
+                                               (vhdl-ext-path-join vhdl-ext-tests-common-dir file)
+                                               (vhdl-ext-path-join vhdl-ext-tests-faceup-dir (concat file
+                                                                                                     (when tree-sitter
+                                                                                                       ".ts")
+                                                                                                     ".faceup")))))
+    (if (eq t result)
+        t ; Propagate 't for the test to pass
+      ;; In case of failure, show also which file failed
+      (push file result)
+      result)))
 
 (ert-deftest font-lock::generic ()
-  (should (vhdl-ext-test-font-lock-test-file "axi_if_converter.vhd"))
-  (should (vhdl-ext-test-font-lock-test-file "tb_axi_if_converter.vhd"))
-  (should (vhdl-ext-test-font-lock-test-file "global_pkg.vhd"))
-  (should (vhdl-ext-test-font-lock-test-file "global_sim.vhd"))
-  (should (vhdl-ext-test-font-lock-test-file "instances.vhd")))
+  (let ((default-directory vhdl-ext-tests-common-dir)
+        (faceup-test-explain t))
+    (dolist (file (directory-files vhdl-ext-tests-common-dir nil ".vhd$"))
+      (should (eq t (vhdl-ext-test-font-lock-test-file file))))))
+
 
 (provide 'vhdl-ext-tests-font-lock)
 

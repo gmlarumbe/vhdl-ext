@@ -17,3 +17,11 @@ test_setup_pkg_el:
 
 test_run_pkg_el:
 	$(ERT_TESTS) run_tests t pkg_el
+
+gen_font_lock:
+	$(ERT_TESTS) recompile
+	$(ERT_TESTS) gen_font_lock
+
+gen_font_lock_ts:
+	$(ERT_TESTS) recompile
+	$(ERT_TESTS) gen_font_lock treesit

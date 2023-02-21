@@ -41,8 +41,10 @@
 (defvar vhdl-ext-tests-test-dir (if (bound-and-true-p straight-base-dir)
                                     (vhdl-ext-path-join (expand-file-name straight-base-dir) "straight/repos/vhdl-ext/test")
                                   (file-name-directory (or load-file-name (buffer-file-name)))))
-(defvar vhdl-ext-tests-examples-dir (vhdl-ext-path-join vhdl-ext-tests-test-dir "examples"))
-(defvar vhdl-ext-tests-faceup-dir (vhdl-ext-path-join vhdl-ext-tests-test-dir "examples/faceup"))
+(defvar vhdl-ext-tests-files-dir (vhdl-ext-path-join vhdl-ext-tests-test-dir "files"))
+(defvar vhdl-ext-tests-common-dir (vhdl-ext-path-join vhdl-ext-tests-files-dir "common"))
+(defvar vhdl-ext-tests-faceup-dir (vhdl-ext-path-join vhdl-ext-tests-files-dir "faceup"))
+(defvar vhdl-ext-tests-jump-parent-dir (vhdl-ext-path-join vhdl-ext-tests-files-dir "jump-parent"))
 
 (unless (member vhdl-ext-tests-test-dir load-path)
   (add-to-list 'load-path vhdl-ext-tests-test-dir))

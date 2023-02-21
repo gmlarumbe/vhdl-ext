@@ -46,8 +46,12 @@ recompile() {
     compile $PACKAGE_EL
 }
 
-gen_indent_dir () {
-    run_elisp_cmd "(vhdl-ext-test-indent-gen-expected-files)"
+gen_font_lock () {
+    if [[ $# -ge 1 ]]; then
+        run_elisp_cmd "(vhdl-ext-test-font-lock-update-dir :tree-sitter)"
+    else
+        run_elisp_cmd "(vhdl-ext-test-font-lock-update-dir)"
+    fi
 }
 
 run_tests () {

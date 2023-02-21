@@ -28,14 +28,10 @@
 (require 'vhdl-ext-tests-font-lock)
 
 (ert-deftest tree-sitter::font-lock ()
-  ;; TODO: These two failed through .github/scripts/ert-tests but worked through `ert' for some reason I couldn't figure out
-  ;; However the `vhdl-ext-test-font-lock-test-file' defexplainr didn't show much...
-  ;; (should (vhdl-ext-test-font-lock-test-file "axi_if_converter.vhd" :tree-sitter))
-  ;; (should (vhdl-ext-test-font-lock-test-file "tb_axi_if_converter.vhd" :tree-sitter))
-  ;; End of TODO
-  (should (vhdl-ext-test-font-lock-test-file "global_pkg.vhd" :tree-sitter))
-  (should (vhdl-ext-test-font-lock-test-file "global_sim.vhd" :tree-sitter))
-  (should (vhdl-ext-test-font-lock-test-file "instances.vhd" :tree-sitter)))
+  (let ((default-directory vhdl-ext-tests-common-dir)
+        (faceup-test-explain t))
+    (dolist (file (directory-files vhdl-ext-tests-common-dir nil ".vhd$"))
+      (should (eq t (vhdl-ext-test-font-lock-test-file file :tree-sitter))))))
 
 
 (provide 'vhdl-ext-tests-tree-sitter)
