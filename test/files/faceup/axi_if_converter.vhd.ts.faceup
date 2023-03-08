@@ -5,7 +5,7 @@
 «k:use» «f:xil_defaultlib»«:vhdl-ext-font-lock-punctuation-face:.»«f:global»«:vhdl-ext-font-lock-punctuation-face:.»«k:all»«:vhdl-ext-font-lock-punctuation-face:;»
 «k:use» «f:xil_defaultlib»«:vhdl-ext-font-lock-punctuation-face:.»«f:input_buffer_types»«:vhdl-ext-font-lock-punctuation-face:.»«k:all»«:vhdl-ext-font-lock-punctuation-face:;»
 
-«k:entity» axi_if_converter «k:is»
+«k:entity» «f:axi_if_converter» «k:is»
 
     «k:port» «:vhdl-ext-font-lock-punctuation-face:(»
         «x:-- Non-axi modules clocks and resets»
@@ -185,12 +185,12 @@
         m_axi_conf_rresp   «:vhdl-ext-font-lock-punctuation-face::» «k:in»  «t:std_logic_vector»«:vhdl-ext-font-lock-punctuation-face:(»«:vhdl-ext-font-lock-braces-content-face:1» «:vhdl-ext-font-lock-instance-lib-face:downto» «:vhdl-ext-font-lock-braces-content-face:0»«:vhdl-ext-font-lock-punctuation-face:);»
         m_axi_conf_rvalid  «:vhdl-ext-font-lock-punctuation-face::» «k:in»  «t:std_logic»«:vhdl-ext-font-lock-punctuation-face:;»
         m_axi_conf_rready  «:vhdl-ext-font-lock-punctuation-face::» «k:out» «t:std_logic»
-        «:vhdl-ext-font-lock-punctuation-face:);»
+        «:vhdl-ext-font-lock-punctuation-face:)»;
 
-«k:end» «k:entity» axi_if_converter«:vhdl-ext-font-lock-punctuation-face:;»
+«k:end» «k:entity» «f:axi_if_converter»«:vhdl-ext-font-lock-punctuation-face:;»
 
 
-«k:architecture» RTL «k:of» axi_if_converter «k:is»
+«k:architecture» «f:RTL» «k:of» «f:axi_if_converter» «k:is»
 
     «x:-- Global signals»
     «k:signal» soft_reset «:vhdl-ext-font-lock-punctuation-face::» «t:std_logic»«:vhdl-ext-font-lock-punctuation-face:;»
@@ -786,4 +786,4 @@
 
 
 
-«k:end» «k:architecture» RTL«:vhdl-ext-font-lock-punctuation-face:;»
+«k:end» «k:architecture» «f:RTL»«:vhdl-ext-font-lock-punctuation-face:;»
