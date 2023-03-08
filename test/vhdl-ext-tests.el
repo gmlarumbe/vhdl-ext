@@ -63,7 +63,9 @@
     (require 'treesit)
     (message "(treesit-language-available-p 'vhdl): %s" (treesit-language-available-p 'vhdl))
     (when (treesit-language-available-p 'vhdl)
-      (require 'vhdl-ext-tests-tree-sitter))))
+      (message "(functionp 'vhdl-ts-mode): %s" (functionp 'vhdl-ts-mode))
+      (when (functionp 'vhdl-ts-mode)
+        (require 'vhdl-ext-tests-tree-sitter)))))
 
 
 (provide 'vhdl-ext-tests)
