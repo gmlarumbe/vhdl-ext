@@ -29,26 +29,13 @@
 (require 'faceup)
 
 (defun vhdl-ext-test-font-lock-update-dir (&optional tree-sitter)
-  "Update .faceup files.
-INFO: Makes sure that additional settings that might change specific font-lock
-are disabled for the .faceup generation.
-E.g: disables `fic-mode', `untabify-trailing-ws', `outshine-mode'.
-At some point tried with `with-temp-buffer' without success."
+  "Update .faceup files."
   (save-window-excursion
-    (when (fboundp 'untabify-trailing-ws-mode)
-      (untabify-trailing-ws-mode -1)
-      (message "Disabling untabify-trailing-ws-mode..."))
     (dolist (file (directory-files vhdl-ext-tests-common-dir t ".vhd$"))
       (find-file file)
       (if tree-sitter
           (vhdl-ts-mode)
         (vhdl-mode))
-      (when (fboundp 'fic-mode)
-        (fic-mode -1)
-        (message "Disabling fic-mode for file %s" file))
-      (when (fboundp 'outshine-mode)
-        (outshine-mode -1)
-        (message "Disabling outshine-mode for file %s" file))
       (message "Processing %s" file)
       ;; It is needed to explicitly fontify for batch-mode updates, since by
       ;; default batch mode does not enable font-lock.  Initially tried with
