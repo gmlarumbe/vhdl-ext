@@ -905,9 +905,9 @@ See URL `http://vhdltool.com'."
 ;;     - hdl_checker: https://github.com/suoto/hdl_checker
 (defcustom vhdl-ext-lsp-available-servers
   '((ve-hdl-checker . ("hdl_checker" "--lsp"))
-    (ve-vhdl-ls     . "vhdl_ls")
+    (ve-rust-hdl    . "vhdl_ls")
     (ve-ghdl-ls     . "ghdl-ls")
-    (ve-vhdl-tool   . "vhdl-tool"))
+    (ve-vhdl-tool   . ("vhdl-tool" "lsp")))
   "Vhdl-ext available LSP servers."
   :type '(alist :key-type (symbol)
                 :value-type (string))
@@ -917,7 +917,7 @@ See URL `http://vhdltool.com'."
   (mapcar #'car vhdl-ext-lsp-available-servers))
 
 ;;;; lsp-mode
-(defvar vhdl-ext-lsp-mode-default-server 've-vhdl-ls)
+(defvar vhdl-ext-lsp-mode-default-server 've-rust-hdl)
 
 (defun vhdl-ext-lsp-setup ()
   "Configure VHDL for `lsp-mode'.
@@ -956,7 +956,7 @@ Override any previous configuration for `vhdl-mode' and `vhdl-ts-mode'."
 
 
 ;;;; eglot
-(defvar vhdl-ext-eglot-default-server 've-vhdl-ls)
+(defvar vhdl-ext-eglot-default-server 've-rust-ls)
 
 (defun vhdl-ext-eglot-set-server (server-id)
   "Configure VHDL for `eglot' for selected SERVER-ID.
