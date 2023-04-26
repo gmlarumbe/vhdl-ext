@@ -524,6 +524,14 @@ portB => signalB
   "Face for instances lib prefix."
   :group 'vhdl-ext-font-lock-faces)
 
+(defvar vhdl-ext-font-lock-translate-off-face 'vhdl-ext-font-lock-translate-off-face)
+(defface vhdl-ext-font-lock-translate-off-face
+  '((t (:background "gray20" :slant italic)))
+  "Face for pragmas between comments, e.g:
+* translate_off / * translate_on"
+  :group 'vhdl-ext-font-lock-faces)
+
+
 ;;;; Regexps
 (defconst vhdl-ext-font-lock-punctuation-re "\\([!,;:?'=<>]\\|\\*\\)")
 (defconst vhdl-ext-font-lock-punctuation-bold-re "\\([&^~+-]\\||\\|\\.\\|\\/\\)")
