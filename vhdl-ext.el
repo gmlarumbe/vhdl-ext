@@ -830,6 +830,7 @@ Regex search bound to LIMIT."
    vhdl-ext-font-lock-keywords-5))
 
 ;;; Flycheck
+;;;; GHDL
 ;; Overriding of `vhdl-ghdl' syntax checker to add more options
 (flycheck-def-option-var vhdl-ext-flycheck-ghdl-include-path nil vhdl-ghdl
   "A list of include directories for GHDL.
@@ -863,6 +864,38 @@ See URL `https://github.com/ghdl/ghdl'."
   ((error line-start (file-name) ":" line ":" column ": " (message) line-end))
   :modes (vhdl-mode vhdl-ts-mode))
 
+
+;;;; vhdl_lang
+(flycheck-def-config-file-var flycheck-vhdl-lang-config-file vhdl-lang "vhdl_lang.toml")
+
+(flycheck-define-checker vhdl-lang
+  "Rust_hdl VHDL Language Frontend.
+
+See URL `https://github.com/VHDL-LS/rust_hdl'."
+  :command ("vhdl_lang"
+            (config-file "--config" flycheck-vhdl-lang-config-file))
+  :standard-input t
+  :error-patterns
+  ((info    line-start "hint: "    (message) "\n" "   --> " (file-name) ":" line line-end)
+   (warning line-start "warning: " (message) "\n" "   --> " (file-name) ":" line line-end)
+   (error   line-start "error: "   (message) "\n" "   --> " (file-name) ":" line line-end))
+  :modes (vhdl-mode vhdl-ts-mode))
+
+
+;;;; vhdl-tool
+;; https://git.vhdltool.com/vhdl-tool/configs/src/master/emacs
+;; INFO: Requires running following command in the background:
+;;  $ vhdl-tool server
+(flycheck-define-checker vhdl-tool
+  "A VHDL syntax checker, type checker and linter using VHDL-Tool.
+
+See URL `http://vhdltool.com'."
+  :command ("vhdl-tool" "client" "lint" "--compact" "--stdin" "-f" source)
+  :standard-input t
+  :error-patterns
+  ((warning line-start (file-name) ":" line ":" column ":w:" (message) line-end)
+   (error   line-start (file-name) ":" line ":" column ":e:" (message) line-end))
+  :modes (vhdl-mode vhdl-ts-mode))
 
 ;;; LSP
 ;; Support for various VHDL language servers (already supported by `lsp-mode', adds support for `eglot'):
