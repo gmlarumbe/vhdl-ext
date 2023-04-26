@@ -964,7 +964,7 @@ Override any previous configuration for `vhdl-mode' and `vhdl-ts-mode'."
 
 
 ;;;; eglot
-(defvar vhdl-ext-eglot-default-server 've-rust-ls)
+(defvar vhdl-ext-eglot-default-server 've-rust-hdl)
 
 (defun vhdl-ext-eglot-set-server (server-id)
   "Configure VHDL for `eglot' for selected SERVER-ID.
