@@ -66,7 +66,7 @@
 (message "Installing and setting up vhdl-ext")
 (use-package vhdl-ext
   :straight (:host github :repo "gmlarumbe/vhdl-ext"
-             :files ("vhdl-ext.el" "vhdl-ts-mode.el"))
+             :files ("*.el" "snippets" "ts-mode/vhdl-ts-mode.el"))
   :after vhdl-mode
   :hook ((vhdl-mode . vhdl-ext-mode))
   :demand
