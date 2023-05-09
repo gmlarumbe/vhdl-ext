@@ -846,6 +846,15 @@ Regex search bound to LIMIT."
    vhdl-ext-font-lock-keywords-2
    vhdl-ext-font-lock-keywords-5))
 
+;;;; Setup
+(defun vhdl-ext-font-lock-setup ()
+  "Setup syntax highlighting of VHDL buffers.
+Add `vhdl-ext-mode' font lock keywords before running
+`vhdl-mode' in order to populate `font-lock-keywords-alist'
+before `font-lock' is loaded."
+  (font-lock-add-keywords 'vhdl-mode vhdl-ext-font-lock-keywords 'set))
+
+
 ;;; Flycheck
 ;;;; GHDL
 (defcustom vhdl-ext-flycheck-extra-include nil
@@ -1027,6 +1036,8 @@ Override any previous configuration for `vhdl-mode' and `vhdl-ts-mode'."
   ;; Jump to parent module ag/ripgrep hooks
   (add-hook 'ag-search-finished-hook #'vhdl-ext-navigation-ag-rg-hook)
   (add-hook 'ripgrep-search-finished-hook #'vhdl-ext-navigation-ag-rg-hook)
+  ;; Font lock
+  (vhdl-ext-font-lock-setup)
   ;; Lsp
   (vhdl-ext-lsp-setup)
   (vhdl-ext-lsp-set-server vhdl-ext-lsp-mode-default-server)
@@ -1056,7 +1067,6 @@ Override any previous configuration for `vhdl-mode' and `vhdl-ts-mode'."
           ;;   The workaround consists in add/remove keywords to the major mode when
           ;;   the minor mode is loaded/unloaded.
           ;;   https://emacs.stackexchange.com/questions/60198/font-lock-add-keywords-is-not-working
-          (font-lock-add-keywords 'vhdl-mode vhdl-ext-font-lock-keywords 'set)
           (font-lock-flush)
           (setq-local font-lock-multiline nil)))
     ;; Cleanup
