@@ -185,6 +185,15 @@ Return nil if no entity was found."
   "VHDL hook to run when killing a buffer."
   (setq vhdl-ext-buffer-list (remove (current-buffer) vhdl-ext-buffer-list)))
 
+(defun vhdl-ext-workdir ()
+  "Return the working library directory according to current project.
+Check `vhdl-project-alist'."
+  (let ((root (nth 1 (vhdl-aget vhdl-project-alist vhdl-project)))
+        (dir  (nth 7 (vhdl-aget vhdl-project-alist vhdl-project))))
+    (when (and root dir)
+      (vhdl-ext-path-join root dir))))
+
+
 ;;; Navigation
 ;;  - Find instances forward/backwards
 ;;  - Jump to definition/reference of entity at point
@@ -839,6 +848,11 @@ Regex search bound to LIMIT."
 
 ;;; Flycheck
 ;;;; GHDL
+(defcustom vhdl-ext-flycheck-extra-include nil
+  "Extra includes for GHDL flycheck."
+  :type '(repeat (directory))
+  :group 'vhdl-ext)
+
 ;; Overriding of `vhdl-ghdl' syntax checker to add more options
 (flycheck-def-option-var vhdl-ext-flycheck-ghdl-include-path nil vhdl-ghdl
   "A list of include directories for GHDL.
@@ -856,6 +870,9 @@ GHDL."
   :safe #'stringp
   :package-version '(flycheck . "32"))
 
+(flycheck-def-args-var vhdl-ext-flycheck-ghdl-extra-args vhdl-ghdl
+  :package-version '(flycheck . "32"))
+
 (flycheck-define-checker vhdl-ghdl
   "A VHDL syntax checker using GHDL.
 See URL `https://github.com/ghdl/ghdl'."
@@ -867,9 +884,13 @@ See URL `https://github.com/ghdl/ghdl'."
             ;; Additional options
             (option-list "-P" vhdl-ext-flycheck-ghdl-include-path concat)
             (option "--work=" vhdl-ext-flycheck-ghdl-work-lib concat)
+            ;; Extra args
+            (eval vhdl-ext-flycheck-ghdl-extra-args)
             source)
   :error-patterns
-  ((error line-start (file-name) ":" line ":" column ": " (message) line-end))
+  ((info    line-start (file-name) ":" line ":" column ":note: "    (message) line-end)
+   (warning line-start (file-name) ":" line ":" column ":warning: " (message) line-end)
+   (error   line-start (file-name) ":" line ":" column ": "         (message) line-end))
   :modes (vhdl-mode vhdl-ts-mode))
 
 
@@ -1022,7 +1043,8 @@ Override any previous configuration for `vhdl-mode' and `vhdl-ts-mode'."
       (progn
         (vhdl-ext-update-buffer-and-dir-list)
         (setq flycheck-ghdl-language-standard (vhdl-ext-get-standard))
-        (setq vhdl-ext-flycheck-ghdl-include-path vhdl-ext-dir-list)
+        (setq flycheck-ghdl-workdir (vhdl-ext-workdir))
+        (setq vhdl-ext-flycheck-ghdl-include-path (append vhdl-ext-flycheck-extra-include vhdl-ext-dir-list))
         (setq vhdl-ext-flycheck-ghdl-work-lib (vhdl-work-library))
         (add-hook 'kill-buffer-hook #'vhdl-ext-kill-buffer-hook nil :local)
         ;; `vhdl-mode'-only customization (exclude `vhdl-ts-mode')
