@@ -1,4 +1,4 @@
-;;; vhdl-ext-templates.el --- VHDL Templates -*- lexical-binding: t -*-
+;;; vhdl-ext-template.el --- VHDL Templates -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2022-2023 Gonzalo Larumbe
 
@@ -99,9 +99,9 @@ entity or component declaration via `vhdl-port-copy'."
   ("C-g" nil nil :color blue))
 
 
-(provide 'vhdl-ext-templates)
+(provide 'vhdl-ext-template)
 
-;;; vhdl-ext-templates.el ends here
+;;; vhdl-ext-template.el ends here
 
 ;; Silence Hydra byte-compiler docstring warnings
 ;;
