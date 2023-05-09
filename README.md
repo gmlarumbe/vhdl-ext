@@ -172,7 +172,7 @@ To run a subset of tests (e.g. imenu):
 
 ```shell
 $ cd ~/.emacs.d/vhdl-ext
-$ tests/scripts/ert-tests.sh recompile_run imenu::
+$ test/scripts/ert-tests.sh recompile_run imenu::
 ```
 
 ## Other packages
