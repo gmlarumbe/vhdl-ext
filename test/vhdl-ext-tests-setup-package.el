@@ -1,4 +1,4 @@
-;;; vhdl-ext-tests-setup-package.el --- Verilog Tests Setup with package.el  -*- lexical-binding: t -*-
+;;; vhdl-ext-tests-setup-package.el --- VHDL Tests Setup with package.el  -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2022-2023 Gonzalo Larumbe
 
