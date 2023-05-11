@@ -61,13 +61,6 @@
   (mapcar #'car vhdl-ext-lsp-available-servers))
 
 
-(defun vhdl-ext-path-join (arg1 arg2)
-  "Join path of ARG1 and ARG2."
-  (if (and arg1 arg2)
-      (concat (file-name-as-directory arg1) arg2)
-    (error "Cannot join path with nil arguments")
-    nil))
-
 (defun vhdl-ext-replace-regexp (regexp to-string start end)
   "Wrapper function for programatic use of `replace-regexp'.
 Replace REGEXP with TO-STRING from START to END."
@@ -169,7 +162,7 @@ Check `vhdl-project-alist'."
   (let ((root (nth 1 (vhdl-aget vhdl-project-alist vhdl-project)))
         (dir  (nth 7 (vhdl-aget vhdl-project-alist vhdl-project))))
     (when (and root dir)
-      (vhdl-ext-path-join root dir))))
+      (file-name-concat root dir))))
 
 
 (provide 'vhdl-ext-utils)

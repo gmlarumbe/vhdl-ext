@@ -28,7 +28,7 @@
 (defmacro vhdl-ext-test-imenu-file (file)
   (declare (indent 1))
   `(with-temp-buffer
-     (insert-file-contents (vhdl-ext-path-join vhdl-ext-tests-common-dir ,file))
+     (insert-file-contents (file-name-concat vhdl-ext-tests-common-dir ,file))
      (cl-letf (((symbol-function 'message)
                 (lambda (FORMAT-STRING &rest ARGS)
                   nil))) ; Mock `message' to silence VHDL version reporting

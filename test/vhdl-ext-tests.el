@@ -52,12 +52,12 @@ Otherwise, byte-compile."
 (require 'vhdl-ext)
 
 (defvar vhdl-ext-tests-test-dir (if (bound-and-true-p straight-base-dir)
-                                    (vhdl-ext-path-join (expand-file-name straight-base-dir) "straight/repos/vhdl-ext/test")
+                                    (file-name-concat (expand-file-name straight-base-dir) "straight/repos/vhdl-ext/test")
                                   (file-name-directory (or load-file-name (buffer-file-name)))))
-(defvar vhdl-ext-tests-files-dir (vhdl-ext-path-join vhdl-ext-tests-test-dir "files"))
-(defvar vhdl-ext-tests-common-dir (vhdl-ext-path-join vhdl-ext-tests-files-dir "common"))
-(defvar vhdl-ext-tests-faceup-dir (vhdl-ext-path-join vhdl-ext-tests-files-dir "faceup"))
-(defvar vhdl-ext-tests-jump-parent-dir (vhdl-ext-path-join vhdl-ext-tests-files-dir "jump-parent"))
+(defvar vhdl-ext-tests-files-dir (file-name-concat vhdl-ext-tests-test-dir "files"))
+(defvar vhdl-ext-tests-common-dir (file-name-concat vhdl-ext-tests-files-dir "common"))
+(defvar vhdl-ext-tests-faceup-dir (file-name-concat vhdl-ext-tests-files-dir "faceup"))
+(defvar vhdl-ext-tests-jump-parent-dir (file-name-concat vhdl-ext-tests-files-dir "jump-parent"))
 
 (unless (member vhdl-ext-tests-test-dir load-path)
   (add-to-list 'load-path vhdl-ext-tests-test-dir))

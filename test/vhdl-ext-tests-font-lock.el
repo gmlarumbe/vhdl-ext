@@ -43,7 +43,7 @@
       ;; `faceup-write-file' calls internally `font-lock-fontify-region' so
       ;; it's more consistent
       (font-lock-fontify-region (point-min) (point-max))
-      (faceup-write-file (vhdl-ext-path-join vhdl-ext-tests-faceup-dir
+      (faceup-write-file (file-name-concat vhdl-ext-tests-faceup-dir
                                              (concat (file-name-nondirectory file)
                                                      (when tree-sitter
                                                        ".ts")
@@ -59,8 +59,8 @@
                (lambda (FORMAT-STRING &rest ARGS)
                  nil))) ; Mock `message' to silence VHDL version reporting
       (setq result (faceup-test-font-lock-file mode
-                                               (vhdl-ext-path-join vhdl-ext-tests-common-dir file)
-                                               (vhdl-ext-path-join vhdl-ext-tests-faceup-dir (concat file
+                                               (file-name-concat vhdl-ext-tests-common-dir file)
+                                               (file-name-concat vhdl-ext-tests-faceup-dir (concat file
                                                                                                      (when tree-sitter
                                                                                                        ".ts")
                                                                                                      ".faceup")))))
