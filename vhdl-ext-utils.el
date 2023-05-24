@@ -32,10 +32,11 @@
 (defconst vhdl-ext-blank-optional-re "[[:blank:]\n]*")
 (defconst vhdl-ext-blank-mandatory-re "[[:blank:]\n]+")
 (defconst vhdl-ext-identifier-re "[a-zA-Z_][a-zA-Z0-9_-]*")
+(defconst vhdl-ext-arch-identifier-opt-re (concat "\\(\\s-*(\\s-*" vhdl-ext-identifier-re ")\\s-*\\)?"))
 (defconst vhdl-ext-instance-re
   (concat "^\\s-*\\(?1:" vhdl-ext-identifier-re "\\)\\s-*:" vhdl-ext-blank-optional-re ; Instance name
           "\\(?2:\\(?3:component\\s-+\\|configuration\\s-+\\|\\(?4:entity\\s-+\\(?5:" vhdl-ext-identifier-re "\\)\\.\\)\\)\\)?"
-          "\\(?6:" vhdl-ext-identifier-re "\\)" vhdl-ext-blank-optional-re ; Entity name
+          "\\(?6:" vhdl-ext-identifier-re "\\)" vhdl-ext-arch-identifier-opt-re vhdl-ext-blank-optional-re ; Entity name
           "\\(--[^\n]*" vhdl-ext-blank-mandatory-re "\\)*\\(generic\\|port\\)\\s-+map\\>"))
 (defconst vhdl-ext-entity-re "^\\s-*\\(entity\\)\\s-+\\(\\(\\w\\|\\s_\\)+\\)")
 (defconst vhdl-ext-function-re "^\\s-*\\(\\(\\(impure\\|pure\\)\\s-+\\|\\)function\\)\\s-+\\(\"?\\(\\w\\|\\s_\\)+\"?\\)")
