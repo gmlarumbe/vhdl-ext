@@ -56,19 +56,20 @@ the function call."
     (save-excursion
       (when interactive-p
         (if bwd
-            (backward-char))
-        (forward-char))
-      (while (and (not found)
-                  (if bwd
-                      (re-search-backward vhdl-ext-instance-re limit t)
-                    (re-search-forward vhdl-ext-instance-re limit t)))
-        (unless (or (equal (face-at-point) 'font-lock-comment-face)
-                    (equal (face-at-point) 'font-lock-string-face))
-          (setq found t)
-          (if interactive-p
-              (setq pos (match-beginning 6))
-            (setq pos (point))))))
-    (when found
+            (backward-char)
+          (forward-char)))
+      (if bwd
+          (setq found (vhdl-re-search-backward vhdl-ext-instance-re limit t))
+        (setq found (vhdl-re-search-forward vhdl-ext-instance-re limit t)))
+      (if interactive-p
+          (setq pos (match-beginning 6))
+        (setq pos (point))))
+    (if (not found)
+        (when interactive-p
+          (message "Cound not find instance %s" (if bwd "backward" "forward")))
+      ;; When found
+      (when interactive-p
+        (message (concat (match-string-no-properties 1) " : " (match-string-no-properties 6))))
       (goto-char pos))))
 
 (defun vhdl-ext-find-entity-instance-fwd (&optional limit)
