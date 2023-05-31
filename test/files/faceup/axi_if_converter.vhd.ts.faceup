@@ -297,8 +297,8 @@
 «k:begin»
 
     «x:-- Comb logic»
-    fb_send_size_l «:vhdl-ext-font-lock-punctuation-face:<=» «s:b"00"» «:vhdl-ext-font-lock-punctuation-bold-face:&» «t:unsigned»«:vhdl-ext-font-lock-punctuation-face:(»fb_awlen_lch«:vhdl-ext-font-lock-punctuation-face:);»
-    fb_send_size_r «:vhdl-ext-font-lock-punctuation-face:<=» «s:b"00"» «:vhdl-ext-font-lock-punctuation-bold-face:&» «t:unsigned»«:vhdl-ext-font-lock-punctuation-face:(»fb_awlen_rch«:vhdl-ext-font-lock-punctuation-face:);»
+    fb_send_size_l «:vhdl-ext-font-lock-punctuation-face:<=» «s:b"00"» «:vhdl-ext-font-lock-punctuation-bold-face:&» «t:unsigned»«:vhdl-ext-font-lock-punctuation-face:(»«:vhdl-ext-font-lock-braces-content-face:fb_awlen_lch»«:vhdl-ext-font-lock-punctuation-face:);»
+    fb_send_size_r «:vhdl-ext-font-lock-punctuation-face:<=» «s:b"00"» «:vhdl-ext-font-lock-punctuation-bold-face:&» «t:unsigned»«:vhdl-ext-font-lock-punctuation-face:(»«:vhdl-ext-font-lock-braces-content-face:fb_awlen_rch»«:vhdl-ext-font-lock-punctuation-face:);»
     system_running «:vhdl-ext-font-lock-punctuation-face:<=» system_running_lch «k:or» system_running_rch«:vhdl-ext-font-lock-punctuation-face:;»
 
     «x:-- Instances»

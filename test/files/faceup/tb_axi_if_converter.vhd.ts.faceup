@@ -539,11 +539,11 @@
 
         «k:procedure» «f:rx_data» «:vhdl-ext-font-lock-punctuation-face:(»«k:signal» tvalid «:vhdl-ext-font-lock-punctuation-face::» «k:out» «t:std_logic»«:vhdl-ext-font-lock-punctuation-face:;» «k:signal» tdata «:vhdl-ext-font-lock-punctuation-face::» «k:inout» «t:std_logic_vector»«:vhdl-ext-font-lock-punctuation-face:(»«:vhdl-ext-font-lock-braces-content-face:63» «:vhdl-ext-font-lock-instance-lib-face:downto» «:vhdl-ext-font-lock-braces-content-face:0»«:vhdl-ext-font-lock-punctuation-face:);» «k:constant» RX_DATA_AMOUNT «:vhdl-ext-font-lock-punctuation-face::» «t:natural» «:vhdl-ext-font-lock-punctuation-face::=» 128«:vhdl-ext-font-lock-punctuation-face:)» «k:is»
         «k:begin»
-            «k:wait» «k:until» «:vhdl-ext-font-lock-punctuation-face:(»«b:rising_edge»«:vhdl-ext-font-lock-punctuation-face:(»s_axis_lch_aclk«:vhdl-ext-font-lock-punctuation-face:));»
+            «k:wait» «k:until» «:vhdl-ext-font-lock-punctuation-face:(»«b:rising_edge»«:vhdl-ext-font-lock-punctuation-face:(»«:vhdl-ext-font-lock-braces-content-face:s_axis_lch_aclk»«:vhdl-ext-font-lock-punctuation-face:));»
             tvalid «:vhdl-ext-font-lock-punctuation-face:<=» «s:'1'»«:vhdl-ext-font-lock-punctuation-face:;»
             «k:wait» «k:for» AXI_CLK_T«:vhdl-ext-font-lock-punctuation-face:;»
             «k:for» i «k:in» 1 «:vhdl-ext-font-lock-instance-lib-face:to» RX_DATA_AMOUNT «k:loop»
-                tdata «:vhdl-ext-font-lock-punctuation-face:<=» «t:std_logic_vector»«:vhdl-ext-font-lock-punctuation-face:(»«t:unsigned»«:vhdl-ext-font-lock-punctuation-face:(»tdata«:vhdl-ext-font-lock-punctuation-face:)» «:vhdl-ext-font-lock-punctuation-bold-face:+» «t:to_unsigned»«:vhdl-ext-font-lock-punctuation-face:(»«:vhdl-ext-font-lock-braces-content-face:1»«:vhdl-ext-font-lock-punctuation-face:,» «:vhdl-ext-font-lock-braces-content-face:64»«:vhdl-ext-font-lock-punctuation-face:));»
+                tdata «:vhdl-ext-font-lock-punctuation-face:<=» «t:std_logic_vector»«:vhdl-ext-font-lock-punctuation-face:(»«t:unsigned»«:vhdl-ext-font-lock-punctuation-face:(»«:vhdl-ext-font-lock-braces-content-face:tdata»«:vhdl-ext-font-lock-punctuation-face:)» «:vhdl-ext-font-lock-punctuation-bold-face:+» «t:to_unsigned»«:vhdl-ext-font-lock-punctuation-face:(»«:vhdl-ext-font-lock-braces-content-face:1»«:vhdl-ext-font-lock-punctuation-face:,» «:vhdl-ext-font-lock-braces-content-face:64»«:vhdl-ext-font-lock-punctuation-face:));»
                 «k:wait» «k:for» AXI_CLK_T«:vhdl-ext-font-lock-punctuation-face:;»
             «k:end» «k:loop»«:vhdl-ext-font-lock-punctuation-face:;»
             tvalid «:vhdl-ext-font-lock-punctuation-face:<=» «s:'0'»«:vhdl-ext-font-lock-punctuation-face:;»
