@@ -31,15 +31,21 @@
 ;;; Code:
 
 ;;; Requirements
-(require 'vhdl-mode)
 (require 'treesit)
+(eval-when-compile
+  (require 'vhdl-mode))
+
+(declare-function treesit-parser-create "treesit.c")
+(declare-function treesit-induce-sparse-tree "treesit.c")
+(declare-function treesit-node-parent "treesit.c")
+(declare-function treesit-node-start "treesit.c")
+(declare-function treesit-node-end "treesit.c")
+(declare-function treesit-node-child "treesit.c")
+(declare-function treesit-node-child-by-field-name "treesit.c")
+(declare-function treesit-node-type "treesit.c")
+
 
 ;;; Customization
-(defcustom vhdl-ts-mode-hook nil
-  "Hook run after VHDL Tree-sitter mode is loaded."
-  :type 'hook
-  :group 'vhdl-ext)
-
 (defcustom vhdl-ts-indent-level 4
   "Tree-sitter indentation of VHDL statements with respect to containing block."
   :group 'vhdl-ext
@@ -101,40 +107,17 @@ Snippet fetched from `treesit--indent-1'."
 (defconst vhdl-ts-directives vhdl-08-directives)
 
 
-(defconst vhdl-ts-operators-relational
-  '("="
-    "/="
-    "<"
-    ">"
-    "<=" ; Less or equal/signal assignment
-    "=>" ; Greater or equal/port connection
-    ":=" ; Not an operator, but falls better here
-    ))
+(defconst vhdl-ts-operators-relational '("=" "/=" "<" ">"
+                                         "<=" ; Less or equal/signal assignment
+                                         "=>" ; Greater or equal/port connection
+                                         ":=")) ; Not an operator, but falls better here
 
-(defconst vhdl-ts-operators-arithmetic
-  '("+"
-    "-"
-    "*"
-    "/"
-    "**"
-    "&"))
+(defconst vhdl-ts-operators-arithmetic '("+" "-" "*" "/" "**" "&"))
 
-(defconst vhdl-ts-punctuation
-  '(";"
-    ":"
-    ","
-    "'"
-    "("
-    ")"
-    "["
-    "]"
-    "|"
-    "."
-    "!"
-    "?"))
+(defconst vhdl-ts-punctuation '(";" ":" "," "'" "(" ")" "[" "]" "|" "." "!" "?"))
 
 
-(defvar vhdl--treesit-settings
+(defvar vhdl-ts--treesit-settings
   (treesit-font-lock-rules
    :feature 'comment
    :language 'vhdl
@@ -209,6 +192,8 @@ Snippet fetched from `treesit--indent-1'."
       low: (simple_expression) @vhdl-ext-font-lock-braces-content-face)
      (expression_list
       (expression (integer_decimal) @vhdl-ext-font-lock-braces-content-face))
+     (expression_list
+      (expression (simple_name) @vhdl-ext-font-lock-braces-content-face))
      (["downto" "to"] @vhdl-ext-font-lock-instance-lib-face)
      ;; Constants
      (constant_declaration
@@ -222,8 +207,7 @@ Snippet fetched from `treesit--indent-1'."
      ;; clk'event
      (attribute_name
       prefix: (simple_name) @font-lock-builtin-face
-      (predefined_designator) @font-lock-builtin-face)
-     )
+      (predefined_designator) @font-lock-builtin-face))
 
    :feature 'keyword
    :language 'vhdl
@@ -263,8 +247,7 @@ Snippet fetched from `treesit--indent-1'."
    :language 'vhdl
    `(((ambiguous_name
        prefix: (simple_name) @font-lock-builtin-face)
-      (:match ,vhdl-ts-functions-regexp @font-lock-builtin-face)))
-   ))
+      (:match ,vhdl-ts-functions-regexp @font-lock-builtin-face)))))
 
 
 ;;; Indent
@@ -281,10 +264,8 @@ Matches if point is at generic/port declaration."
       (treesit-node-start entity-node))))
 
 
-;; INFO: Testing with "axi_if_converter/src/axi_lite_master/rtl/axi_lite_master.vhd"
-(setq vhdl-ts--indent-rules
+(defvar vhdl-ts--indent-rules
   `((vhdl
-     ;; TODO: Still needs polishing
      ((node-is "comment") parent-bol 4)
 
      ((node-is "library_clause") parent-bol 0)
@@ -305,11 +286,7 @@ Matches if point is at generic/port declaration."
      ((node-is "simple_concurrent_signal_assignment") grand-parent 4) ; Parent is (concurrent_statement_part)
      ((node-is "conditional_concurrent_signal_assignment") grand-parent 4)
 
-     ;; TODO: Still not working as expected
      ((node-is "alternative_conditional_waveforms") parent-bol 4) ; Parent is conditional_waveforms
-    ;;      read_data <= m_axi_rdata when (m_axi_rvalid = '1' and axi_rready = '1')
-    ;;                   else (others => '0');
-
      ((node-is "process_statement") grand-parent 4) ; Parent is architecture_body
 
      ((node-is "sequence_of_statements") parent-bol 4) ; Statements inside process
@@ -320,21 +297,14 @@ Matches if point is at generic/port declaration."
           (node-is "elsif"))
       prev-sibling 0)
 
-     ;; ((or (node-is "end if")
-     ;;      (node-is "end process"))
-     ;;  parent-bol 0)
      ((node-is "end") parent-bol 0)
-
      ;; Opening
      ((node-is "begin") parent-bol 0)
-
      ;; Closing
      ((or (node-is "}")
           (node-is ")")
           (node-is "]"))
-      parent-bol 0)
-
-     )))
+      parent-bol 0))))
 
 
 ;;; Major-mode
@@ -352,7 +322,7 @@ Matches if point is at generic/port declaration."
                   (keyword operator punctuation function builtin types)
                   (all)
                   (nil)))
-    (setq-local treesit-font-lock-settings vhdl--treesit-settings)
+    (setq-local treesit-font-lock-settings vhdl-ts--treesit-settings)
     ;; Indent.
     (setq-local indent-line-function nil)
     (setq-local comment-indent-function nil)
