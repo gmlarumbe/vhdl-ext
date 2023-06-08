@@ -27,9 +27,8 @@
 ;;
 ;;  - Improve syntax highlighting
 ;;  - LSP configuration for `lsp-mode' and `eglot'
-;;  - Additional options for `flycheck' linters
+;;  - Support for many linters via `flycheck'
 ;;  - Navigate through instances in a module
-;;  - Jump to definition/reference of module at point
 ;;  - Templates insertion via `hydra'
 ;;  - Improve `imenu': detect instances
 ;;
@@ -96,6 +95,8 @@ FEATURES can be a single feature or a list of features."
 ;;; Major-mode
 (defvar vhdl-ext-mode-map
   (let ((map (make-sparse-keymap)))
+    (vhdl-ext-when-feature 'flycheck
+      (define-key map (kbd "C-c C-f") 'vhdl-ext-flycheck-mode))
     (vhdl-ext-when-feature 'navigation
       (define-key map (kbd "C-M-u") 'vhdl-ext-find-entity-instance-bwd)
       (define-key map (kbd "C-M-d") 'vhdl-ext-find-entity-instance-fwd)
@@ -131,13 +132,17 @@ FEATURES can be a single feature or a list of features."
   :global nil
   (if vhdl-ext-mode
       (progn
-        (vhdl-ext-update-buffer-and-dir-list)
+        (vhdl-ext-update-buffer-file-and-dir-list)
         (add-hook 'kill-buffer-hook #'vhdl-ext-kill-buffer-hook nil :local)
         (vhdl-ext-when-feature 'flycheck
-          (setq flycheck-ghdl-language-standard (vhdl-ext-get-standard))
-          (setq flycheck-ghdl-workdir (vhdl-ext-workdir))
-          (setq vhdl-ext-flycheck-ghdl-include-path (append vhdl-ext-flycheck-extra-include vhdl-ext-dir-list))
-          (setq vhdl-ext-flycheck-ghdl-work-lib (vhdl-work-library)))
+          (if vhdl-ext-flycheck-use-open-buffers
+              (progn (setq vhdl-ext-flycheck-dirs vhdl-ext-dir-list)
+                     (setq vhdl-ext-flycheck-files vhdl-ext-file-list))
+            (setq vhdl-ext-flycheck-dirs nil)
+            (setq vhdl-ext-flycheck-files nil))
+          (setq flycheck-ghdl-language-standard (vhdl-ext-get-standard)) ; Global for all projects
+          (setq flycheck-ghdl-workdir (vhdl-ext-workdir))                ; Project dependant
+          (setq flycheck-ghdl-work-lib (vhdl-ext-work-library)))         ; Project dependant
         ;; `vhdl-mode'-only customization (exclude `vhdl-ts-mode')
         (when (eq major-mode 'vhdl-mode)
           ;; Imenu

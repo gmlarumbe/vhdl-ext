@@ -28,46 +28,66 @@
 
 (require 'flycheck)
 (require 'vhdl-mode)
+(require 'vhdl-ext-utils)
 
-;;;; GHDL
-(defcustom vhdl-ext-flycheck-extra-include nil
-  "Extra includes for GHDL flycheck."
-  :type '(repeat (directory))
+
+;;; Custom
+(defgroup vhdl-ext-flycheck nil
+  "Vhdl-ext flycheck."
   :group 'vhdl-ext)
 
-;; Overriding of `vhdl-ghdl' syntax checker to add more options
-(flycheck-def-option-var vhdl-ext-flycheck-ghdl-include-path nil vhdl-ghdl
-  "A list of include directories for GHDL.
+(defcustom vhdl-ext-flycheck-use-open-buffers t
+  "Set to non-nil to use list of open VHDL buffers/dirs for linters."
+  :type 'boolean
+  :group 'vhdl-ext-flycheck)
 
-List of strings where each is a directory to be added to the include path of
-GHDL."
-  :type '(repeat (directory :tag "Include directory"))
-  :safe #'flycheck-string-list-p
-  :package-version '(flycheck . "32"))
+(defcustom vhdl-ext-flycheck-ghdl-include-path nil
+  "List of include paths for GHDL linter."
+  :type '(repeat directory)
+  :group 'vhdl-ext-flycheck)
 
-(flycheck-def-option-var vhdl-ext-flycheck-ghdl-work-lib vhdl-default-library vhdl-ghdl
+(defcustom vhdl-ext-flycheck-ghdl-extra-args nil
+  "List of extra arguments for GHDL linter."
+  :type '(repeat string)
+  :group 'vhdl-ext-flycheck)
+
+
+;;; Vars
+(defvar vhdl-ext-flycheck-linter 'vhdl-ghdl
+  "Vhdl-ext flycheck linter.")
+
+(defconst vhdl-ext-flycheck-linters '(vhdl-ghdl
+                                      vhdl-lang
+                                      vhdl-tool)
+  "List of supported linters.")
+
+(defvar vhdl-ext-flycheck-dirs nil "List of open dirs for `vhdl-ext-flycheck'.")
+(defvar vhdl-ext-flycheck-files nil "List of open files for `vhdl-ext-flycheck'.")
+
+;;; Linters
+;;;; GHDL
+(flycheck-def-option-var flycheck-ghdl-work-lib vhdl-default-library vhdl-ghdl
   "Work library name to be used for GHDL."
   :type '(choice (const :tag "Default library" vhdl-default-library)
                  (string :tag "Custom work library"))
   :safe #'stringp
   :package-version '(flycheck . "32"))
-
-(flycheck-def-args-var vhdl-ext-flycheck-ghdl-extra-args vhdl-ghdl
-  :package-version '(flycheck . "32"))
+(make-variable-buffer-local 'flycheck-ghdl-work-lib)
 
 (flycheck-define-checker vhdl-ghdl
   "A VHDL syntax checker using GHDL.
 See URL `https://github.com/ghdl/ghdl'."
   :command ("ghdl"
             "-s" ; only do the syntax checking
-            (option "--std=" flycheck-ghdl-language-standard concat)
-            (option "--workdir=" flycheck-ghdl-workdir concat)
+            (option "--std=" flycheck-ghdl-language-standard concat) ; Set by `vhdl-ext' based on `vhdl-standard'
+            (option "--workdir=" flycheck-ghdl-workdir concat) ; Set by `vhdl-ext' based on `vhdl-project-alist'
             (option "--ieee=" flycheck-ghdl-ieee-library concat)
             ;; Additional options
-            (option-list "-P" vhdl-ext-flycheck-ghdl-include-path concat)
-            (option "--work=" vhdl-ext-flycheck-ghdl-work-lib concat)
-            ;; Extra args
+            (option "--work=" flycheck-ghdl-work-lib concat) ; Set by `vhdl-ext' based on `vhdl-project-alist'
             (eval vhdl-ext-flycheck-ghdl-extra-args)
+            ;; Extra dirs and files
+            (option-list "-P" vhdl-ext-flycheck-ghdl-include-path concat)
+            (option-list "-P" vhdl-ext-flycheck-dirs concat)
             source)
   :error-patterns
   ((info    line-start (file-name) ":" line ":" column ":note: "    (message) line-end)
@@ -94,9 +114,12 @@ See URL `https://github.com/VHDL-LS/rust_hdl'."
 
 
 ;;;; vhdl-tool
+(defun vhdl-ext-flycheck-vhdl-tool-directory-fn (_checker)
+  "Return directory where vhdl-tool is executed.
+Needed to keep in sync where the server and the client are run."
+  (vhdl-ext-project-root))
+
 ;; https://git.vhdltool.com/vhdl-tool/configs/src/master/emacs
-;; INFO: Requires running following command in the background:
-;;  $ vhdl-tool server
 (flycheck-define-checker vhdl-tool
   "A VHDL syntax checker, type checker and linter using VHDL-Tool.
 
@@ -106,7 +129,69 @@ See URL `http://vhdltool.com'."
   :error-patterns
   ((warning line-start (file-name) ":" line ":" column ":w:" (message) line-end)
    (error   line-start (file-name) ":" line ":" column ":e:" (message) line-end))
-  :modes (vhdl-mode vhdl-ts-mode))
+  :modes (vhdl-mode vhdl-ts-mode)
+  :working-directory vhdl-ext-flycheck-vhdl-tool-directory-fn)
+
+
+;;; Functions
+(defun vhdl-ext-flycheck-setup-linter (linter)
+  "Setup LINTER before enabling flycheck."
+  (pcase linter
+    ('vhdl-lang
+     (unless (locate-dominating-file buffer-file-name flycheck-vhdl-lang-config-file)
+       (error "Could not find \"vhdl_lang.toml\" in project root!")))
+    ('vhdl-tool
+     (let ((buf (concat " *vhdl-tool-server@" (vhdl-ext-project-root) "*")))
+       (unless (get-buffer-process buf)
+         (start-process-shell-command buf buf (concat "cd " (vhdl-ext-project-root) " && vhdl-tool server"))
+         (message "Started process @ %s" buf))))))
+
+(defun vhdl-ext-flycheck-set-linter (&optional linter)
+  "Set LINTER as default and enable it if flycheck is on."
+  (interactive)
+  (unless linter
+    (setq linter (intern (completing-read "Select linter: " vhdl-ext-flycheck-linters nil t))))
+  (unless (member linter vhdl-ext-flycheck-linters)
+    (error "Linter %s not available" linter))
+  ;; Set it at the head of the list
+  (delete linter flycheck-checkers)
+  (add-to-list 'flycheck-checkers linter)
+  (vhdl-ext-flycheck-setup-linter linter)
+  (setq vhdl-ext-flycheck-linter linter) ; Save state for reporting
+  ;; Refresh linter if in a vhdl buffer
+  (when (eq major-mode 'vhdl-mode)
+    (flycheck-select-checker linter))
+  (message "Linter set to: %s " linter))
+
+(defun vhdl-ext-flycheck-setup ()
+  "Add available linters from `vhdl-ext-flycheck-linters' and set default one."
+  (interactive)
+  (dolist (checker vhdl-ext-flycheck-linters)
+    (add-to-list 'flycheck-checkers checker))
+  (vhdl-ext-flycheck-set-linter vhdl-ext-flycheck-linter))
+
+;;;###autoload
+(defun vhdl-ext-flycheck-mode (&optional uarg)
+  "`flycheck-mode' VHDL wrapper function.
+If called with UARG select among available linters and enable flycheck."
+  (interactive "P")
+  (let (enable)
+    (when buffer-read-only
+      (error "Flycheck does not work on read-only buffers!"))
+    (if uarg
+        (progn
+          (vhdl-ext-flycheck-set-linter)
+          (setq enable t))
+      (unless flycheck-mode
+        (setq enable t)))
+    (when (flycheck-disabled-checker-p vhdl-ext-flycheck-linter)
+      (user-error "[%s] Current checker is disabled by flycheck.\nEnable it with C-u M-x `flycheck-disable-checker'" vhdl-ext-flycheck-linter))
+    (if enable
+        (progn
+          (flycheck-mode 1)
+          (message "[%s] Flycheck enabled" vhdl-ext-flycheck-linter))
+      (flycheck-mode -1)
+      (message "Flycheck disabled"))))
 
 
 (provide 'vhdl-ext-flycheck)

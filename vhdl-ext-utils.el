@@ -29,6 +29,14 @@
 (require 'project)
 (require 'vhdl-mode)
 
+
+(defcustom vhdl-ext-file-extension-re "\\.vhdl?$"
+  "VHDL file extensions.
+Defaults to .vhd and .vhdl."
+  :type 'string
+  :group 'vhdl-ext)
+
+
 (defconst vhdl-ext-blank-optional-re "[[:blank:]\n]*")
 (defconst vhdl-ext-blank-mandatory-re "[[:blank:]\n]+")
 (defconst vhdl-ext-identifier-re "[a-zA-Z_][a-zA-Z0-9_-]*")
@@ -51,6 +59,7 @@
 
 (defvar vhdl-ext-buffer-list nil)
 (defvar vhdl-ext-dir-list nil)
+(defvar vhdl-ext-file-list nil)
 
 (defconst vhdl-ext-lsp-available-servers
   '((ve-hdl-checker . ("hdl_checker" "--lsp"))
@@ -133,18 +142,22 @@ Return nil if no entity was found."
            (project-root (project-current)))
       default-directory))
 
-(defun vhdl-ext-update-buffer-and-dir-list ()
-  "Update Vhdl-mode opened buffers and directories lists."
-  (let (vhdl-buffers vhdl-dirs)
+(defun vhdl-ext-update-buffer-file-and-dir-list ()
+  "Update `vhdl-mode' list of open buffers, files, and dir lists."
+  (let (vhdl-buffers vhdl-dirs vhdl-files)
     (dolist (buf (buffer-list (current-buffer)))
       (with-current-buffer buf
         (when (or (eq major-mode 'vhdl-mode)
                   (eq major-mode 'vhdl-ts-mode))
           (push buf vhdl-buffers)
           (unless (member default-directory vhdl-dirs)
-            (push default-directory vhdl-dirs)))))
+            (push default-directory vhdl-dirs))
+          (when (and buffer-file-name
+                     (string-match vhdl-ext-file-extension-re (concat "." (file-name-extension buffer-file-name))))
+            (push buffer-file-name vhdl-files)))))
     (setq vhdl-ext-buffer-list vhdl-buffers)
-    (setq vhdl-ext-dir-list vhdl-dirs)))
+    (setq vhdl-ext-dir-list vhdl-dirs)
+    (setq vhdl-ext-file-list vhdl-files)))
 
 (defun vhdl-ext-get-standard ()
   "Get current standard as a string from `vhdl-standard'."
@@ -157,14 +170,41 @@ Return nil if no entity was found."
   "VHDL hook to run when killing a buffer."
   (setq vhdl-ext-buffer-list (remove (current-buffer) vhdl-ext-buffer-list)))
 
+(defun vhdl-ext-buffer-proj-dir ()
+  "Return current buffer project if it belongs to `vhdl-project-alist'."
+  (catch 'project
+    (when (and buffer-file-name vhdl-project-alist)
+      (dolist (proj vhdl-project-alist)
+        (when (string-prefix-p (expand-file-name (nth 2 proj))
+                               (expand-file-name buffer-file-name))
+          (throw 'project (car proj)))))))
+
 (defun vhdl-ext-workdir ()
-  "Return the working library directory according to current project.
-Check `vhdl-project-alist'."
-  (let ((root (nth 1 (vhdl-aget vhdl-project-alist vhdl-project)))
-        (dir  (nth 7 (vhdl-aget vhdl-project-alist vhdl-project))))
+  "Return working library dir according to project of current buffer dir.
+
+Instead of fetching the value from `vhdl-project', it depends on current
+directory.  If current directory has no project in `vhdl-project-alist', fetch
+the value from `vhdl-project' instead."
+  (let* ((project (vhdl-ext-buffer-proj-dir))
+         (root (nth 1 (vhdl-aget vhdl-project-alist (or project vhdl-project))))
+         (dir  (nth 7 (vhdl-aget vhdl-project-alist (or project vhdl-project)))))
     (when (and root dir)
       (file-name-concat root dir))))
 
+(defun vhdl-ext-work-library ()
+  "Return the working library name of the current directory project.
+
+Instead of fetching the value from `vhdl-project', it depends on current
+directory.  If current directory has no project in `vhdl-project-alist', fetch
+the value from `vhdl-project' instead.
+
+Return \"work\" if no project is defined.
+
+See `vhdl-work-library'."
+  (let* ((project (vhdl-ext-buffer-proj-dir)))
+    (vhdl-resolve-env-variable
+     (or (nth 6 (vhdl-aget vhdl-project-alist (or project vhdl-project)))
+         vhdl-default-library))))
 
 (provide 'vhdl-ext-utils)
 
