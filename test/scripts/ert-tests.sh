@@ -18,6 +18,7 @@ run_elisp_cmd() {
           -L $PWD/test \
           -l ert \
           -l $SETUP_FILE \
+          -l vhdl-ext-tests-setup-faces \
           -l vhdl-ext-tests \
           --eval "$1"
 }

@@ -187,13 +187,13 @@ Snippet fetched from `treesit--indent-1'."
                      suffix: (simple_name) @vhdl-ext-font-lock-port-connection-face)))
      ;; Ranges
      (descending_range
-      high: (simple_expression) @vhdl-ext-font-lock-braces-content-face)
+      high: (simple_expression) @vhdl-ext-font-lock-brackets-content-face)
      (descending_range
-      low: (simple_expression) @vhdl-ext-font-lock-braces-content-face)
+      low: (simple_expression) @vhdl-ext-font-lock-brackets-content-face)
      (expression_list
-      (expression (integer_decimal) @vhdl-ext-font-lock-braces-content-face))
+      (expression (integer_decimal) @vhdl-ext-font-lock-brackets-content-face))
      (expression_list
-      (expression (simple_name) @vhdl-ext-font-lock-braces-content-face))
+      (expression (simple_name) @vhdl-ext-font-lock-brackets-content-face))
      (["downto" "to"] @vhdl-ext-font-lock-instance-lib-face)
      ;; Constants
      (constant_declaration

@@ -13,8 +13,8 @@
     «k:type» «t:conversion_req_t» «k:is» «k:record»
         op_type «:vhdl-ext-font-lock-punctuation-face::» «t:conversion_op»«:vhdl-ext-font-lock-punctuation-face:;»
         request «:vhdl-ext-font-lock-punctuation-face::» «t:std_logic»«:vhdl-ext-font-lock-punctuation-face:;»
-        size    «:vhdl-ext-font-lock-punctuation-face::» «t:unsigned»«:vhdl-ext-font-lock-punctuation-face:(»«:vhdl-ext-font-lock-braces-content-face:9» «:vhdl-ext-font-lock-instance-lib-face:downto» «:vhdl-ext-font-lock-braces-content-face:0»«:vhdl-ext-font-lock-punctuation-face:);»
-        address «:vhdl-ext-font-lock-punctuation-face::» «t:std_logic_vector»«:vhdl-ext-font-lock-punctuation-face:(»«:vhdl-ext-font-lock-braces-content-face:31» «:vhdl-ext-font-lock-instance-lib-face:downto» «:vhdl-ext-font-lock-braces-content-face:0»«:vhdl-ext-font-lock-punctuation-face:);»
+        size    «:vhdl-ext-font-lock-punctuation-face::» «t:unsigned»«:vhdl-ext-font-lock-punctuation-face:(»«:vhdl-ext-font-lock-brackets-content-face:9» «:vhdl-ext-font-lock-instance-lib-face:downto» «:vhdl-ext-font-lock-brackets-content-face:0»«:vhdl-ext-font-lock-punctuation-face:);»
+        address «:vhdl-ext-font-lock-punctuation-face::» «t:std_logic_vector»«:vhdl-ext-font-lock-punctuation-face:(»«:vhdl-ext-font-lock-brackets-content-face:31» «:vhdl-ext-font-lock-instance-lib-face:downto» «:vhdl-ext-font-lock-brackets-content-face:0»«:vhdl-ext-font-lock-punctuation-face:);»
     «k:end» «k:record» conversion_req_t«:vhdl-ext-font-lock-punctuation-face:;»
 
     «k:type» «t:conversion_rsp_t» «k:is» «k:record»
@@ -47,14 +47,14 @@
 
     «x:-- Pattern counters»
     «k:constant» «c:PATTERN_COUNTER_DATA_WIDTH» «:vhdl-ext-font-lock-punctuation-face::» «t:integer» «:vhdl-ext-font-lock-punctuation-face::=» 64«:vhdl-ext-font-lock-punctuation-face:;»
-    «k:constant» «c:PATTERN» «:vhdl-ext-font-lock-punctuation-face::» «t:std_logic_vector»«:vhdl-ext-font-lock-punctuation-face:(»«:vhdl-ext-font-lock-braces-content-face:PATTERN_COUNTER_DATA_WIDTH-1» «:vhdl-ext-font-lock-instance-lib-face:downto» «:vhdl-ext-font-lock-braces-content-face:0»«:vhdl-ext-font-lock-punctuation-face:)» «:vhdl-ext-font-lock-punctuation-face::=» «:vhdl-ext-font-lock-punctuation-face:(»«k:others» «:vhdl-ext-font-lock-punctuation-face:=>» «s:'0'»«:vhdl-ext-font-lock-punctuation-face:);»
+    «k:constant» «c:PATTERN» «:vhdl-ext-font-lock-punctuation-face::» «t:std_logic_vector»«:vhdl-ext-font-lock-punctuation-face:(»«:vhdl-ext-font-lock-brackets-content-face:PATTERN_COUNTER_DATA_WIDTH-1» «:vhdl-ext-font-lock-instance-lib-face:downto» «:vhdl-ext-font-lock-brackets-content-face:0»«:vhdl-ext-font-lock-punctuation-face:)» «:vhdl-ext-font-lock-punctuation-face::=» «:vhdl-ext-font-lock-punctuation-face:(»«k:others» «:vhdl-ext-font-lock-punctuation-face:=>» «s:'0'»«:vhdl-ext-font-lock-punctuation-face:);»
     
     «x:-- Clock divider»
     «k:constant» «c:DIV_FACTOR» «:vhdl-ext-font-lock-punctuation-face::» «t:integer» «:vhdl-ext-font-lock-punctuation-face::=» 16«:vhdl-ext-font-lock-punctuation-face:;»
 
     «x:-- Input buffer»
-    «k:constant» «c:LEFT_CH_ST_BASE_ADDRESS»  «:vhdl-ext-font-lock-punctuation-face::» «t:std_logic_vector»«:vhdl-ext-font-lock-punctuation-face:(»«:vhdl-ext-font-lock-braces-content-face:31» «:vhdl-ext-font-lock-instance-lib-face:downto» «:vhdl-ext-font-lock-braces-content-face:0»«:vhdl-ext-font-lock-punctuation-face:)» «:vhdl-ext-font-lock-punctuation-face::=» «s:x"1000_0000"»«:vhdl-ext-font-lock-punctuation-face:;»
-    «k:constant» «c:RIGHT_CH_ST_BASE_ADDRESS» «:vhdl-ext-font-lock-punctuation-face::» «t:std_logic_vector»«:vhdl-ext-font-lock-punctuation-face:(»«:vhdl-ext-font-lock-braces-content-face:31» «:vhdl-ext-font-lock-instance-lib-face:downto» «:vhdl-ext-font-lock-braces-content-face:0»«:vhdl-ext-font-lock-punctuation-face:)» «:vhdl-ext-font-lock-punctuation-face::=» «s:x"2000_0000"»«:vhdl-ext-font-lock-punctuation-face:;»
+    «k:constant» «c:LEFT_CH_ST_BASE_ADDRESS»  «:vhdl-ext-font-lock-punctuation-face::» «t:std_logic_vector»«:vhdl-ext-font-lock-punctuation-face:(»«:vhdl-ext-font-lock-brackets-content-face:31» «:vhdl-ext-font-lock-instance-lib-face:downto» «:vhdl-ext-font-lock-brackets-content-face:0»«:vhdl-ext-font-lock-punctuation-face:)» «:vhdl-ext-font-lock-punctuation-face::=» «s:x"1000_0000"»«:vhdl-ext-font-lock-punctuation-face:;»
+    «k:constant» «c:RIGHT_CH_ST_BASE_ADDRESS» «:vhdl-ext-font-lock-punctuation-face::» «t:std_logic_vector»«:vhdl-ext-font-lock-punctuation-face:(»«:vhdl-ext-font-lock-brackets-content-face:31» «:vhdl-ext-font-lock-instance-lib-face:downto» «:vhdl-ext-font-lock-brackets-content-face:0»«:vhdl-ext-font-lock-punctuation-face:)» «:vhdl-ext-font-lock-punctuation-face::=» «s:x"2000_0000"»«:vhdl-ext-font-lock-punctuation-face:;»
 
 
 «k:end» «k:package» global«:vhdl-ext-font-lock-punctuation-face:;»

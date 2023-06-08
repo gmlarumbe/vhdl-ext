@@ -20,8 +20,8 @@
 »«m:-------------------------------------------------------------------------------»«x:
 »
 «k:library» «b:ieee»«:vhdl-ext-font-lock-punctuation-face:;»
-«k:use» «b:ieee»«:vhdl-ext-font-lock-punctuation-bold-face:.»«b:std_logic_1164»«:vhdl-ext-font-lock-punctuation-bold-face:.»«k:all»«:vhdl-ext-font-lock-punctuation-face:;»
-«k:use» «b:ieee»«:vhdl-ext-font-lock-punctuation-bold-face:.»«b:numeric_std»«:vhdl-ext-font-lock-punctuation-bold-face:.»«k:all»«:vhdl-ext-font-lock-punctuation-face:;»
+«k:use» «b:ieee»«:vhdl-ext-font-lock-operator-face:.»«b:std_logic_1164»«:vhdl-ext-font-lock-operator-face:.»«k:all»«:vhdl-ext-font-lock-punctuation-face:;»
+«k:use» «b:ieee»«:vhdl-ext-font-lock-operator-face:.»«b:numeric_std»«:vhdl-ext-font-lock-operator-face:.»«k:all»«:vhdl-ext-font-lock-punctuation-face:;»
 
 «k:entity» «f:instances» «k:is»
 «k:end» «k:entity» «f:instances»«:vhdl-ext-font-lock-punctuation-face:;»
@@ -67,21 +67,21 @@
             «:vhdl-ext-font-lock-port-connection-face:Port2» «:vhdl-ext-font-lock-punctuation-face:=>» Port2«:vhdl-ext-font-lock-parenthesis-face:)»«:vhdl-ext-font-lock-punctuation-face:;»
 
     «m:-- »«x:Entity instantiation
-»    «:vhdl-ext-font-lock-instance-face:I_BLOCK1_0» «:vhdl-ext-font-lock-punctuation-face::» «k:entity» «b:work»«:vhdl-ext-font-lock-punctuation-bold-face:.»«:vhdl-ext-font-lock-entity-face:block1»
+»    «:vhdl-ext-font-lock-instance-face:I_BLOCK1_0» «:vhdl-ext-font-lock-punctuation-face::» «k:entity» «b:work»«:vhdl-ext-font-lock-operator-face:.»«:vhdl-ext-font-lock-entity-face:block1»
         «k:port» «k:map» «:vhdl-ext-font-lock-parenthesis-face:(»
             «:vhdl-ext-font-lock-port-connection-face:Port0» «:vhdl-ext-font-lock-punctuation-face:=>» Port0«:vhdl-ext-font-lock-punctuation-face:,»
             «:vhdl-ext-font-lock-port-connection-face:Port1» «:vhdl-ext-font-lock-punctuation-face:=>» Port1«:vhdl-ext-font-lock-punctuation-face:,»
             «:vhdl-ext-font-lock-port-connection-face:Port2» «:vhdl-ext-font-lock-punctuation-face:=>» Port2
             «:vhdl-ext-font-lock-parenthesis-face:)»«:vhdl-ext-font-lock-punctuation-face:;»
 
-    «:vhdl-ext-font-lock-instance-face:I_BLOCK1_1» «:vhdl-ext-font-lock-punctuation-face::» «k:entity» «b:work»«:vhdl-ext-font-lock-punctuation-bold-face:.»«:vhdl-ext-font-lock-entity-face:block1»
+    «:vhdl-ext-font-lock-instance-face:I_BLOCK1_1» «:vhdl-ext-font-lock-punctuation-face::» «k:entity» «b:work»«:vhdl-ext-font-lock-operator-face:.»«:vhdl-ext-font-lock-entity-face:block1»
         «k:port» «k:map» «:vhdl-ext-font-lock-parenthesis-face:(»
             «:vhdl-ext-font-lock-port-connection-face:Port0» «:vhdl-ext-font-lock-punctuation-face:=>» Port0«:vhdl-ext-font-lock-punctuation-face:,»
             «:vhdl-ext-font-lock-port-connection-face:Port1» «:vhdl-ext-font-lock-punctuation-face:=>» Port1«:vhdl-ext-font-lock-punctuation-face:,»
             «:vhdl-ext-font-lock-port-connection-face:Port2» «:vhdl-ext-font-lock-punctuation-face:=>» Port2
             «:vhdl-ext-font-lock-parenthesis-face:)»«:vhdl-ext-font-lock-punctuation-face:;»
 
-    «:vhdl-ext-font-lock-instance-face:I_BLOCK1_2» «:vhdl-ext-font-lock-punctuation-face::» «k:entity» «b:work»«:vhdl-ext-font-lock-punctuation-bold-face:.»«:vhdl-ext-font-lock-entity-face:block1» «k:generic» «k:map» «:vhdl-ext-font-lock-parenthesis-face:(»
+    «:vhdl-ext-font-lock-instance-face:I_BLOCK1_2» «:vhdl-ext-font-lock-punctuation-face::» «k:entity» «b:work»«:vhdl-ext-font-lock-operator-face:.»«:vhdl-ext-font-lock-entity-face:block1» «k:generic» «k:map» «:vhdl-ext-font-lock-parenthesis-face:(»
         «:vhdl-ext-font-lock-port-connection-face:Generic0» «:vhdl-ext-font-lock-punctuation-face:=>» 0«:vhdl-ext-font-lock-punctuation-face:,»
         «:vhdl-ext-font-lock-port-connection-face:Generic1» «:vhdl-ext-font-lock-punctuation-face:=>» 0«:vhdl-ext-font-lock-punctuation-face:,»
         «:vhdl-ext-font-lock-port-connection-face:Generic2» «:vhdl-ext-font-lock-punctuation-face:=>» 0

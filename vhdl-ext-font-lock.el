@@ -44,84 +44,88 @@
 (require 'vhdl-ext-nav)
 
 ;;;; Faces
+(defgroup vhdl-ext-font-lock nil
+  "Vhdl-ext faces."
+  :group 'vhdl-ext)
+
 (defvar vhdl-ext-font-lock-punctuation-face 'vhdl-ext-font-lock-punctuation-face)
 (defface vhdl-ext-font-lock-punctuation-face
-  '((t (:foreground "burlywood")))
+  '((t (:inherit font-lock-punctuation-face)))
   "Face for punctuation symbols:
 !,;:?'=<>*"
-  :group 'vhdl-ext-font-lock-faces)
+  :group 'vhdl-ext-font-lock)
 
-(defvar vhdl-ext-font-lock-punctuation-bold-face 'vhdl-ext-font-lock-punctuation-bold-face)
-(defface vhdl-ext-font-lock-punctuation-bold-face
-  '((t (:inherit vhdl-ext-font-lock-punctuation-face :weight extra-bold)))
-  "Face for bold punctuation symbols, such as &^~+-/|."
-  :group 'vhdl-ext-font-lock-faces)
+(defvar vhdl-ext-font-lock-operator-face 'vhdl-ext-font-lock-operator-face)
+(defface vhdl-ext-font-lock-operator-face
+  '((t (:inherit font-lock-operator-face)))
+  "Face for operator symbols, such as &^~+-/|."
+  :group 'vhdl-ext-font-lock)
 
-(defvar vhdl-ext-font-lock-braces-face 'vhdl-ext-font-lock-braces-face)
-(defface vhdl-ext-font-lock-braces-face
-  '((t (:foreground "goldenrod")))
-  "Face for braces []."
-  :group 'vhdl-ext-font-lock-faces)
+(defvar vhdl-ext-font-lock-brackets-face 'vhdl-ext-font-lock-brackets-face)
+(defface vhdl-ext-font-lock-brackets-face
+  '((t (:inherit font-lock-bracket-face)))
+  "Face for brackets []."
+  :group 'vhdl-ext-font-lock)
 
 (defvar vhdl-ext-font-lock-parenthesis-face 'vhdl-ext-font-lock-parenthesis-face)
 (defface vhdl-ext-font-lock-parenthesis-face
-  '((t (:foreground "dark goldenrod")))
+  '((t (:inherit font-lock-bracket-face)))
   "Face for parenthesis ()."
-  :group 'vhdl-ext-font-lock-faces)
+  :group 'vhdl-ext-font-lock)
 
-(defvar vhdl-ext-font-lock-curly-brackets-face 'vhdl-ext-font-lock-curly-brackets-face)
-(defface vhdl-ext-font-lock-curly-brackets-face
-  '((t (:foreground "DarkGoldenrod2")))
-  "Face for curly brackets {}."
-  :group 'vhdl-ext-font-lock-faces)
+(defvar vhdl-ext-font-lock-curly-braces-face 'vhdl-ext-font-lock-curly-braces-face)
+(defface vhdl-ext-font-lock-curly-braces-face
+  '((t (:inherit font-lock-bracket-face)))
+  "Face for curly braces {}."
+  :group 'vhdl-ext-font-lock)
 
-(defvar vhdl-ext-font-lock-braces-content-face 'vhdl-ext-font-lock-braces-content-face)
-(defface vhdl-ext-font-lock-braces-content-face
-  '((t (:foreground "yellow green")))
-  "Face for content between braces: arrays, bit vector width and indexing."
-  :group 'vhdl-ext-font-lock-faces)
+(defvar vhdl-ext-font-lock-brackets-content-face 'vhdl-ext-font-lock-brackets-content-face)
+(defface vhdl-ext-font-lock-brackets-content-face
+  '((t (:inherit font-lock-number-face)))
+  "Face for content between brackets: arrays, bit vector width and indexing."
+  :group 'vhdl-ext-font-lock)
 
 (defvar vhdl-ext-font-lock-port-connection-face 'vhdl-ext-font-lock-port-connection-face)
 (defface vhdl-ext-font-lock-port-connection-face
-  '((t (:foreground "bisque2")))
+  '((t (:inherit font-lock-constant-face)))
   "Face for port connections of instances.
 portA => signalA,
 portB => signalB
 );"
-  :group 'vhdl-ext-font-lock-faces)
+  :group 'vhdl-ext-font-lock)
 
 (defvar vhdl-ext-font-lock-entity-face 'vhdl-ext-font-lock-entity-face)
 (defface vhdl-ext-font-lock-entity-face
-  '((t (:foreground "green1")))
+  '((t (:inherit font-lock-function-call-face)))
   "Face for entity names."
-  :group 'vhdl-ext-font-lock-faces)
+  :group 'vhdl-ext-font-lock)
 
 (defvar vhdl-ext-font-lock-instance-face 'vhdl-ext-font-lock-instance-face)
 (defface vhdl-ext-font-lock-instance-face
-  '((t (:foreground "medium spring green")))
+  '((t (:inherit font-lock-variable-use-face)))
   "Face for instance names."
-  :group 'vhdl-ext-font-lock-faces)
+  :group 'vhdl-ext-font-lock)
 
 (defvar vhdl-ext-font-lock-instance-lib-face 'vhdl-ext-font-lock-instance-lib-face)
 (defface vhdl-ext-font-lock-instance-lib-face
-  '((t (:foreground "gray70")))
+  '((t (:inherit font-lock-property-name-face)))
   "Face for instances lib prefix."
-  :group 'vhdl-ext-font-lock-faces)
+  :group 'vhdl-ext-font-lock)
 
 (defvar vhdl-ext-font-lock-translate-off-face 'vhdl-ext-font-lock-translate-off-face)
 (defface vhdl-ext-font-lock-translate-off-face
-  '((t (:background "gray20" :slant italic)))
+  '((t (:slant italic)))
   "Face for pragmas between comments, e.g:
 * translate_off / * translate_on"
-  :group 'vhdl-ext-font-lock-faces)
+  :group 'vhdl-ext-font-lock)
 
 
 ;;;; Regexps
 (defconst vhdl-ext-font-lock-punctuation-re "\\([!,;:?'=<>]\\|\\*\\)")
-(defconst vhdl-ext-font-lock-punctuation-bold-re "\\([&^~+-]\\||\\|\\.\\|\\/\\)")
+(defconst vhdl-ext-font-lock-operator-re "\\([&^~+-]\\||\\|\\.\\|\\/\\)")
 (defconst vhdl-ext-font-lock-parenthesis-re "[()]")
-(defconst vhdl-ext-font-lock-curly-brackets-re "[{}]")
-(defconst vhdl-ext-font-lock-braces-re "\\(\\[\\|\\]\\)")
+(defconst vhdl-ext-font-lock-curly-braces-re "[{}]")
+(defconst vhdl-ext-font-lock-brackets-re "\\(\\[\\|\\]\\)")
 (defconst vhdl-ext-font-lock-common-constructs-re
   (concat "^\\s-*\\(\\w+\\)\\s-*:[ \t\n\r\f]*\\(\\("
           "assert\\|block\\|case\\|exit\\|for\\|if\\|loop\\|next\\|null\\|"
@@ -392,23 +396,23 @@ Regex search bound to LIMIT."
   (list
    ;; Punctuation
    (list vhdl-ext-font-lock-punctuation-re 0 vhdl-ext-font-lock-punctuation-face)
-   (list vhdl-ext-font-lock-punctuation-bold-re 0 vhdl-ext-font-lock-punctuation-bold-face)
+   (list vhdl-ext-font-lock-operator-re 0 vhdl-ext-font-lock-operator-face)
    ;; Bit range
    (list vhdl-ext-font-lock-brackets-content-range-re
-         '(1 vhdl-ext-font-lock-curly-brackets-face)
-         '(5 vhdl-ext-font-lock-curly-brackets-face)
-         '(2 vhdl-ext-font-lock-braces-content-face)
-         '(4 vhdl-ext-font-lock-braces-content-face)
+         '(1 vhdl-ext-font-lock-curly-braces-face)
+         '(5 vhdl-ext-font-lock-curly-braces-face)
+         '(2 vhdl-ext-font-lock-brackets-content-face)
+         '(4 vhdl-ext-font-lock-brackets-content-face)
          '(3 vhdl-ext-font-lock-instance-lib-face))
    ;; Bit index
    (list vhdl-ext-font-lock-brackets-content-index-re
-         '(1 vhdl-ext-font-lock-curly-brackets-face)
-         '(3 vhdl-ext-font-lock-curly-brackets-face)
-         '(2 vhdl-ext-font-lock-braces-content-face))
+         '(1 vhdl-ext-font-lock-curly-braces-face)
+         '(3 vhdl-ext-font-lock-curly-braces-face)
+         '(2 vhdl-ext-font-lock-brackets-content-face))
    ;; Braces and brackets
-   (list vhdl-ext-font-lock-braces-re 0 vhdl-ext-font-lock-braces-face)
+   (list vhdl-ext-font-lock-brackets-re 0 vhdl-ext-font-lock-brackets-face)
    (list vhdl-ext-font-lock-parenthesis-re 0 vhdl-ext-font-lock-parenthesis-face)
-   (list vhdl-ext-font-lock-curly-brackets-re 0 vhdl-ext-font-lock-curly-brackets-face)))
+   (list vhdl-ext-font-lock-curly-braces-re 0 vhdl-ext-font-lock-curly-braces-face)))
 
 ;; highlight everything together
 (defconst vhdl-ext-font-lock-keywords
