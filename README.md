@@ -1,7 +1,6 @@
 [![MELPA](https://melpa.org/packages/vhdl-ext-badge.svg)](https://melpa.org/#/vhdl-ext)
 [![Build Status](https://github.com/gmlarumbe/vhdl-ext/workflows/ERT-straight/badge.svg)](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/build_straight.yml)
 [![Build Status](https://github.com/gmlarumbe/vhdl-ext/workflows/ERT-package-el/badge.svg)](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/build_package.yml)
-[![Build Status](https://github.com/gmlarumbe/vhdl-ext/workflows/melpazoid/badge.svg)](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/melpazoid.yml)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 
@@ -9,14 +8,13 @@
 
 This package includes some extensions on top of the great Emacs `vhdl-mode`.
 
-* Tree-sitter powered `vhdl-ts-mode`
-* Improve syntax highlighting
-* LSP configuration for `lsp-mode` and `eglot`
-* Additional options for `flycheck` linters
-* Improve `imenu`, detect instances
-* Navigate through instances in a entity
-* Jump to definition/reference of entity at point
-* Templates insertion via `hydra`
+* [Tree-sitter powered `vhdl-ts-mode`](#tree-sitter)
+* [Improve syntax highlighting](#syntax-highlighting)
+* [LSP configuration for `lsp-mode` and `eglot`](#language-server-protocol)
+* [Support for many linters via `flycheck`](#linting)
+* [Navigate through instances in a entity](#navigation)
+* [Templates insertion via `hydra`](#templates)
+* [Improve `imenu`, detect instances](#imenu)
 
 ## Installation ##
 
@@ -24,9 +22,7 @@ This package includes some extensions on top of the great Emacs `vhdl-mode`.
 
 `vhdl-ext` is available on MELPA.
 
-See [Getting Started](https://melpa.org/partials/getting-started.html) for instructions on how to setup and download packages.
-
-`vhdl-ts-mode` is not yet available on MELPA. See [notes](https://github.com/gmlarumbe/vhdl-ext/wiki/Tree-sitter#notes) for more info.
+`vhdl-ts-mode` is not yet available on MELPA. See the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Tree-sitter) for more info.
 
 
 ### straight.el ###
@@ -35,33 +31,27 @@ To install it via [straight](https://github.com/radian-software/straight.el) wit
 
 ```emacs-lisp
 (straight-use-package 'use-package)
-
-(use-package vhdl-ext
-  :straight (:host github :repo "gmlarumbe/vhdl-ext"
-             :files ("vhdl-ext.el" "vhdl-ts-mode.el"")))
-```
-
-### Manually ###
-
-First download `vhdl-ext` in the desired directory (e.g. `~/.emacs.d`):
-
-```shell
-$ cd ~/.emacs.d
-$ git clone https://github.com/gmlarumbe/vhdl-ext
-```
-
-And add the following snippet to your `.emacs` or `init.el`:
-
-```emacs-lisp
-(add-to-list 'load-path (expand-file-name "~/.emacs.d/vhdl-ext"))
-(require 'vhdl-ext)
+(use-package vhdl-ext)
 ```
 
 ## Basic config ##
 
-The most basic configuration just requires setup of the minor-mode and to add it as a hook for `vhdl-mode`:
+The most basic configuration just requires choosing which features you
+want to load, setup the minor-mode and add it as a hook for `vhdl-mode`.
+By default all features are enabled:
 
 ```elisp
+;; Can also be set through `M-x RET customize-group RET vhdl-ext':
+;;  - Vhdl Ext Feature List (provides info of different features)
+;; Comment out/remove the ones you do not need
+(setq vhdl-ext-feature-list
+      '(font-lock
+        eglot
+        lsp
+        flycheck
+        navigation
+        template
+        imenu))
 (vhdl-ext-mode-setup)
 (add-hook 'vhdl-mode-hook #'vhdl-ext-mode)
 ```
@@ -73,6 +63,18 @@ If installed and loaded via `use-package`:
   :after vhdl-mode
   :demand
   :hook ((vhdl-mode . vhdl-ext-mode))
+  :init
+  ;; Can also be set through `M-x RET customize-group RET vhdl-ext':
+  ;;  - Vhdl Ext Feature List (provides info of different features)
+  ;; Comment out/remove the ones you do not need
+  (setq vhdl-ext-feature-list
+        '(font-lock
+          eglot
+          lsp
+          flycheck
+          navigation
+          template
+          imenu))
   :config
   (vhdl-ext-mode-setup))
 ```
@@ -87,6 +89,7 @@ Enabling of `vhdl-ext-mode` minor-mode creates the following keybindings:
   * <kbd>C-c M-.</kbd> `vhdl-ext-jump-to-entity-at-point-def`
   * <kbd>C-c M-?</kbd> `vhdl-ext-jump-to-entity-at-point-ref`
   * <kbd>C-c C-t</kbd> `vhdl-ext-hydra/body`
+  * <kbd>C-c C-f</kbd> `vhdl-ext-flycheck-mode`
 
 
 # Features #
@@ -103,7 +106,7 @@ For more information see the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/T
 
 <img src="https://user-images.githubusercontent.com/51021955/215353070-8a21f758-407d-4455-bdac-bf92310c59e4.gif" width=400 height=300>
 
-For face customization: <kbd>M-x</kbd> `customize-group` <kbd>RET</kbd> `vhdl-ext-faces`
+For configuration information, see the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Syntax-highlighting).
 
 
 ## Language Server Protocol ##
@@ -119,20 +122,15 @@ For configuration instructions, see the [wiki](https://github.com/gmlarumbe/vhdl
 
 
 ## Linting ##
-Enhanced version of [GHDL](https://github.com/ghdl/ghdl) flycheck checker.
 
-* Allows setting name of current work library name, e.g:
-  ```elisp
-  (setq vhdl-ext-flycheck-ghdl-work-lib (vhdl-work-library))
-  ```
-* Automatically include directories of open VHDL buffers
-  * Variable `vhdl-ext-flycheck-ghdl-include-path` will be updated every time a new VHDL file is opened
+Support via `flycheck` for the following linters:
 
+* [GHDL](https://github.com/ghdl/ghdl)
+* [vhdl_lang](https://github.com/VHDL-LS/rust_hdl)
+* [vhdl-tool](http://vhdltool.com)
 
-## Imenu ##
-Support detection of instances
+For configuration and usage instructions, see the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Linting)
 
-<img src="https://user-images.githubusercontent.com/51021955/215353082-9a187daf-7f76-4c9b-8563-7beba6e1aa6a.gif" width=400 height=300>
 
 ## Navigation ##
 
@@ -145,12 +143,18 @@ Support detection of instances
 For detailed info see the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Navigation).
 
 
-## Snippets ##
+## Templates ##
 Snippet selection via `hydra`.
 
 <img src="https://user-images.githubusercontent.com/51021955/215353124-7e374754-cd91-4924-9b4b-3c6a29cad921.gif" width=400 height=300>
 
 * `vhdl-ext-hydra/body`: <kbd>C-c C-t</kbd>
+
+
+## Imenu ##
+Support detection of instances.
+
+<img src="https://user-images.githubusercontent.com/51021955/215353082-9a187daf-7f76-4c9b-8563-7beba6e1aa6a.gif" width=400 height=300>
 
 
 # Contributing #
@@ -159,13 +163,16 @@ Contributions are welcome! Just stick to common Elisp conventions and run the ER
 
 For new functionality add new ERT tests if possible.
 
+Consider [sponsoring](https://github.com/sponsors/gmlarumbe) to help
+maintaining the project and for the development of new features. *Thank you!*
+
 ## ERT Tests setup ###
 
 To run the whole ERT test suite change directory to the `vhdl-ext` root and run the `test` target:
 
 ```shell
 $ cd ~/.emacs.d/vhdl-ext
-$ make test
+$ make
 ```
 
 To run a subset of tests (e.g. imenu):
@@ -175,7 +182,9 @@ $ cd ~/.emacs.d/vhdl-ext
 $ test/scripts/ert-tests.sh recompile_run imenu::
 ```
 
-## Other packages
+## Other packages ##
 
 * [verilog-ext](https://github.com/gmlarumbe/verilog-ext): SystemVerilog Extensions for Emacs
   * Analog package to edit Verilog/SystemVerilog sources
+* [fpga](https://github.com/gmlarumbe/fpga): FPGA & ASIC Utilities for Emacs
+  * Utilities for tools of major vendors of FPGA & ASIC
