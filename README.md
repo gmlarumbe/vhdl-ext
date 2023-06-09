@@ -15,6 +15,7 @@ This package includes some extensions on top of the great Emacs `vhdl-mode`.
 * [Support for many linters via `flycheck`](#linting)
 * [Navigate through instances in a entity](#navigation)
 * [Templates insertion via `hydra`](#templates)
+* [Compilation with colored errors/warnings and jump to file/line](#compilation)
 * [Improve `imenu`, detect instances](#imenu)
 * [Auto-configure `time-stamp`](#time-stamp)
 * [Auto-configure `company-keywords`](#company-keywords)
@@ -54,6 +55,7 @@ By default all features are enabled:
         flycheck
         navigation
         template
+        compilation
         imenu
         time-stamp
         company-keywords))
@@ -79,6 +81,7 @@ If installed and loaded via `use-package`:
           flycheck
           navigation
           template
+          compilation
           imenu
           time-stamp
           company-keywords))
@@ -97,6 +100,7 @@ Enabling of `vhdl-ext-mode` minor-mode creates the following keybindings:
   * <kbd>C-c M-?</kbd> `vhdl-ext-jump-to-entity-at-point-ref`
   * <kbd>C-c C-t</kbd> `vhdl-ext-hydra/body`
   * <kbd>C-c C-f</kbd> `vhdl-ext-flycheck-mode`
+  * <kbd>C-c \<f5\></kbd> `vhdl-ext-compile-ghdl-project`
 
 
 # Features #
@@ -156,6 +160,18 @@ Snippet selection via `hydra`.
 <img src="https://user-images.githubusercontent.com/51021955/215353124-7e374754-cd91-4924-9b4b-3c6a29cad921.gif" width=400 height=300>
 
 * `vhdl-ext-hydra/body`: <kbd>C-c C-t</kbd>
+
+
+## Compilation ##
+
+Provides functions to perform compilations with syntax highlighting
+and jump to error:
+
+<img src="https://github.com/gmlarumbe/vhdl-ext/assets/51021955/845980ab-c54b-4e89-b53f-056140be87a7" width=400 height=300>
+
+* `vhdl-ext-compile-ghdl-project`: <kbd>C-c \<f5\></kbd>
+
+See more info in the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Compilation).
 
 
 ## Imenu ##

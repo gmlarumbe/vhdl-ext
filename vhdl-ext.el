@@ -30,6 +30,7 @@
 ;;  - Support for many linters via `flycheck'
 ;;  - Navigate through instances in a module
 ;;  - Templates insertion via `hydra'
+;;  - Compilation-based utilities
 ;;  - Improve `imenu': detect instances
 ;;  - Time-stamp auto-configuration
 ;;  - Automatically add VHDL keywords to `company-keywords` backend
@@ -51,6 +52,7 @@
                                    flycheck
                                    navigation
                                    template
+                                   compilation
                                    imenu
                                    time-stamp
                                    company-keywords)
@@ -67,6 +69,8 @@
                 navigation)
               (const :tag "`yasnippet' and custom templates."
                 template)
+              (const :tag "Compilation functions."
+                compilation)
               (const :tag "Improved `imenu'."
                 imenu)
               (const :tag "`time-stamp' configuration."
@@ -92,6 +96,7 @@ FEATURES can be a single feature or a list of features."
 
 ;;; Features
 (require 'vhdl-ext-time-stamp)
+(require 'vhdl-ext-compile)
 (require 'vhdl-ext-utils)
 (require 'vhdl-ext-nav)
 (require 'vhdl-ext-imenu)
@@ -104,6 +109,8 @@ FEATURES can be a single feature or a list of features."
 ;;; Major-mode
 (defvar vhdl-ext-mode-map
   (let ((map (make-sparse-keymap)))
+    (vhdl-ext-when-feature 'compilation
+      (define-key map (kbd "C-c <f5>") 'vhdl-ext-compile-ghdl-project))
     (vhdl-ext-when-feature 'flycheck
       (define-key map (kbd "C-c C-f") 'vhdl-ext-flycheck-mode))
     (vhdl-ext-when-feature 'navigation
