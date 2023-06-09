@@ -23,7 +23,13 @@
 
 ;; Timestamp setup
 
+;; Serves the same function as `vhdl-modify-date-on-saving' but with extra
+;; parameters and built-in `time-stamp' package for more flexibility.
+
 ;;; Code:
+
+(require 'vhdl-mode)
+
 
 (defgroup vhdl-ext-time-stamp nil
   "Vhdl-ext time-stamp."
@@ -70,15 +76,20 @@ specified by `time-stamp-format' between them."
   "Setup `time-stamp' format for Vhdl files.
 By default `time-stamp' looks for the pattern in the first 8 lines.
 This can be changed by setting the local variables `time-stamp-start'
-and `time-stamp-end' for custom scenarios."
+and `time-stamp-end' for custom scenarios.
+
+Skip configuration if `vhdl-modify-date-on-saving' is non-nil.
+Use only one method of timestamp update."
   :global nil
-  (setq-local time-stamp-pattern vhdl-ext-time-stamp-pattern)
-  (setq-local time-stamp-format vhdl-ext-time-stamp-format)
-  (setq-local time-stamp-start vhdl-ext-time-stamp-start)
-  (setq-local time-stamp-end vhdl-ext-time-stamp-end)
-  (if vhdl-ext-time-stamp-mode
-      (add-hook 'before-save-hook #'time-stamp nil :local)
-    (remove-hook 'before-save-hook #'time-stamp :local)))
+  (if vhdl-modify-date-on-saving
+      (warn "vhdl-ext-time-stamp incompatible with `vhdl-modify-date-on-saving'.  Disable one of both.")
+    (setq-local time-stamp-pattern vhdl-ext-time-stamp-pattern)
+    (setq-local time-stamp-format vhdl-ext-time-stamp-format)
+    (setq-local time-stamp-start vhdl-ext-time-stamp-start)
+    (setq-local time-stamp-end vhdl-ext-time-stamp-end)
+    (if vhdl-ext-time-stamp-mode
+        (add-hook 'before-save-hook #'time-stamp nil :local)
+      (remove-hook 'before-save-hook #'time-stamp :local))))
 
 
 (provide 'vhdl-ext-time-stamp)
