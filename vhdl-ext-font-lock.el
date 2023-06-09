@@ -48,6 +48,12 @@
   "Vhdl-ext faces."
   :group 'vhdl-ext)
 
+(defvar vhdl-ext-font-lock-then-face 'vhdl-ext-font-lock-then-face)
+(defface vhdl-ext-font-lock-then-face
+  '((t (:inherit font-lock-keyword-face)))
+  "Face for if-else grouping keyword: then."
+  :group 'verilog-ext-font-lock)
+
 (defvar vhdl-ext-font-lock-punctuation-face 'vhdl-ext-font-lock-punctuation-face)
 (defface vhdl-ext-font-lock-punctuation-face
   '((t (:inherit font-lock-punctuation-face)))
@@ -141,6 +147,8 @@ portB => signalB
   (eval-when-compile
     (regexp-opt '("psl" "pragma" "synopsys" "synthesis") 'symbols)))
 (defconst vhdl-ext-font-lock-highlight-variable-declaration-names nil)
+(defconst vhdl-ext-then-regexp "\\_<then\\_>")
+
 
 ;;;; Functions
 (defun vhdl-ext-font-lock-entity-instance-fontify (limit)
@@ -242,6 +250,7 @@ Regex search bound to LIMIT."
    (list vhdl-packages-regexp    1 'font-lock-builtin-face)
    (list vhdl-enum-values-regexp 1 'vhdl-font-lock-enumvalue-face)
    (list vhdl-constants-regexp   1 'font-lock-constant-face)
+   (list vhdl-ext-then-regexp    0 'vhdl-ext-font-lock-then-face) ; Place before `vhdl-keywords-regexp' to override its face
    (list vhdl-keywords-regexp    1 'font-lock-keyword-face)))
 
 (defconst vhdl-ext-font-lock-keywords-2

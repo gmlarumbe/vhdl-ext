@@ -24,6 +24,7 @@
 
 ;;; Code:
 
+(set-face-attribute 'vhdl-ext-font-lock-then-face nil :foreground "dark olive green")
 (set-face-attribute 'vhdl-ext-font-lock-punctuation-face nil :foreground "burlywood")
 (set-face-attribute 'vhdl-ext-font-lock-operator-face nil :inherit 'vhdl-ext-font-lock-punctuation-face :weight 'extra-bold)
 (set-face-attribute 'vhdl-ext-font-lock-brackets-face nil :foreground "goldenrod")
