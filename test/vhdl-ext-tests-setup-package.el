@@ -42,6 +42,7 @@
 (package-install 'vhdl-ext)
 
 ;;;; Setup `vhdl-mode' and `vhdl-ext'
+(setq vhdl-modify-date-on-saving nil) ; Use `vhdl-ext' time-stamp instead
 (require 'vhdl-mode)
 (setq vhdl-basic-offset 4)
 

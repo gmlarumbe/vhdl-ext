@@ -59,6 +59,8 @@
 
 (use-package vhdl-mode
   :straight nil
+  :init
+  (setq vhdl-modify-date-on-saving nil) ; Use `vhdl-ext' time-stamp instead
   :config
   (setq vhdl-basic-offset 4))
 
