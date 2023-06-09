@@ -32,6 +32,7 @@
 ;;  - Templates insertion via `hydra'
 ;;  - Compilation-based utilities
 ;;  - Improve `imenu': detect instances
+;;  - Improve code folding via `hideshow`
 ;;  - Time-stamp auto-configuration
 ;;  - Automatically add VHDL keywords to `company-keywords` backend
 ;;
@@ -54,6 +55,7 @@
                                    template
                                    compilation
                                    imenu
+                                   hideshow
                                    time-stamp
                                    company-keywords)
   "Which Vhdl-ext features to enable."
@@ -73,6 +75,8 @@
                 compilation)
               (const :tag "Improved `imenu'."
                 imenu)
+              (const :tag "`hideshow' configuration."
+                hideshow)
               (const :tag "`time-stamp' configuration."
                 time-stamp)
               (const :tag "Add `vhdl-keywords' to `company-keywords' backend."
@@ -95,6 +99,7 @@ FEATURES can be a single feature or a list of features."
        ,@body)))
 
 ;;; Features
+(require 'vhdl-ext-hs)
 (require 'vhdl-ext-time-stamp)
 (require 'vhdl-ext-compile)
 (require 'vhdl-ext-utils)
@@ -128,9 +133,9 @@ FEATURES can be a single feature or a list of features."
 (defun vhdl-ext-mode-setup ()
   "Setup `vhdl-ext-mode' depending on enabled features."
   (interactive)
-  ;; Jump to parent module ag/ripgrep hooks
-  (add-hook 'ag-search-finished-hook #'vhdl-ext-navigation-ag-rg-hook)
-  (add-hook 'ripgrep-search-finished-hook #'vhdl-ext-navigation-ag-rg-hook)
+  ;; Features
+  (vhdl-ext-when-feature 'hideshow
+    (vhdl-ext-hs-setup))
   (vhdl-ext-when-feature 'company-keywords
     (vhdl-ext-company-keywords-add))
   (vhdl-ext-when-feature 'font-lock
@@ -139,7 +144,10 @@ FEATURES can be a single feature or a list of features."
     (vhdl-ext-eglot-set-server vhdl-ext-eglot-default-server))
   (vhdl-ext-when-feature 'lsp
     (vhdl-ext-lsp-setup)
-    (vhdl-ext-lsp-set-server vhdl-ext-lsp-mode-default-server)))
+    (vhdl-ext-lsp-set-server vhdl-ext-lsp-mode-default-server))
+  ;; Jump to parent module ag/ripgrep hooks
+  (add-hook 'ag-search-finished-hook #'vhdl-ext-navigation-ag-rg-hook)
+  (add-hook 'ripgrep-search-finished-hook #'vhdl-ext-navigation-ag-rg-hook))
 
 ;;;###autoload
 (define-minor-mode vhdl-ext-mode
