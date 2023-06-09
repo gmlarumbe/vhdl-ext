@@ -16,6 +16,7 @@ This package includes some extensions on top of the great Emacs `vhdl-mode`.
 * [Navigate through instances in a entity](#navigation)
 * [Templates insertion via `hydra`](#templates)
 * [Improve `imenu`, detect instances](#imenu)
+* [Auto-configure `time-stamp`](#time-stamp)
 * [Auto-configure `company-keywords`](#company-keywords)
 
 ## Installation ##
@@ -54,6 +55,7 @@ By default all features are enabled:
         navigation
         template
         imenu
+        time-stamp
         company-keywords))
 (vhdl-ext-mode-setup)
 (add-hook 'vhdl-mode-hook #'vhdl-ext-mode)
@@ -78,6 +80,7 @@ If installed and loaded via `use-package`:
           navigation
           template
           imenu
+          time-stamp
           company-keywords))
   :config
   (vhdl-ext-mode-setup))
@@ -159,6 +162,15 @@ Snippet selection via `hydra`.
 Support detection of instances.
 
 <img src="https://user-images.githubusercontent.com/51021955/215353082-9a187daf-7f76-4c9b-8563-7beba6e1aa6a.gif" width=400 height=300>
+
+
+## Time-stamp ##
+
+Automatic update of header timestamp after file saving.
+
+   - `vhdl-ext-time-stamp-mode`
+
+For configuration see [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Time-stamp)
 
 
 ## Company keywords ##

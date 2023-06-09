@@ -1,0 +1,86 @@
+;;; vhdl-ext-time-stamp.el --- Vhdl-ext Timestamp  -*- lexical-binding: t -*-
+
+;; Copyright (C) 2022-2023 Gonzalo Larumbe
+
+;; Author: Gonzalo Larumbe <gonzalomlarumbe@gmail.com>
+;; URL: https://github.com/gmlarumbe/vhdl-ext
+;; Version: 0.1.0
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; Timestamp setup
+
+;;; Code:
+
+(defgroup vhdl-ext-time-stamp nil
+  "Vhdl-ext time-stamp."
+  :group 'vhdl-ext)
+
+(defcustom vhdl-ext-time-stamp-enable t
+  "Enable `vhdl-ext-time-stamp-mode'."
+  :type 'boolean
+  :group 'vhdl-ext-time-stamp)
+
+(defcustom vhdl-ext-time-stamp-regex "^-- Last update: "
+  "Timestamp regexp."
+  :type 'string
+  :group 'vhdl-ext-time-stamp)
+
+(defcustom vhdl-ext-time-stamp-pattern (concat vhdl-ext-time-stamp-regex "%%$")
+  "Timestamp pattern.  See `time-stamp-pattern'."
+  :type 'string
+  :group 'vhdl-ext-time-stamp)
+
+(defcustom vhdl-ext-time-stamp-format  "%:y-%02m-%02d"
+  "Timestamp format.  See `time-stamp-format'."
+  :type 'string
+  :group 'vhdl-ext-time-stamp)
+
+(defcustom vhdl-ext-time-stamp-start nil
+  "If using `time-stamp-start' and `time-stamp-end':
+`'time-stamp' deletes the text between the first match of `time-stamp-start'.
+and the following match of `time-stamp-end', then writes the time stamp
+specified by `time-stamp-format' between them."
+  :type 'string
+  :group 'vhdl-ext-time-stamp)
+
+(defcustom vhdl-ext-time-stamp-end nil
+  "If using `time-stamp-start' and `time-stamp-end':
+`time-stamp' deletes the text between the first match of `time-stamp-start'.
+and the following match of `time-stamp-end', then writes the time stamp
+specified by `time-stamp-format' between them."
+  :type 'string
+  :group 'vhdl-ext-time-stamp)
+
+
+(define-minor-mode vhdl-ext-time-stamp-mode
+  "Setup `time-stamp' format for Vhdl files.
+By default `time-stamp' looks for the pattern in the first 8 lines.
+This can be changed by setting the local variables `time-stamp-start'
+and `time-stamp-end' for custom scenarios."
+  :global nil
+  (setq-local time-stamp-pattern vhdl-ext-time-stamp-pattern)
+  (setq-local time-stamp-format vhdl-ext-time-stamp-format)
+  (setq-local time-stamp-start vhdl-ext-time-stamp-start)
+  (setq-local time-stamp-end vhdl-ext-time-stamp-end)
+  (if vhdl-ext-time-stamp-mode
+      (add-hook 'before-save-hook #'time-stamp nil :local)
+    (remove-hook 'before-save-hook #'time-stamp :local)))
+
+
+(provide 'vhdl-ext-time-stamp)
+
+;;; vhdl-ext-time-stamp.el ends here

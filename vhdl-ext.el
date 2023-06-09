@@ -31,6 +31,7 @@
 ;;  - Navigate through instances in a module
 ;;  - Templates insertion via `hydra'
 ;;  - Improve `imenu': detect instances
+;;  - Time-stamp auto-configuration
 ;;  - Automatically add VHDL keywords to `company-keywords` backend
 ;;
 ;;  Experimental:
@@ -51,6 +52,7 @@
                                    navigation
                                    template
                                    imenu
+                                   time-stamp
                                    company-keywords)
   "Which Vhdl-ext features to enable."
   :type '(set (const :tag "Improved syntax highlighting via `font-lock'."
@@ -67,6 +69,8 @@
                 template)
               (const :tag "Improved `imenu'."
                 imenu)
+              (const :tag "`time-stamp' configuration."
+                time-stamp)
               (const :tag "Add `vhdl-keywords' to `company-keywords' backend."
                 company-keywords))
   :group 'vhdl-ext)
@@ -87,6 +91,7 @@ FEATURES can be a single feature or a list of features."
        ,@body)))
 
 ;;; Features
+(require 'vhdl-ext-time-stamp)
 (require 'vhdl-ext-utils)
 (require 'vhdl-ext-nav)
 (require 'vhdl-ext-imenu)
@@ -140,6 +145,8 @@ FEATURES can be a single feature or a list of features."
       (progn
         (vhdl-ext-update-buffer-file-and-dir-list)
         (add-hook 'kill-buffer-hook #'vhdl-ext-kill-buffer-hook nil :local)
+        (vhdl-ext-when-feature 'time-stamp
+          (vhdl-ext-time-stamp-mode))
         (vhdl-ext-when-feature 'flycheck
           (if vhdl-ext-flycheck-use-open-buffers
               (progn (setq vhdl-ext-flycheck-dirs vhdl-ext-dir-list)
@@ -164,6 +171,8 @@ FEATURES can be a single feature or a list of features."
             (setq-local font-lock-multiline nil))))
     ;; Cleanup
     (remove-hook 'kill-buffer-hook #'vhdl-ext-kill-buffer-hook :local)
+    (vhdl-ext-when-feature 'time-stamp
+      (vhdl-ext-time-stamp-mode -1))
     (vhdl-ext-when-feature 'imenu
       (advice-remove 'vhdl-index-menu-init #'vhdl-ext-index-menu-init))))
 
