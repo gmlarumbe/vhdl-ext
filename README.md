@@ -16,6 +16,7 @@ This package includes some extensions on top of the great Emacs `vhdl-mode`.
 * [Navigate through instances in a entity](#navigation)
 * [Templates insertion via `hydra`](#templates)
 * [Improve `imenu`, detect instances](#imenu)
+* [Auto-configure `company-keywords`](#company-keywords)
 
 ## Installation ##
 
@@ -52,7 +53,8 @@ By default all features are enabled:
         flycheck
         navigation
         template
-        imenu))
+        imenu
+        company-keywords))
 (vhdl-ext-mode-setup)
 (add-hook 'vhdl-mode-hook #'vhdl-ext-mode)
 ```
@@ -75,7 +77,8 @@ If installed and loaded via `use-package`:
           flycheck
           navigation
           template
-          imenu))
+          imenu
+          company-keywords))
   :config
   (vhdl-ext-mode-setup))
 ```
@@ -157,6 +160,10 @@ Support detection of instances.
 
 <img src="https://user-images.githubusercontent.com/51021955/215353082-9a187daf-7f76-4c9b-8563-7beba6e1aa6a.gif" width=400 height=300>
 
+
+## Company keywords ##
+
+Setup `company` to complete with VHDL keywords.
 
 # Contributing #
 

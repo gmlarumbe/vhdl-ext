@@ -28,6 +28,7 @@
 
 (require 'project)
 (require 'vhdl-mode)
+(require 'company-keywords)
 
 
 (defcustom vhdl-ext-file-extension-re "\\.vhdl?$"
@@ -205,6 +206,15 @@ See `vhdl-work-library'."
     (vhdl-resolve-env-variable
      (or (nth 6 (vhdl-aget vhdl-project-alist (or project vhdl-project)))
          vhdl-default-library))))
+
+
+;;;; Misc
+(defun vhdl-ext-company-keywords-add ()
+  "Add `vhdl-keywords' to `company-keywords' backend."
+  (dolist (mode '(vhdl-mode vhdl-ts-mode))
+    (add-to-list 'company-keywords-alist (append `(,mode) vhdl-keywords))))
+
+
 
 (provide 'vhdl-ext-utils)
 

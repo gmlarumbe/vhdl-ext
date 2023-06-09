@@ -6,7 +6,7 @@
 ;; URL: https://github.com/gmlarumbe/vhdl-ext
 ;; Version: 0.1.0
 ;; Keywords: VHDL, IDE, Tools
-;; Package-Requires: ((emacs "28.1") (eglot "1.9") (lsp-mode "8.0.1") (ag "0.48") (ripgrep "0.4.0") (hydra "0.15.0") (flycheck "33-cvs"))
+;; Package-Requires: ((emacs "28.1") (eglot "1.9") (lsp-mode "8.0.1") (ag "0.48") (ripgrep "0.4.0") (hydra "0.15.0") (flycheck "33-cvs") (company "0.9.13"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@
 ;;  - Navigate through instances in a module
 ;;  - Templates insertion via `hydra'
 ;;  - Improve `imenu': detect instances
+;;  - Automatically add VHDL keywords to `company-keywords` backend
 ;;
 ;;  Experimental:
 ;;  - Tree-sitter powered `verilog-ts-mode` support
@@ -49,7 +50,8 @@
                                    flycheck
                                    navigation
                                    template
-                                   imenu)
+                                   imenu
+                                   company-keywords)
   "Which Vhdl-ext features to enable."
   :type '(set (const :tag "Improved syntax highlighting via `font-lock'."
                 font-lock)
@@ -64,7 +66,9 @@
               (const :tag "`yasnippet' and custom templates."
                 template)
               (const :tag "Improved `imenu'."
-                imenu))
+                imenu)
+              (const :tag "Add `vhdl-keywords' to `company-keywords' backend."
+                company-keywords))
   :group 'vhdl-ext)
 
 (defmacro vhdl-ext-when-feature (features &rest body)
@@ -115,6 +119,8 @@ FEATURES can be a single feature or a list of features."
   ;; Jump to parent module ag/ripgrep hooks
   (add-hook 'ag-search-finished-hook #'vhdl-ext-navigation-ag-rg-hook)
   (add-hook 'ripgrep-search-finished-hook #'vhdl-ext-navigation-ag-rg-hook)
+  (vhdl-ext-when-feature 'company-keywords
+    (vhdl-ext-company-keywords-add))
   (vhdl-ext-when-feature 'font-lock
     (vhdl-ext-font-lock-setup))
   (vhdl-ext-when-feature 'eglot
