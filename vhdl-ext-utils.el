@@ -315,6 +315,48 @@ cannot be ommitted after an end."
           (t
            (vhdl-backward-sexp count)))))
 
+(defconst vhdl-ext-block-at-point-re
+  (eval-when-compile
+    (regexp-opt
+     '("entity" "architecture" "package" "configuration" "context"
+       "function" "procedure" "component" "process" "generate")
+     'symbols)))
+
+(defun vhdl-ext-block-at-point ()
+  "Return current block at point type and name."
+  (let ((pos (point))
+        beg-pos end-pos found block name)
+    (save-excursion
+      (while (and (not found)
+                  (vhdl-re-search-backward vhdl-ext-block-at-point-re nil t))
+        (when (looking-back "\\_<end\\_>\\s-+" (line-beginning-position))
+          (vhdl-ext-backward-sexp)
+          (vhdl-re-search-backward vhdl-ext-block-at-point-re nil t))
+        (setq block (thing-at-point 'symbol :no-props))
+        (setq beg-pos (point))
+        (cond ((string= block "process")
+               (when (looking-back "^\\s-*\\(?1:[a-zA-Z0-9_-]+\\)\\s-*:\\s-*" (line-beginning-position))
+                 (setq name (match-string-no-properties 1))))
+              ((string= block "generate")
+               (when (save-excursion (vhdl-re-search-backward "^\\s-*\\(?1:[a-zA-Z0-9_-]+\\)\\s-*:\\s-*" (line-beginning-position) :noerror))
+                 (setq name (match-string-no-properties 1))))
+              ((string= block "package")
+               (when (save-excursion (vhdl-re-search-forward "package\\s-+\\(?1:body\\s-+\\)?\\(?2:[a-zA-Z0-9_-]+\\)" (line-end-position) :noerror))
+                 (setq name (match-string-no-properties 2))))
+              (t
+               (save-excursion
+                 (forward-word)
+                 (vhdl-forward-syntactic-ws)
+                 (setq name (thing-at-point 'symbol :no-props)))))
+        (save-excursion
+          (vhdl-ext-forward-sexp)
+          (setq end-pos (point)))
+        (when (and (>= pos beg-pos)
+                   (<= pos end-pos))
+          (setq found t))))
+    (when found
+      `((type . ,block)
+        (name . ,name)))))
 
 ;; TODO: To be fixed @ emacs/main
 (defun vhdl-corresponding-begin (&optional lim)

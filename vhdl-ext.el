@@ -55,6 +55,7 @@
                                    template
                                    compilation
                                    imenu
+                                   which-func
                                    hideshow
                                    time-stamp
                                    company-keywords)
@@ -75,6 +76,8 @@
                 compilation)
               (const :tag "Improved `imenu'."
                 imenu)
+              (const :tag "Improved `which-function-mode'."
+                which-func)
               (const :tag "`hideshow' configuration."
                 hideshow)
               (const :tag "`time-stamp' configuration."
@@ -106,6 +109,7 @@ FEATURES can be a single feature or a list of features."
 (require 'vhdl-ext-nav)
 (require 'vhdl-ext-imenu)
 (require 'vhdl-ext-template)
+(require 'vhdl-ext-which-func)
 (require 'vhdl-ext-font-lock)
 (require 'vhdl-ext-flycheck)
 (require 'vhdl-ext-eglot)
@@ -162,6 +166,8 @@ FEATURES can be a single feature or a list of features."
       (progn
         (vhdl-ext-update-buffer-file-and-dir-list)
         (add-hook 'kill-buffer-hook #'vhdl-ext-kill-buffer-hook nil :local)
+        (vhdl-ext-when-feature 'which-func
+          (vhdl-ext-which-func))
         (vhdl-ext-when-feature 'time-stamp
           (vhdl-ext-time-stamp-mode))
         (vhdl-ext-when-feature 'flycheck

@@ -17,6 +17,7 @@ This package includes some extensions on top of the great Emacs `vhdl-mode`.
 * [Templates insertion via `hydra`](#templates)
 * [Compilation with colored errors/warnings and jump to file/line](#compilation)
 * [Improve `imenu`, detect instances](#imenu)
+* [Enhanced support for `which-func`](#which-func)
 * [Improve code folding via `hideshow`](#code-folding)
 * [Auto-configure `time-stamp`](#time-stamp)
 * [Auto-configure `company-keywords`](#company-keywords)
@@ -58,6 +59,7 @@ By default all features are enabled:
         template
         compilation
         imenu
+        which-func
         hideshow
         time-stamp
         company-keywords))
@@ -85,6 +87,7 @@ If installed and loaded via `use-package`:
           template
           compilation
           imenu
+          which-func
           hideshow
           time-stamp
           company-keywords))
@@ -183,6 +186,11 @@ See more info in the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Compilati
 Support detection of instances.
 
 <img src="https://user-images.githubusercontent.com/51021955/215353082-9a187daf-7f76-4c9b-8563-7beba6e1aa6a.gif" width=400 height=300>
+
+
+## Which-func ##
+
+Enhanced `which-func` support: show current block/instance at point in the mode-line
 
 
 ## Code folding ##
