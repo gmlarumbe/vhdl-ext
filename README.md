@@ -96,6 +96,8 @@ If installed and loaded via `use-package`:
 
 Enabling of `vhdl-ext-mode` minor-mode creates the following keybindings:
 
+  * <kbd>C-M-f</kbd> `vhdl-ext-forward-sexp`
+  * <kbd>C-M-b</kbd> `vhdl-ext-backward-sexp`
   * <kbd>C-M-u</kbd> `vhdl-ext-find-entity-instance-bwd`
   * <kbd>C-M-d</kbd> `vhdl-ext-find-entity-instance-fwd`
   * <kbd>C-M-.</kbd> `vhdl-ext-jump-to-parent-entity`

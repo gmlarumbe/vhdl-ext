@@ -119,6 +119,8 @@ FEATURES can be a single feature or a list of features."
     (vhdl-ext-when-feature 'flycheck
       (define-key map (kbd "C-c C-f") 'vhdl-ext-flycheck-mode))
     (vhdl-ext-when-feature 'navigation
+      (define-key map (kbd "C-M-f") 'vhdl-ext-forward-sexp)
+      (define-key map (kbd "C-M-d") 'vhdl-ext-backward-sexp)
       (define-key map (kbd "C-M-u") 'vhdl-ext-find-entity-instance-bwd)
       (define-key map (kbd "C-M-d") 'vhdl-ext-find-entity-instance-fwd)
       (define-key map (kbd "C-M-.") 'vhdl-ext-jump-to-parent-entity)

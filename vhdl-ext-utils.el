@@ -207,12 +207,212 @@ See `vhdl-work-library'."
      (or (nth 6 (vhdl-aget vhdl-project-alist (or project vhdl-project)))
          vhdl-default-library))))
 
+(defun vhdl-ext-inside-if-else ()
+  "Return non-nil if point is inside an if-else block."
+  (let (beg-pos end-pos)
+    (vhdl-prepare-search-2
+     (save-excursion
+       (when (vhdl-re-search-backward "\\_<\\(then\\|else\\)\\_>" nil t)
+         (setq beg-pos (point))
+         (vhdl-forward-sexp)
+         (setq end-pos (point)))))
+    (when (and beg-pos end-pos
+               (> (point) beg-pos)
+               (< (point) end-pos))
+      (cons beg-pos end-pos))))
+
+(defun vhdl-ext-forward-sexp (&optional count)
+  "Move forward one SEXP.
+With prefix arg, move COUNT sexps."
+  (interactive "P")
+  (let ((symbol (thing-at-point 'symbol :no-props))
+        (bounds (bounds-of-thing-at-point 'symbol)))
+    (cond (;; entity, architecture, package, configuration, context
+           (member symbol '("entity" "architecture" "configuration" "context"))
+           (vhdl-re-search-forward "\\_<is\\_>" nil t)
+           (goto-char (match-beginning 0))
+           (vhdl-forward-sexp count)
+           (when (looking-at (concat "\\s-+\\_<" symbol "\\_>"))
+             (forward-word)))
+          ;; function, procedure
+          ((member symbol '("function" "procedure"))
+           (let ((pos (point)))
+             (if (save-excursion (setq pos (vhdl-end-of-statement))
+                                 (eq (preceding-char) ?\;)) ; Function declaration in package declaration (not body)
+                 (goto-char pos)
+               (vhdl-re-search-forward "\\_<is\\_>" nil t)
+               (goto-char (match-beginning 0))
+               (vhdl-forward-sexp count)
+               (when (looking-at (concat "\\s-+\\_<" symbol "\\_>"))
+                 (forward-word)))))
+          ;; component, process
+          ((member symbol '("component" "process" "generate" "loop"))
+           (goto-char (car bounds))
+           (vhdl-forward-sexp count)
+           (when (looking-at (concat "\\s-+\\_<" symbol "\\_>"))
+             (forward-word)))
+          ;; if then/else/elsif
+          ((member symbol '("then" "else" "elsif"))
+           (goto-char (car bounds))
+           (vhdl-forward-sexp count)
+           (when (looking-at (concat "\\s-+\\_<if\\_>"))
+             (forward-word)))
+          ;; Package/package body
+          ((member symbol '("package"))
+           (vhdl-re-search-forward "\\_<is\\_>" nil t)
+           (goto-char (match-beginning 0))
+           (vhdl-forward-sexp count)
+           (when (looking-at (concat "\\s-+\\_<" symbol "\\_>\\(\\s-+body\\)?"))
+             (goto-char (match-end 0))))
+          ;; Fallback
+          (t
+           (vhdl-forward-sexp count)))))
+
+(defun vhdl-ext-backward-sexp (&optional count)
+  "Move backward one SEXP.
+With prefix arg, move COUNT sexps.
+
+Algorithm takes into account that keywords component, generate and process
+cannot be ommitted after an end."
+  (interactive "P")
+  (let ((symbol (thing-at-point 'symbol :no-props))
+        (bounds (bounds-of-thing-at-point 'symbol)))
+    (cond (;; end
+           (member symbol '("end"))
+           (goto-char (cdr bounds))
+           (vhdl-backward-sexp count)
+           (cond ((looking-at "\\_<is\\_>")
+                  (vhdl-re-search-backward "\\_<\\(entity\\|function\\|procedure\\|component\\|package\\|context\\|configuration\\)\\_>" nil t))
+                 ((looking-at "\\_<begin\\_>")
+                  (vhdl-re-search-backward "\\_<\\(?1:end\\|architecture\\|function\\|procedure\\|process\\)\\_>" nil t)
+                  (while (or (string= "end" (match-string-no-properties 1))
+                             (looking-back "\\_<\\(?1:end\\)\\_>\\s-+" (line-beginning-position)))
+                    (goto-char (match-end 1))
+                    (vhdl-ext-backward-sexp count)
+                    (vhdl-re-search-backward "\\_<\\(end\\|architecture\\|function\\|procedure\\|process\\)\\_>" nil t)))))
+          ;; entity, architecture, ,function, procedure, package, process, if, context, configuration
+          ((member symbol '("entity" "architecture" "function" "procedure" "package" "process" "if" "context" "configuration"))
+           (vhdl-re-search-backward "\\_<end\\_>" nil t)
+           (goto-char (match-end 0))
+           (vhdl-backward-sexp count)
+           (vhdl-re-search-backward (concat "\\_<" symbol "\\_>") nil t))
+          ;; component, generate, loop
+          ((member symbol '("component" "generate" "loop"))
+           (vhdl-re-search-backward "\\_<end\\_>" nil t)
+           (goto-char (match-end 0))
+           (vhdl-backward-sexp count))
+          ;; if then/else/elsif
+          ((member symbol '("else" "elsif"))
+           (goto-char (car bounds))
+           (vhdl-backward-sexp count))
+          ;; package body
+          ((member symbol '("body"))
+           (vhdl-re-search-backward "\\(?1:end\\)\\s-+package" nil t)
+           (goto-char (match-end 1))
+           (vhdl-backward-sexp count)
+           (vhdl-re-search-backward (concat "package\\s-+body") nil t))
+          ;; Fallback
+          (t
+           (vhdl-backward-sexp count)))))
+
+
+;; TODO: To be fixed @ emacs/main
+(defun vhdl-corresponding-begin (&optional lim)
+  "If the word at the current position corresponds to an \"end\"
+keyword, then return a vector containing enough information to find
+the corresponding \"begin\" keyword, else return nil.  The keyword to
+search backward for is aref 0.  The column in which the keyword must
+appear is aref 1 or nil if any column is suitable.  The supplementary
+keyword to search forward for is aref 2 or nil if this is not
+required.  If aref 3 is t, then the \"begin\" keyword may be found in
+the middle of a statement.
+Assumes that the caller will make sure that we are not in the middle
+of an identifier that just happens to contain an \"end\" keyword."
+  (save-excursion
+    (let (pos)
+      (if (and (looking-at vhdl-end-fwd-re)
+               (not (vhdl-in-literal))
+               (vhdl-end-p lim))
+          (if (looking-at "el")
+              ;; "else", "elsif":
+              (vector "if\\|elsif" (vhdl-first-word (point)) "then\\|use" nil)
+            ;; "end ...":
+            (setq pos (point))
+            (forward-sexp)
+            (skip-chars-forward " \t\n\r\f")
+            (cond
+             ;; "end if":
+             ((looking-at "if\\b[^_]")
+              (vector "else\\|elsif\\|if"
+                      (vhdl-first-word pos)
+                      "else\\|then\\|use" nil))
+             ;; "end component":
+             ;; DANGER: Overrid here
+             ((looking-at "\\(component\\)\\b[^_]")
+              (vector (buffer-substring (match-beginning 1)
+                                        (match-end 1))
+                      (vhdl-first-word pos)
+                      nil nil))
+             ;; End of DANGER: Overrid here
+             ;; "end units", "end record", "end protected":
+             ((looking-at "\\(units\\|record\\|protected\\(\\s-+body\\)?\\)\\b[^_]")
+              (vector (buffer-substring (match-beginning 1)
+                                        (match-end 1))
+                      (vhdl-first-word pos)
+                      nil t))
+             ;; "end block", "end process", "end procedural":
+             ((looking-at "\\(block\\|process\\|procedural\\)\\b[^_]")
+              (vector "begin" (vhdl-first-word pos) nil nil))
+             ;; "end case":
+             ((looking-at "case\\b[^_]")
+              (vector "case" (vhdl-first-word pos) "is" nil))
+             ;; "end generate":
+             ((looking-at "generate\\b[^_]")
+              (vector "generate\\|for\\|if"
+                      (vhdl-first-word pos)
+                      "generate" nil))
+             ;; "end loop":
+             ((looking-at "loop\\b[^_]")
+              (vector "loop\\|while\\|for"
+                      (vhdl-first-word pos)
+                      "loop" nil))
+             ;; "end for" (inside configuration declaration):
+             ((looking-at "for\\b[^_]")
+              (vector "for" (vhdl-first-word pos) nil nil))
+             ;; "end [id]":
+             (t
+              (vector "begin\\|architecture\\|configuration\\|context\\|entity\\|package\\|procedure\\|function"
+                      (vhdl-first-word pos)
+                      ;; return an alist of (statement . keyword) mappings
+                      '(
+                        ;; "begin ... end [id]":
+                        ("begin"          . nil)
+                        ;; "architecture ... is ... begin ... end [id]":
+                        ("architecture"   . "is")
+                        ;; "configuration ... is ... end [id]":
+                        ("configuration"  . "is")
+                        ;; "context ... is ... end [id]":
+                        ("context"        . "is")
+                        ;; "entity ... is ... end [id]":
+                        ("entity"         . "is")
+                        ;; "package ... is ... end [id]":
+                        ("package"        . "is")
+                        ;; "procedure ... is ... begin ... end [id]":
+                        ("procedure"      . "is")
+                        ;; "function ... is ... begin ... end [id]":
+                        ("function"       . "is")
+                        )
+                      nil))
+             ))) ; "end ..."
+      )))
 
 ;;;; Misc
 (defun vhdl-ext-company-keywords-add ()
   "Add `vhdl-keywords' to `company-keywords' backend."
   (dolist (mode '(vhdl-mode vhdl-ts-mode))
     (add-to-list 'company-keywords-alist (append `(,mode) vhdl-keywords))))
+
+
 
 
 

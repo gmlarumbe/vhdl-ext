@@ -25,6 +25,8 @@
 ;;; Code:
 
 
+(require 'vhdl-ext-utils)
+
 (defmacro vhdl-ext-test-utils-file (file &rest body)
   (declare (indent 1) (debug t))
   `(with-temp-buffer
@@ -46,6 +48,123 @@
   (should (equal (vhdl-ext-test-utils-file "global_pkg.vhd"
                    (vhdl-ext-scan-buffer-entities))
                  nil)))
+
+(defun vhdl-ext-test-utils-sexp (file alist function)
+  (vhdl-ext-test-utils-file file
+    (let ((expected-alist alist)
+          result-alist)
+      (dolist (positions expected-alist)
+        (goto-char (car positions))
+        (funcall function)
+        (push (cons (car positions) (point)) result-alist))
+      (nreverse result-alist))))
+
+(defconst vhdl-ext-test-forward-sexp-points
+  '((949 . 1057) ; entity with end entity
+    (951 . 1057)
+    (955 . 1057)
+    (1064 . 1166) ; entity w/o end entity
+    (1067 . 1166)
+    (1070 . 1166)
+    (1244 . 2381) ; architecture with end architecture
+    (1256 . 2381)
+    (1312 . 1472) ; component
+    (1321 . 1472)
+    (1479 . 2031) ; function
+    (1486 . 2031)
+    (1668 . 1989) ; loop
+    (1670 . 1989)
+    (1672 . 1989)
+    (1705 . 1750) ; then
+    (1707 . 1750)
+    (1709 . 1750)
+    (1750 . 1971) ; else
+    (1752 . 1971)
+    (1754 . 1971)
+    (2059 . 2238) ; process
+    (2066 . 2238)
+    (2076 . 2198) ; procedure with end procedure
+    (2085 . 2198)
+    (2287 . 2350) ; generate
+    (2295 . 2350)
+    (2390 . 3385) ; architecture w/o end architecture
+    (2458 . 3077) ; function w/o end function
+    (2647 . 3044) ; external nested loop
+    (2808 . 2881) ; internal nested loop
+    (3115 . 3227) ; procedure w/o end procedure
+    (3124 . 3227)
+    (3406 . 3527) ; Package with endpackage
+    (3426 . 3514) ; procedure declaration without body
+    (3534 . 3647) ; package w/o end package
+    (3651 . 3858) ; package body
+    (3658 . 3858)
+    (3676 . 3835) ; procedure with endprocedure inside package body
+    (3685 . 3835)
+    (3866 . 4051) ; package body without end package body
+    (3891 . 4040) ; procedure w/o endprocedure inside package body
+    (4072 . 4119) ; configuration with end configuration
+    (4126 . 4159) ; configuration w/o end configuration
+    (4175 . 4202) ; context with end context
+    (4209 . 4228)) ; context w/o context
+  "Alist with initial point and expected point after `vhdl-ext-forward-sexp'.")
+
+(defconst vhdl-ext-test-backward-sexp-points
+  '((1057 . 949) ; entity with end entity
+    (1051 . 949)
+    (1047 . 949)
+    (1166 . 1064) ; entity w/o end entity
+    (1163 . 1064)
+    (2381 . 1244) ; architecture with end architecture
+    (2368 . 1244)
+    (1472 . 1312) ; component
+    (1462 . 1312)
+    (2031 . 1479) ; function
+    (2022 . 1479)
+    (1989 . 1668) ; loop
+    (1984 . 1668)
+    (1981 . 1668)
+    (1971 . 1685) ; end if
+    (1951 . 1771)
+    (1965 . 1750) ; end
+    (1945 . 1844)
+    (1754 . 1705) ; else
+    (1750 . 1705)
+    (2238 . 2059) ; process
+    (2230 . 2059)
+    (2198 . 2076) ; procedure with end procedure
+    (2188 . 2076)
+    (2350 . 2287) ; generate
+    (2341 . 2287)
+    (3385 . 2390) ; architecture w/o end architecture
+    (3077 . 2458) ; function w/o end function
+    (3044 . 2647) ; external nested loop
+    (3039 . 2647)
+    (2881 . 2808) ; internal nested loop
+    (2876 . 2808)
+    (3227 . 3115) ; procedure w/o end procedure
+    (3224 . 3115)
+    (3527 . 3406) ; Package with endpackage
+    (3514 . 3440) ; procedure declaration without body
+    (3647 . 3534) ; package w/o end package
+    (3858 . 3651) ; package body
+    (3853 . 3651)
+    (4040 . 3891) ; procedure with endprocedure inside package body
+    (4037 . 3891)
+    (4051 . 3866) ; package body without end package body
+    (4040 . 3891) ; procedure w/o endprocedure inside package body
+    (4119 . 4072) ; configuration with end configuration
+    (4159 . 4126) ; configuration w/o end configuration
+    (4202 . 4175) ; context with end context
+    (4228 . 4209)) ; context w/o context
+  "Alist with initial point and expected point after `vhdl-ext-backward-sexp'.")
+
+(ert-deftest utils::forward-sexp ()
+  (should (equal (vhdl-ext-test-utils-sexp "sexp.vhd" vhdl-ext-test-forward-sexp-points #'vhdl-ext-forward-sexp)
+                 vhdl-ext-test-forward-sexp-points)))
+
+(ert-deftest utils::backward-sexp ()
+  (should (equal (vhdl-ext-test-utils-sexp "sexp.vhd" vhdl-ext-test-backward-sexp-points #'vhdl-ext-backward-sexp)
+                 vhdl-ext-test-backward-sexp-points)))
 
 
 
