@@ -22,6 +22,7 @@ This package includes some extensions on top of the great Emacs `vhdl-mode`.
 * [Improve code folding via `hideshow`](#code-folding)
 * [Auto-configure `time-stamp`](#time-stamp)
 * [Auto-configure `company-keywords`](#company-keywords)
+* [Port connection utilities](#port-connections)
 
 ## Installation ##
 
@@ -64,7 +65,8 @@ By default all features are enabled:
         which-func
         hideshow
         time-stamp
-        company-keywords))
+        company-keywords
+        ports))
 (vhdl-ext-mode-setup)
 (add-hook 'vhdl-mode-hook #'vhdl-ext-mode)
 ```
@@ -93,7 +95,8 @@ If installed and loaded via `use-package`:
           which-func
           hideshow
           time-stamp
-          company-keywords))
+          company-keywords
+          ports))
   :config
   (vhdl-ext-mode-setup))
 ```
@@ -114,6 +117,8 @@ Enabling of `vhdl-ext-mode` minor-mode creates the following keybindings:
   * <kbd>C-c C-t</kbd> `vhdl-ext-hydra/body`
   * <kbd>C-c C-f</kbd> `vhdl-ext-flycheck-mode`
   * <kbd>C-c \<f5\></kbd> `vhdl-ext-compile-ghdl-project`
+  * <kbd>C-c C-c t</kbd> `vhdl-ext-ports-toggle-connect`
+  * <kbd>C-c C-c r</kbd> `vhdl-ext-ports-connect-recursively`
 
 
 # Features #
@@ -233,6 +238,18 @@ For configuration see [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Time-sta
 ## Company keywords ##
 
 Setup `company` to complete with VHDL keywords.
+
+
+## Port connections ##
+
+Toggle connections of ports under instance at point:
+
+<!-- TODO: Add image -->
+<!-- <img src="https://user-images.githubusercontent.com/51021955/220176192-d823ba19-099f-4484-abc7-8269fd92928b.gif" width=400 height=300> -->
+
+  * `vhdl-ext-ports-toggle-connect`: <kbd>C-c C-c t</kbd>
+  * `vhdl-ext-ports-connect-recursively`: <kbd>C-c C-c r</kbd>
+
 
 # Contributing #
 

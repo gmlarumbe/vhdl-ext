@@ -37,6 +37,7 @@
 ;;  - Improve code folding via `hideshow'
 ;;  - Auto-configure `time-stamp'
 ;;  - Automatically add VHDL keywords to `company-keywords' backend
+;;  - Port connections utilities
 ;;
 ;;  Experimental:
 ;;  - Tree-sitter powered `verilog-ts-mode` support
@@ -61,7 +62,8 @@
                                    which-func
                                    hideshow
                                    time-stamp
-                                   company-keywords)
+                                   company-keywords
+                                   ports)
   "Which Vhdl-ext features to enable."
   :type '(set (const :tag "Improved syntax highlighting via `font-lock'."
                 font-lock)
@@ -88,7 +90,9 @@
               (const :tag "`time-stamp' configuration."
                 time-stamp)
               (const :tag "Add `vhdl-keywords' to `company-keywords' backend."
-                company-keywords))
+                company-keywords)
+              (const :tag "Port connections utilities."
+                ports))
   :group 'vhdl-ext)
 
 (defmacro vhdl-ext-when-feature (features &rest body)
@@ -114,6 +118,7 @@ FEATURES can be a single feature or a list of features."
 (require 'vhdl-ext-nav)
 (require 'vhdl-ext-imenu)
 (require 'vhdl-ext-template)
+(require 'vhdl-ext-ports)
 (require 'vhdl-ext-which-func)
 (require 'vhdl-ext-beautify)
 (require 'vhdl-ext-font-lock)
@@ -141,6 +146,9 @@ FEATURES can be a single feature or a list of features."
       (define-key map (kbd "C-c M-?") 'vhdl-ext-jump-to-entity-at-point-ref))
     (vhdl-ext-when-feature 'template
       (define-key map (kbd "C-c C-t") 'vhdl-ext-hydra/body))
+    (vhdl-ext-when-feature 'ports
+      (define-key map (kbd "C-c C-c t") 'vhdl-ext-ports-toggle-connect)
+      (define-key map (kbd "C-c C-c r") 'vhdl-ext-ports-connect-recursively))
     map)
   "Key map for the `vhdl-ext'.")
 
