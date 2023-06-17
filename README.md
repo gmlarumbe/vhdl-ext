@@ -13,6 +13,7 @@ This package includes some extensions on top of the great Emacs `vhdl-mode`.
 * [Improve syntax highlighting](#syntax-highlighting)
 * [LSP configuration for `lsp-mode` and `eglot`](#language-server-protocol)
 * [Support for many linters via `flycheck`](#linting)
+* [Beautify blocks and instances](#beautify-blocks-and-instances)
 * [Navigate through instances in a entity](#navigation)
 * [Templates insertion via `hydra`](#templates)
 * [Compilation with colored errors/warnings and jump to file/line](#compilation)
@@ -55,6 +56,7 @@ By default all features are enabled:
         eglot
         lsp
         flycheck
+        beautify
         navigation
         template
         compilation
@@ -83,6 +85,7 @@ If installed and loaded via `use-package`:
           eglot
           lsp
           flycheck
+          beautify
           navigation
           template
           compilation
@@ -106,6 +109,8 @@ Enabling of `vhdl-ext-mode` minor-mode creates the following keybindings:
   * <kbd>C-M-.</kbd> `vhdl-ext-jump-to-parent-entity`
   * <kbd>C-c M-.</kbd> `vhdl-ext-jump-to-entity-at-point-def`
   * <kbd>C-c M-?</kbd> `vhdl-ext-jump-to-entity-at-point-ref`
+  * <kbd>C-M-i</kbd> `vhdl-ext-beautify-block-at-point`
+  * <kbd>C-c M-i</kbd> `vhdl-ext-beautify-instance-at-point`
   * <kbd>C-c C-t</kbd> `vhdl-ext-hydra/body`
   * <kbd>C-c C-f</kbd> `vhdl-ext-flycheck-mode`
   * <kbd>C-c \<f5\></kbd> `vhdl-ext-compile-ghdl-project`
@@ -149,6 +154,24 @@ Support via `flycheck` for the following linters:
 * [vhdl-tool](http://vhdltool.com)
 
 For configuration and usage instructions, see the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Linting)
+
+
+## Beautify blocks and instances ##
+
+Beautify block and instances at point:
+
+<!-- TODO: Add GIF -->
+<!-- <img src="https://user-images.githubusercontent.com/51021955/208781782-dbf45c3e-df3f-405a-aacc-1d190ab87ae9.gif" width=400 height=300> -->
+
+Interactive functions:
+
+* `vhdl-ext-beautify-block-at-point`: <kbd>C-M-i</kbd>
+* `vhdl-ext-beautify-instance-at-point`: <kbd>C-c M-i</kbd>
+
+Batch-mode functions:
+
+* `vhdl-ext-beautify-files`
+* `vhdl-ext-beautify-dir-files`
 
 
 ## Navigation ##

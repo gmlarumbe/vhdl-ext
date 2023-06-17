@@ -355,11 +355,59 @@ cannot be ommitted after an end."
                    (<= pos end-pos))
           (setq found t))))
     (when found
-      `((type . ,block)
-        (name . ,name)))))
+      `((type      . ,block)
+        (name      . ,name)
+        (beg-point . ,beg-pos)
+        (end-point . ,end-pos)))))
 
+;;;; Dirs
+(defun vhdl-ext-dir-files (dir &optional follow-symlinks ignore-dirs)
+  "Find VHDL files recursively on DIR.
+
+Follow symlinks if optional argument FOLLOW-SYMLINKS is non-nil.
+
+Discard non-regular files (e.g. Emacs temporary non-saved buffer files like
+symlink #.test.vhd).
+
+Optional arg IGNORE-DIRS specifies which directories should be excluded from
+search."
+  (let* ((files (directory-files-recursively dir
+                                             vhdl-ext-file-extension-re
+                                             nil nil follow-symlinks))
+         (files-after-ignored (seq-filter (lambda (file)
+                                            ;; Each file checks if it has its prefix in the list of ignored directories
+                                            (let (ignore-file)
+                                              (dolist (dir ignore-dirs)
+                                                (when (string-prefix-p (expand-file-name dir) (expand-file-name file))
+                                                  (setq ignore-file t)))
+                                              (not ignore-file)))
+                                          files))
+         (files-regular (seq-filter #'file-regular-p files-after-ignored)))
+    files-regular))
+
+(defun vhdl-ext-dirs-files (dirs &optional follow-symlinks ignore-dirs)
+  "Find VHDL files recursively on DIRS.
+DIRS is a list of directory strings.
+
+Follow symlinks if optional argument FOLLOW-SYMLINKS is non-nil.
+
+Optional arg IGNORE-DIRS specifies which directories should be excluded from
+search."
+  (let (files)
+    (dolist (dir dirs)
+      (push (vhdl-ext-dir-files dir follow-symlinks ignore-dirs) files))
+    (when files
+      (flatten-tree files))))
+
+;;;; Misc
+(defun vhdl-ext-company-keywords-add ()
+  "Add `vhdl-keywords' to `company-keywords' backend."
+  (dolist (mode '(vhdl-mode vhdl-ts-mode))
+    (add-to-list 'company-keywords-alist (append `(,mode) vhdl-keywords))))
+
+;;;; Overrides
 ;; TODO: To be fixed @ emacs/main
-(defun vhdl-corresponding-begin (&optional lim)
+(defun vhdl-ext-corresponding-begin (&optional lim)
   "If the word at the current position corresponds to an \"end\"
 keyword, then return a vector containing enough information to find
 the corresponding \"begin\" keyword, else return nil.  The keyword to
@@ -448,14 +496,7 @@ of an identifier that just happens to contain an \"end\" keyword."
              ))) ; "end ..."
       )))
 
-;;;; Misc
-(defun vhdl-ext-company-keywords-add ()
-  "Add `vhdl-keywords' to `company-keywords' backend."
-  (dolist (mode '(vhdl-mode vhdl-ts-mode))
-    (add-to-list 'company-keywords-alist (append `(,mode) vhdl-keywords))))
-
-
-
+(advice-add 'vhdl-corresponding-begin :override #'vhdl-ext-corresponding-begin)
 
 
 (provide 'vhdl-ext-utils)

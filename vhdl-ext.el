@@ -28,13 +28,15 @@
 ;;  - Improve syntax highlighting
 ;;  - LSP configuration for `lsp-mode' and `eglot'
 ;;  - Support for many linters via `flycheck'
+;;  - Beautify blocks and instances
 ;;  - Navigate through instances in a module
 ;;  - Templates insertion via `hydra'
 ;;  - Compilation-based utilities
 ;;  - Improve `imenu': detect instances
-;;  - Improve code folding via `hideshow`
-;;  - Time-stamp auto-configuration
-;;  - Automatically add VHDL keywords to `company-keywords` backend
+;;  - Enhanced support for `which-func'
+;;  - Improve code folding via `hideshow'
+;;  - Auto-configure `time-stamp'
+;;  - Automatically add VHDL keywords to `company-keywords' backend
 ;;
 ;;  Experimental:
 ;;  - Tree-sitter powered `verilog-ts-mode` support
@@ -51,6 +53,7 @@
                                    eglot
                                    lsp
                                    flycheck
+                                   beautify
                                    navigation
                                    template
                                    compilation
@@ -68,6 +71,8 @@
                 lsp)
               (const :tag "Setup linters for `flycheck'."
                 flycheck)
+              (const :tag "Code beautifying functions."
+                beautify)
               (const :tag "Code Navigation functions."
                 navigation)
               (const :tag "`yasnippet' and custom templates."
@@ -110,6 +115,7 @@ FEATURES can be a single feature or a list of features."
 (require 'vhdl-ext-imenu)
 (require 'vhdl-ext-template)
 (require 'vhdl-ext-which-func)
+(require 'vhdl-ext-beautify)
 (require 'vhdl-ext-font-lock)
 (require 'vhdl-ext-flycheck)
 (require 'vhdl-ext-eglot)
@@ -122,6 +128,9 @@ FEATURES can be a single feature or a list of features."
       (define-key map (kbd "C-c <f5>") 'vhdl-ext-compile-ghdl-project))
     (vhdl-ext-when-feature 'flycheck
       (define-key map (kbd "C-c C-f") 'vhdl-ext-flycheck-mode))
+    (vhdl-ext-when-feature 'beautify
+      (define-key map (kbd "C-M-i") 'vhdl-ext-beautify-block-at-point)
+      (define-key map (kbd "C-c M-i") 'vhdl-ext-beautify-instance-at-point))
     (vhdl-ext-when-feature 'navigation
       (define-key map (kbd "C-M-f") 'vhdl-ext-forward-sexp)
       (define-key map (kbd "C-M-d") 'vhdl-ext-backward-sexp)
