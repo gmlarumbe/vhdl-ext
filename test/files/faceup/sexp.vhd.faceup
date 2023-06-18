@@ -48,7 +48,7 @@
     «k:component» «f:blk_mem_gen_0»
         «k:port» «:vhdl-ext-font-lock-parenthesis-face:(»
             clka  «:vhdl-ext-font-lock-punctuation-face::» «k:in»  «t:std_logic»«:vhdl-ext-font-lock-punctuation-face:;»
-            doutb «:vhdl-ext-font-lock-punctuation-face::» «k:out» «t:std_logic_vector»«:vhdl-ext-font-lock-curly-braces-face:(»«:vhdl-ext-font-lock-brackets-content-face:63» «:vhdl-ext-font-lock-instance-lib-face:downto» «:vhdl-ext-font-lock-brackets-content-face:0»«:vhdl-ext-font-lock-curly-braces-face:)»
+            doutb «:vhdl-ext-font-lock-punctuation-face::» «k:out» «t:std_logic_vector»«:vhdl-ext-font-lock-parenthesis-face:(»«:vhdl-ext-font-lock-brackets-content-face:63» «:vhdl-ext-font-lock-instance-lib-face:downto» «:vhdl-ext-font-lock-brackets-content-face:0»«:vhdl-ext-font-lock-parenthesis-face:)»
             «:vhdl-ext-font-lock-parenthesis-face:)»«:vhdl-ext-font-lock-punctuation-face:;»
     «k:end» «k:component»«:vhdl-ext-font-lock-punctuation-face:;»
 

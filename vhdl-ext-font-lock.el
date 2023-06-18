@@ -403,21 +403,17 @@ Regex search bound to LIMIT."
 ;; Punctuation and other symbols
 (defconst vhdl-ext-font-lock-keywords-6
   (list
-   ;; Punctuation
-   (list vhdl-ext-font-lock-punctuation-re 0 vhdl-ext-font-lock-punctuation-face)
-   (list vhdl-ext-font-lock-operator-re 0 vhdl-ext-font-lock-operator-face)
    ;; Bit range
    (list vhdl-ext-font-lock-brackets-content-range-re
-         '(1 vhdl-ext-font-lock-curly-braces-face)
-         '(5 vhdl-ext-font-lock-curly-braces-face)
          '(2 vhdl-ext-font-lock-brackets-content-face)
          '(4 vhdl-ext-font-lock-brackets-content-face)
          '(3 vhdl-ext-font-lock-instance-lib-face))
    ;; Bit index
    (list vhdl-ext-font-lock-brackets-content-index-re
-         '(1 vhdl-ext-font-lock-curly-braces-face)
-         '(3 vhdl-ext-font-lock-curly-braces-face)
          '(2 vhdl-ext-font-lock-brackets-content-face))
+   ;; Punctuation
+   (list vhdl-ext-font-lock-punctuation-re 0 vhdl-ext-font-lock-punctuation-face)
+   (list vhdl-ext-font-lock-operator-re 0 vhdl-ext-font-lock-operator-face)
    ;; Braces and brackets
    (list vhdl-ext-font-lock-brackets-re 0 vhdl-ext-font-lock-brackets-face)
    (list vhdl-ext-font-lock-parenthesis-re 0 vhdl-ext-font-lock-parenthesis-face)
