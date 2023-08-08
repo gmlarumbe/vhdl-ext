@@ -165,8 +165,7 @@ For configuration and usage instructions, see the [wiki](https://github.com/gmla
 
 Beautify block and instances at point:
 
-<!-- TODO: Add GIF -->
-<!-- <img src="https://user-images.githubusercontent.com/51021955/208781782-dbf45c3e-df3f-405a-aacc-1d190ab87ae9.gif" width=400 height=300> -->
+<img src="https://github.com/gmlarumbe/vhdl-ext/assets/51021955/cffb0c9d-3a39-4e58-b422-fb275db124a8" width=400 height=300>
 
 Interactive functions:
 
@@ -244,8 +243,7 @@ Setup `company` to complete with VHDL keywords.
 
 Toggle connections of ports under instance at point:
 
-<!-- TODO: Add image -->
-<!-- <img src="https://user-images.githubusercontent.com/51021955/220176192-d823ba19-099f-4484-abc7-8269fd92928b.gif" width=400 height=300> -->
+<img src="https://github.com/gmlarumbe/vhdl-ext/assets/51021955/14536463-a6c4-410f-a890-081f7deb668e" width=400 height=400>
 
   * `vhdl-ext-ports-toggle-connect`: <kbd>C-c C-c t</kbd>
   * `vhdl-ext-ports-connect-recursively`: <kbd>C-c C-c r</kbd>
