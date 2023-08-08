@@ -3,8 +3,10 @@
 # Copyright (c) 2022-2023 Gonzalo Larumbe
 # All rights reserved.
 
-PKGS_TO_INSTALL=(global universal-ctags python3-pygments silversearcher-ag ripgrep ghdl)
-EXPECTED_INSTALLED_BINARIES=(python global gtags ctags ag rg ghdl)
+PKGS_TO_INSTALL=(global universal-ctags python3-pygments silversearcher-ag ripgrep libgnat-10)
+EXPECTED_INSTALLED_BINARIES=(python global gtags ctags ag rg)
+
+sudo apt-get update
 
 for pkg in "${PKGS_TO_INSTALL[@]}"; do
     echo ""
@@ -20,6 +22,18 @@ for bin in "${EXPECTED_INSTALLED_BINARIES[@]}"; do
     echo "$bin path: $(which $bin)"
     echo "$bin version: $($bin --version)"
 done
+
+# Setup GHDL (get latest release)
+GHDL_GITHUB_URL=https://github.com/ghdl/ghdl
+LATEST_RELEASE_URL=releases/download/v3.0.0
+LATEST_RELEASE_FILE=ghdl-gha-ubuntu-22.04-llvm.tgz
+echo ""
+echo "Setting up GHDL..."
+curl -L -o $LATEST_RELEASE_FILE $GHDL_GITHUB_URL/$LATEST_RELEASE_URL/$LATEST_RELEASE_FILE
+sudo tar xvzf $LATEST_RELEASE_FILE --directory /usr
+echo ""
+echo "$(which ghdl)"
+echo "ghdl version: $(ghdl --version)"
 
 
 echo ""
@@ -37,4 +51,5 @@ echo ""
 echo "tree-sitter lib path: "
 echo "$(sudo ldconfig -p | grep libtree-sitter)"
 cd ..
+
 

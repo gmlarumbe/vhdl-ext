@@ -81,6 +81,11 @@ Otherwise, byte-compile."
       (when (functionp 'vhdl-ts-mode)
         (require 'vhdl-ext-tests-tree-sitter)))))
 
+;; CI
+(when (getenv "GITHUB_WORKSPACE")
+  (setq temporary-file-directory (file-name-concat (getenv "GITHUB_WORKSPACE") "tmp/"))
+  (make-directory temporary-file-directory :parents))
+
 
 (provide 'vhdl-ext-tests)
 

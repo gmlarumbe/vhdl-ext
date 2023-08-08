@@ -235,7 +235,7 @@ Return populated `hierarchy' struct."
         (message (cadr cmd))
         (unless (= 0 (shell-command (car cmd) buf buf-err))
           (pop-to-buffer buf-err)
-          (insert cmd "\n")
+          (insert (car cmd) "\n")
           (error err-msg)))
       ;; Extract flat hierarchy alist from GHDL output and construct hierarchy struct
       (vhdl-ext-hierarchy-ghdl-parse-output) ; Populates `vhdl-ext-hierarchy-ghdl-flat-hier'

@@ -25,6 +25,8 @@
 ;;; Code:
 
 
+(require 'vhdl-ext-hierarchy)
+
 (defun vhdl-ext-test-hierarchy ()
   (let* ((test-file (file-name-concat vhdl-ext-tests-files-dir "common/instances.vhd"))
          (vhdl-standard '(8 nil)) ; If using std93, ghdl will not detect block0 instances
