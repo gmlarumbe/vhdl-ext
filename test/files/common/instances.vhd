@@ -6,11 +6,11 @@
 -- Author     : Gonzalo Larumbe  <gonzalomlarumbe@gmail.com>
 -- Company    : Ericsson
 -- Created    : 2023-01-28
--- Last update: 2023-01-28
+-- Last update: 2023-08-06
 -- Platform   : Debian
 -- Standard   : VHDL'08
 -------------------------------------------------------------------------------
--- Description:                 
+-- Description:
 -------------------------------------------------------------------------------
 -- Copyright (c) 2023 Ericsson
 -------------------------------------------------------------------------------
@@ -93,7 +93,7 @@ begin  -- architecture RTL
     -- Generate
     GEN_BLOCK1 :
     for I in 0 to 3 generate
-        I_BLOCK1_GEN : block1 port map
+        I_BLOCK1_GEN : entity work.block1 port map
             (Port0, Port1, Port2);
     end generate GEN_BLOCK1;
 

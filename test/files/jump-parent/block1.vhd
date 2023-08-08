@@ -10,3 +10,11 @@ entity block1 is
           Port1 : in std_logic;
           Port2 : in std_logic);
 end entity block1;
+
+architecture RTL of block1 is
+
+begin  -- architecture RTL
+
+
+
+end architecture RTL;

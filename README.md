@@ -11,6 +11,7 @@ This package includes some extensions on top of the great Emacs `vhdl-mode`.
 
 * [Tree-sitter powered `vhdl-ts-mode`](#tree-sitter)
 * [Improve syntax highlighting](#syntax-highlighting)
+* [Hierarchy extraction and navigation](#hierarchy-extraction)
 * [LSP configuration for `lsp-mode` and `eglot`](#language-server-protocol)
 * [Support for many linters via `flycheck`](#linting)
 * [Beautify blocks and instances](#beautify-blocks-and-instances)
@@ -54,6 +55,7 @@ By default all features are enabled:
 ;; Comment out/remove the ones you do not need
 (setq vhdl-ext-feature-list
       '(font-lock
+        hierarchy
         eglot
         lsp
         flycheck
@@ -84,6 +86,7 @@ If installed and loaded via `use-package`:
   ;; Comment out/remove the ones you do not need
   (setq vhdl-ext-feature-list
         '(font-lock
+          hierarchy
           eglot
           lsp
           flycheck
@@ -119,6 +122,7 @@ Enabling of `vhdl-ext-mode` minor-mode creates the following keybindings:
   * <kbd>C-c \<f5\></kbd> `vhdl-ext-compile-ghdl-project`
   * <kbd>C-c C-c t</kbd> `vhdl-ext-ports-toggle-connect`
   * <kbd>C-c C-c r</kbd> `vhdl-ext-ports-connect-recursively`
+  * <kbd>C-c C-v</kbd> `vhdl-ext-hierarchy-current-buffer`
 
 
 # Features #
@@ -136,6 +140,15 @@ For more information see the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/T
 <img src="https://user-images.githubusercontent.com/51021955/215353070-8a21f758-407d-4455-bdac-bf92310c59e4.gif" width=400 height=300>
 
 For configuration information, see the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Syntax-highlighting).
+
+
+## Hierarchy extraction ##
+
+Hierarchy extraction of entity at current buffer.
+
+<img src="https://github.com/gmlarumbe/vhdl-ext/assets/51021955/79018dc4-833a-4ce6-9f2b-3195ba75481d" width=400 height=300>
+
+For configuration information, see the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Hierarchy).
 
 
 ## Language Server Protocol ##

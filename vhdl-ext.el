@@ -6,7 +6,7 @@
 ;; URL: https://github.com/gmlarumbe/vhdl-ext
 ;; Version: 0.1.0
 ;; Keywords: VHDL, IDE, Tools
-;; Package-Requires: ((emacs "28.1") (eglot "1.9") (lsp-mode "8.0.1") (ag "0.48") (ripgrep "0.4.0") (hydra "0.15.0") (flycheck "33-cvs") (company "0.9.13"))
+;; Package-Requires: ((emacs "28.1") (eglot "1.9") (lsp-mode "8.0.1") (ag "0.48") (ripgrep "0.4.0") (hydra "0.15.0") (flycheck "33-cvs") (company "0.9.13") (outshine "3.1-pre") (async "1.9.7"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 ;; Extensions for VHDL Mode:
 ;;
 ;;  - Improve syntax highlighting
+;;  - Hierarchy extraction and navigation: builtin and GHDL based
 ;;  - LSP configuration for `lsp-mode' and `eglot'
 ;;  - Support for many linters via `flycheck'
 ;;  - Beautify blocks and instances
@@ -51,6 +52,7 @@
   :group 'vhdl-mode)
 
 (defcustom vhdl-ext-feature-list '(font-lock
+                                   hierarchy
                                    eglot
                                    lsp
                                    flycheck
@@ -67,6 +69,8 @@
   "Which Vhdl-ext features to enable."
   :type '(set (const :tag "Improved syntax highlighting via `font-lock'."
                 font-lock)
+              (const :tag "Hierarchy extraction and visualization."
+                hierarchy)
               (const :tag "Setup LSP servers for `eglot'."
                 eglot)
               (const :tag "Setup LSP servers for `lsp-mode'."
@@ -119,6 +123,7 @@ FEATURES can be a single feature or a list of features."
 (require 'vhdl-ext-imenu)
 (require 'vhdl-ext-template)
 (require 'vhdl-ext-ports)
+(require 'vhdl-ext-hierarchy)
 (require 'vhdl-ext-which-func)
 (require 'vhdl-ext-beautify)
 (require 'vhdl-ext-font-lock)
@@ -129,6 +134,8 @@ FEATURES can be a single feature or a list of features."
 ;;; Major-mode
 (defvar vhdl-ext-mode-map
   (let ((map (make-sparse-keymap)))
+    (vhdl-ext-when-feature 'hierarchy
+      (define-key map (kbd "C-c C-v") 'vhdl-ext-hierarchy-current-buffer))
     (vhdl-ext-when-feature 'compilation
       (define-key map (kbd "C-c <f5>") 'vhdl-ext-compile-ghdl-project))
     (vhdl-ext-when-feature 'flycheck
@@ -157,6 +164,8 @@ FEATURES can be a single feature or a list of features."
   "Setup `vhdl-ext-mode' depending on enabled features."
   (interactive)
   ;; Features
+  (vhdl-ext-when-feature 'hierarchy
+    (vhdl-ext-hierarchy-setup))
   (vhdl-ext-when-feature 'hideshow
     (vhdl-ext-hs-setup))
   (vhdl-ext-when-feature 'company-keywords
@@ -194,8 +203,8 @@ FEATURES can be a single feature or a list of features."
             (setq vhdl-ext-flycheck-dirs nil)
             (setq vhdl-ext-flycheck-files nil))
           (setq flycheck-ghdl-language-standard (vhdl-ext-get-standard)) ; Global for all projects
-          (setq flycheck-ghdl-workdir (vhdl-ext-workdir))                ; Project dependant
-          (setq flycheck-ghdl-work-lib (vhdl-ext-work-library)))         ; Project dependant
+          (setq flycheck-ghdl-workdir (vhdl-ext-proj-workdir)) ; Project dependant
+          (setq flycheck-ghdl-work-lib (vhdl-ext-proj-worklib))) ; Project dependant
         ;; `vhdl-mode'-only customization (exclude `vhdl-ts-mode')
         (when (eq major-mode 'vhdl-mode)
           ;; Imenu

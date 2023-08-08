@@ -6,11 +6,11 @@
 «x:-- Author     : Gonzalo Larumbe  <gonzalomlarumbe@gmail.com>»
 «x:-- Company    : Ericsson»
 «x:-- Created    : 2023-01-28»
-«x:-- Last update: 2023-01-28»
+«x:-- Last update: 2023-08-06»
 «x:-- Platform   : Debian»
 «x:-- Standard   : VHDL'08»
 «x:-------------------------------------------------------------------------------»
-«x:-- Description:                 »
+«x:-- Description:»
 «x:-------------------------------------------------------------------------------»
 «x:-- Copyright (c) 2023 Ericsson»
 «x:-------------------------------------------------------------------------------»
@@ -93,7 +93,7 @@
     «x:-- Generate»
     «c:GEN_BLOCK1» «:vhdl-ext-font-lock-punctuation-face::»
     «k:for» I «k:in» 0 «:vhdl-ext-font-lock-instance-lib-face:to» 3 «k:generate»
-        «:vhdl-ext-font-lock-instance-face:I_BLOCK1_GEN» «:vhdl-ext-font-lock-punctuation-face::» «:vhdl-ext-font-lock-entity-face:block1» «k:port» «k:map»
+        «:vhdl-ext-font-lock-instance-face:I_BLOCK1_GEN» «:vhdl-ext-font-lock-punctuation-face::» «k:entity» «:vhdl-ext-font-lock-instance-lib-face:work»«:vhdl-ext-font-lock-punctuation-face:.»«:vhdl-ext-font-lock-entity-face:block1» «k:port» «k:map»
             «:vhdl-ext-font-lock-punctuation-face:(»Port0«:vhdl-ext-font-lock-punctuation-face:,» Port1«:vhdl-ext-font-lock-punctuation-face:,» Port2«:vhdl-ext-font-lock-punctuation-face:);»
     «k:end» «k:generate» GEN_BLOCK1«:vhdl-ext-font-lock-punctuation-face:;»
 

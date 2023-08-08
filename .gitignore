@@ -3,3 +3,6 @@ gtags.files
 GTAGS
 GPATH
 GRTAGS
+
+# VHDL hierarchy tests lib directory
+test/files/lib/

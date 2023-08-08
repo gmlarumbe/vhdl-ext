@@ -37,10 +37,16 @@ Defaults to .vhd and .vhdl."
   :type 'string
   :group 'vhdl-ext)
 
+(defcustom vhdl-ext-ghdl-extra-args nil
+  "Vhdl-ext GHDL processes extra arguments."
+  :type '(repeat string)
+  :group 'vhdl-ext-hierarchy)
+
 
 (defconst vhdl-ext-blank-optional-re "[[:blank:]\n]*")
 (defconst vhdl-ext-blank-mandatory-re "[[:blank:]\n]+")
 (defconst vhdl-ext-identifier-re "[a-zA-Z_][a-zA-Z0-9_-]*")
+(defconst vhdl-ext-identifier-sym-re (concat "\\_<" vhdl-ext-identifier-re "\\_>"))
 (defconst vhdl-ext-arch-identifier-opt-re (concat "\\(\\s-*(\\s-*" vhdl-ext-identifier-re ")\\s-*\\)?"))
 (defconst vhdl-ext-instance-re
   (concat "^\\s-*\\(?1:" vhdl-ext-identifier-re "\\)\\s-*:" vhdl-ext-blank-optional-re ; Instance name
@@ -171,7 +177,7 @@ Return nil if no entity was found."
   "VHDL hook to run when killing a buffer."
   (setq vhdl-ext-buffer-list (remove (current-buffer) vhdl-ext-buffer-list)))
 
-(defun vhdl-ext-buffer-proj-dir ()
+(defun vhdl-ext-buffer-proj ()
   "Return current buffer project if it belongs to `vhdl-project-alist'."
   (catch 'project
     (when (and buffer-file-name vhdl-project-alist)
@@ -180,19 +186,25 @@ Return nil if no entity was found."
                                (expand-file-name buffer-file-name))
           (throw 'project (car proj)))))))
 
-(defun vhdl-ext-workdir ()
+(defun vhdl-ext-buffer-proj-root ()
+  "Return current buffer project root dir if it belongs to `vhdl-project-alist'."
+  (let ((proj (vhdl-ext-buffer-proj)))
+    (when proj
+      (expand-file-name (nth 1 (vhdl-aget vhdl-project-alist proj))))))
+
+(defun vhdl-ext-proj-workdir ()
   "Return working library dir according to project of current buffer dir.
 
 Instead of fetching the value from `vhdl-project', it depends on current
 directory.  If current directory has no project in `vhdl-project-alist', fetch
 the value from `vhdl-project' instead."
-  (let* ((project (vhdl-ext-buffer-proj-dir))
+  (let* ((project (vhdl-ext-buffer-proj))
          (root (nth 1 (vhdl-aget vhdl-project-alist (or project vhdl-project))))
          (dir  (nth 7 (vhdl-aget vhdl-project-alist (or project vhdl-project)))))
     (when (and root dir)
       (file-name-concat root dir))))
 
-(defun vhdl-ext-work-library ()
+(defun vhdl-ext-proj-worklib ()
   "Return the working library name of the current directory project.
 
 Instead of fetching the value from `vhdl-project', it depends on current
@@ -202,10 +214,23 @@ the value from `vhdl-project' instead.
 Return \"work\" if no project is defined.
 
 See `vhdl-work-library'."
-  (let* ((project (vhdl-ext-buffer-proj-dir)))
+  (let ((project (vhdl-ext-buffer-proj)))
     (vhdl-resolve-env-variable
      (or (nth 6 (vhdl-aget vhdl-project-alist (or project vhdl-project)))
          vhdl-default-library))))
+
+(defun vhdl-ext-proj-files ()
+  "Return file list of the current buffer project."
+  (let ((project (vhdl-ext-buffer-proj)))
+    (unless project
+      (user-error "Not in a VHDL project buffer"))
+    ;; Scan project if it's not cached
+    (unless (vhdl-aget vhdl-file-alist project)
+      (vhdl-scan-project-contents project))
+    ;; Retrieve filelist
+    (nreverse (mapcar #'expand-file-name
+                      (mapcar #'car
+                              (vhdl-aget vhdl-file-alist project))))))
 
 (defun vhdl-ext-inside-if-else ()
   "Return non-nil if point is inside an if-else block."
@@ -422,6 +447,46 @@ search."
       (push (vhdl-ext-dir-files dir follow-symlinks ignore-dirs) files))
     (when files
       (flatten-tree files))))
+
+;;;; Cache
+(defun vhdl-ext-serialize (data filename)
+  "Serialize DATA to FILENAME."
+  (let ((dir (file-name-directory filename)))
+    (unless (file-exists-p dir)
+      (make-directory dir :parents))
+    (if (file-writable-p filename)
+        (with-temp-file filename
+          (insert (let (print-length) (prin1-to-string data))))
+      (message "Vhdl-ext cache '%s' not writeable" filename))))
+
+(defun vhdl-ext-unserialize (filename)
+  "Read data serialized by `vhdl-ext-serialize' from FILENAME."
+  (with-demoted-errors
+      "Error during file deserialization: %S"
+    (when (file-exists-p filename)
+      (with-temp-buffer
+        (insert-file-contents filename)
+        ;; this will blow up if the contents of the file aren't
+        ;; lisp data structures
+        (read (buffer-string))))))
+
+
+;;;; GHDL
+(defun vhdl-ext-ghdl-proj-args ()
+  "Return arguments of GHDL command for current buffer project."
+  (let* ((workdir (vhdl-ext-proj-workdir))
+         (args (mapconcat #'identity
+                          `("-fno-color-diagnostics"
+                            ,(concat "--std=" (vhdl-ext-get-standard))
+                            ,(concat "--workdir=" workdir)
+                            ,(concat "--work=" (vhdl-ext-proj-worklib)))
+                          " "))
+         (extra-args (mapconcat #'identity vhdl-ext-ghdl-extra-args " "))
+         (dirs (mapcar #'expand-file-name (car (vhdl-aget vhdl-directory-alist (vhdl-ext-buffer-proj)))))
+         (dirs-args (mapconcat (lambda (dir) (concat "-P" dir))
+                               dirs
+                               " ")))
+    (concat args (when extra-args (concat " " extra-args))" " dirs-args)))
 
 ;;;; Misc
 (defun vhdl-ext-company-keywords-add ()

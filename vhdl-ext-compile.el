@@ -126,33 +126,22 @@ According to GHDL documentation:
  - GHDL analyzes each filename in the given order, and stops the analysis in
 case of error (the following files are not analyzed)."
   (interactive)
-  (let* ((project (vhdl-ext-buffer-proj-dir))
+  (let* ((project (vhdl-ext-buffer-proj))
          (root (nth 1 (vhdl-aget vhdl-project-alist (or project vhdl-project))))
-         (workdir (vhdl-ext-workdir))
-         sources sources-filtered dirs)
-    ;; Scan project if it's not cached
-    (unless (vhdl-aget vhdl-entity-alist project)
-      (vhdl-scan-project-contents project))
+         (workdir (vhdl-ext-proj-workdir))
+         sources sources-filtered)
     ;; Get sources and put them in the expected order
-    (setq sources (nreverse (mapcar #'expand-file-name
-                                    (mapcar #'car
-                                            (vhdl-aget vhdl-file-alist project)))))
+    (setq sources (vhdl-ext-proj-files))
     (setq sources-filtered (seq-take-while (lambda (elm) (not (string= elm buffer-file-name))) sources))
-    ;; Directories
-    (setq dirs (mapcar #'expand-file-name (car (vhdl-aget vhdl-directory-alist project))))
     ;; Create workdir if it does not exist
     (unless (and (file-exists-p workdir)
                  (file-directory-p workdir))
       (make-directory workdir :parents))
     ;; Compile current buffer
     (vhdl-ext-compile-ghdl (concat "cd " root " && "
-                                   "ghdl "
-                                   "-a "
+                                   "ghdl -a "
                                    "-fno-color-diagnostics "
-                                   "--std=" (vhdl-ext-get-standard) " "
-                                   "--workdir=" workdir " "
-                                   "--work=" (vhdl-ext-work-library) " "
-                                   (mapconcat (lambda (dir) (concat "-P" dir)) dirs " ") " "
+                                   (vhdl-ext-ghdl-proj-args) " "
                                    (mapconcat #'identity sources-filtered " ") " "
                                    buffer-file-name))))
 

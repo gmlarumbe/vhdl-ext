@@ -66,6 +66,7 @@ Otherwise, byte-compile."
 (require 'vhdl-ext-tests-navigation)
 (require 'vhdl-ext-tests-font-lock)
 (require 'vhdl-ext-tests-utils)
+(require 'vhdl-ext-tests-hierarchy)
 
 (message "Emacs version: %s" emacs-version)
 (if (< emacs-major-version 29)
