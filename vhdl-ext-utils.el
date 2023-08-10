@@ -481,7 +481,8 @@ search."
                             ,(concat "--workdir=" workdir)
                             ,(concat "--work=" (vhdl-ext-proj-worklib)))
                           " "))
-         (extra-args (mapconcat #'identity vhdl-ext-ghdl-extra-args " "))
+         (extra-args (when vhdl-ext-ghdl-extra-args
+                       (mapconcat #'identity vhdl-ext-ghdl-extra-args " ")))
          (dirs (mapcar #'expand-file-name (car (vhdl-aget vhdl-directory-alist (vhdl-ext-buffer-proj)))))
          (dirs-args (mapconcat (lambda (dir) (concat "-P" dir))
                                dirs

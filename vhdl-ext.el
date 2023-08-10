@@ -117,8 +117,8 @@ FEATURES can be a single feature or a list of features."
 ;;; Features
 (require 'vhdl-ext-hs)
 (require 'vhdl-ext-time-stamp)
-(require 'vhdl-ext-compile)
 (require 'vhdl-ext-utils)
+(require 'vhdl-ext-compile)
 (require 'vhdl-ext-nav)
 (require 'vhdl-ext-imenu)
 (require 'vhdl-ext-template)
