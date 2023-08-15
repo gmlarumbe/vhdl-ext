@@ -283,8 +283,8 @@ $ make
 To run a subset of tests (e.g. imenu):
 
 ```shell
-$ cd ~/.emacs.d/vhdl-ext
-$ test/scripts/ert-tests.sh recompile_run imenu::
+$ cd ~/.emacs.d/verilog-ext
+$ make subset TESTS=imenu
 ```
 
 ## Other packages ##
