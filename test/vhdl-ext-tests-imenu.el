@@ -34,10 +34,9 @@
                   nil))) ; Mock `message' to silence VHDL version reporting
        (vhdl-mode))
      (let ((imenu-use-markers nil)
-           (print-level nil)
-           (print-length nil)
-           (eval-expression-print-level nil)
-           (eval-expression-print-length nil))
+           ;; DANGER: The one below shouldn't be necessary, but if only running one imenu test
+           ;; it would fail as `vhdl-ext-index-menu-init' wouldn't have run
+           (imenu-generic-expression vhdl-ext-imenu-generic-expression))
        (imenu-default-create-index-function))))
 
 
