@@ -69,7 +69,9 @@ Otherwise, byte-compile."
 (require 'vhdl-ext-tests-indent)
 (require 'vhdl-ext-tests-utils)
 (require 'vhdl-ext-tests-hierarchy)
-(if (not vhdl-ext-tests-tree-sitter-available-p)
+(if (not (and (>= emacs-major-version 29)
+              (treesit-available-p)
+              (treesit-language-available-p 'vhdl)))
     (message "Skipping vhdl-ext-tests-tree-sitter...")
   (defvar vhdl-ext-tests-tree-sitter-dir (file-name-concat vhdl-ext-tests-files-dir "tree-sitter"))
   (require 'vhdl-ext-tests-tree-sitter))
@@ -79,6 +81,18 @@ Otherwise, byte-compile."
 (when (getenv "GITHUB_WORKSPACE")
   (setq temporary-file-directory (file-name-concat (getenv "GITHUB_WORKSPACE") "tmp/"))
   (make-directory temporary-file-directory :parents))
+
+
+;;;; Report loaded file
+(when noninteractive ; Only report in batch-mode
+  ;; Not sure if this one really reports if functions have been loaded from .eln files
+  (message "vhdl-ext is: %s" (locate-library "vhdl-ext"))
+  ;; `describe-function' is not intended to be used programatically, but seems it can do the trick
+  (message "%s" (car (split-string (describe-function 'vhdl-ext-mode) "\n")))
+  (message "%s" (car (split-string (describe-function 'vhdl-ext-find-entity-instance-fwd) "\n"))))
+;; If files are compiled successfully, subsequent invocations of Emacs should
+;; try to load files from native compiled instead of byte-compiled or interactive ones.
+
 
 
 (provide 'vhdl-ext-tests)

@@ -50,6 +50,17 @@
 (vhdl-ext-mode-setup)
 (add-hook 'vhdl-mode-hook #'vhdl-ext-mode)
 
+;;;; Tree-sitter
+;; TODO: Uncomment when integrated into MELPA
+;; (message "Emacs version: %s" emacs-version)
+;; (when (and (>= emacs-major-version 29)
+;;            (treesit-available-p)
+;;            (treesit-language-available-p 'vhdl))
+;;   (require 'treesit)
+;;   (setq treesit-font-lock-level 4)
+;;   (package-install 'vhdl-ts-mode))
+
+
 
 (provide 'vhdl-ext-tests-setup-package)
 
