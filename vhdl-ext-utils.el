@@ -61,7 +61,7 @@ Defaults to .vhd and .vhdl."
 (defconst vhdl-ext-block-re "^\\s-*\\(\\(\\w\\|\\s_\\)+\\)\\s-*:\\(\\s-\\|\n\\)*\\(block\\)")
 (defconst vhdl-ext-package-re "^\\s-*\\(package\\( body\\|\\)\\)\\s-+\\(\\(\\w\\|\\s_\\)+\\)")
 (defconst vhdl-ext-configuration-re "^\\s-*\\(configuration\\)\\s-+\\(\\(\\w\\|\\s_\\)+\\s-+of\\s-+\\(\\w\\|\\s_\\)+\\)")
-(defconst vhdl-ext-architecture-re "^\\s-*\\(architecture\\)\\s-+\\(\\(\\w\\|\\s_\\)+\\s-+of\\s-+\\(\\w\\|\\s_\\)+\\)")
+(defconst vhdl-ext-architecture-re "^\\s-*\\(?1:architecture\\)\\s-+\\(?2:\\(?3:\\(?:\\w\\|\\s_\\)+\\)\\s-+of\\s-+\\(?4:\\(?:\\w\\|\\s_\\)+\\)\\)")
 (defconst vhdl-ext-context-re "^\\s-*\\(context\\)\\s-+\\(\\(\\w\\|\\s_\\)+\\)")
 
 (defvar vhdl-ext-buffer-list nil)
@@ -77,6 +77,13 @@ Defaults to .vhd and .vhdl."
 (defconst vhdl-ext-lsp-server-ids
   (mapcar #'car vhdl-ext-lsp-available-servers))
 
+
+;;;; Macros
+(defmacro vhdl-ext-with-disabled-messages (&rest body)
+  "Execute BODY without displaying messages in the echo area."
+  (declare (indent 1) (debug t))
+  `(let ((inhibit-message t))
+     ,@body))
 
 (defun vhdl-ext-replace-regexp (regexp to-string start end)
   "Wrapper function for programatic use of `replace-regexp'.
@@ -112,8 +119,8 @@ Return list with found entities or nil if not found."
     (save-excursion
       (goto-char (point-min))
       (while (vhdl-re-search-forward vhdl-ext-entity-re nil t)
-        (push (match-string-no-properties 2) entities)))
-    (delete-dups entities)))
+        (push (downcase (match-string-no-properties 2)) entities)))
+    (reverse (delete-dups entities))))
 
 (defun vhdl-ext-read-file-entities (&optional file)
   "Find entities in current buffer.
@@ -219,18 +226,26 @@ See `vhdl-work-library'."
      (or (nth 6 (vhdl-aget vhdl-project-alist (or project vhdl-project)))
          vhdl-default-library))))
 
-(defun vhdl-ext-proj-files ()
-  "Return file list of the current buffer project."
+(defun vhdl-ext-proj-files (&optional rescan)
+  "Return file list of the current buffer project.
+
+If optional arg RESCAN is non-nil, force refreshing of current project filelist."
   (let ((project (vhdl-ext-buffer-proj)))
     (unless project
       (user-error "Not in a VHDL project buffer"))
-    ;; Scan project if it's not cached
-    (unless (vhdl-aget vhdl-file-alist project)
+    ;; Scan project if it's not cached or asked for
+    (when (or rescan
+              (not (vhdl-aget vhdl-file-alist project)))
       (vhdl-scan-project-contents project))
     ;; Retrieve filelist
     (nreverse (mapcar #'expand-file-name
                       (mapcar #'car
                               (vhdl-aget vhdl-file-alist project))))))
+
+(defun vhdl-ext-proj-files-rescan ()
+  "Rescan files of current project."
+  (interactive)
+  (vhdl-ext-proj-files :rescan))
 
 (defun vhdl-ext-inside-if-else ()
   "Return non-nil if point is inside an if-else block."
@@ -250,8 +265,10 @@ See `vhdl-work-library'."
   "Move forward one SEXP.
 With prefix arg, move COUNT sexps."
   (interactive "P")
-  (let ((symbol (thing-at-point 'symbol :no-props))
-        (bounds (bounds-of-thing-at-point 'symbol)))
+  (let* ((symbol-raw (thing-at-point 'symbol :no-props))
+         (symbol (when symbol-raw
+                   (downcase symbol-raw)))
+         (bounds (bounds-of-thing-at-point 'symbol)))
     (cond (;; entity, architecture, package, configuration, context
            (member symbol '("entity" "architecture" "configuration" "context"))
            (vhdl-re-search-forward "\\_<is\\_>" nil t)
@@ -300,8 +317,10 @@ With prefix arg, move COUNT sexps.
 Algorithm takes into account that keywords component, generate and process
 cannot be ommitted after an end."
   (interactive "P")
-  (let ((symbol (thing-at-point 'symbol :no-props))
-        (bounds (bounds-of-thing-at-point 'symbol)))
+  (let* ((symbol-raw (thing-at-point 'symbol :no-props))
+         (symbol (when symbol-raw
+                   (downcase symbol-raw)))
+         (bounds (bounds-of-thing-at-point 'symbol)))
     (cond (;; end
            (member symbol '("end"))
            (goto-char (cdr bounds))
@@ -493,7 +512,7 @@ search."
 (defun vhdl-ext-company-keywords-add ()
   "Add `vhdl-keywords' to `company-keywords' backend."
   (dolist (mode '(vhdl-mode vhdl-ts-mode))
-    (add-to-list 'company-keywords-alist (append `(,mode) vhdl-keywords))))
+    (add-to-list 'company-keywords-alist `(,mode ,@vhdl-keywords))))
 
 ;;;; Overrides
 ;; TODO: To be fixed @ emacs/main

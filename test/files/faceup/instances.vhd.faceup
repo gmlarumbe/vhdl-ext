@@ -4,9 +4,9 @@
 »«m:-------------------------------------------------------------------------------»«x:
 »«m:-- »«x:File       : instances.vhd
 »«m:-- »«x:Author     : Gonzalo Larumbe  <gonzalomlarumbe@gmail.com>
-»«m:-- »«x:Company    : Ericsson
+»«m:-- »«x:Company    : gmlarumbe
 »«m:-- »«x:Created    : 2023-01-28
-»«m:-- »«x:Last update: 2023-08-06
+»«m:-- »«x:Last update: 2023-08-16
 »«m:-- »«x:Platform   : Debian
 »«m:-- »«x:Standard   : VHDL'08
 »«m:-------------------------------------------------------------------------------»«x:

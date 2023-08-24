@@ -37,6 +37,18 @@
 (set-face-attribute 'vhdl-ext-font-lock-instance-lib-face nil :foreground "gray70")
 (set-face-attribute 'vhdl-ext-font-lock-translate-off-face nil :background "gray20" :slant 'italic)
 
+(when vhdl-ext-tests-tree-sitter-available-p
+  (set-face-attribute 'vhdl-ts-font-lock-then-face nil :foreground "dark olive green")
+  (set-face-attribute 'vhdl-ts-font-lock-punctuation-face nil :foreground "burlywood")
+  (set-face-attribute 'vhdl-ts-font-lock-operator-face nil :inherit 'vhdl-ts-font-lock-punctuation-face :weight 'extra-bold)
+  (set-face-attribute 'vhdl-ts-font-lock-parenthesis-face nil :foreground "dark goldenrod")
+  (set-face-attribute 'vhdl-ts-font-lock-brackets-content-face nil :foreground "yellow green")
+  (set-face-attribute 'vhdl-ts-font-lock-port-connection-face nil :foreground "bisque2")
+  (set-face-attribute 'vhdl-ts-font-lock-entity-face nil :foreground "green1")
+  (set-face-attribute 'vhdl-ts-font-lock-instance-face nil :foreground "medium spring green")
+  (set-face-attribute 'vhdl-ts-font-lock-instance-lib-face nil :foreground "gray70")
+  (set-face-attribute 'vhdl-ts-font-lock-translate-off-face nil :background "gray20" :slant 'italic))
+
 (provide 'vhdl-ext-tests-setup-faces)
 
 ;;; vhdl-ext-tests-setup-faces.el ends here

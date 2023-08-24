@@ -50,8 +50,8 @@ Override any previous configuration for `vhdl-mode' and `vhdl-ts-mode'."
       (dolist (mode '(vhdl-mode vhdl-ts-mode))
         (setq eglot-server-programs (assq-delete-all mode eglot-server-programs))
         (if (listp cmd)
-            (push (append (list mode) cmd) eglot-server-programs)
-          (push (list mode cmd) eglot-server-programs)))
+            (push `(,mode ,@cmd) eglot-server-programs)
+          (push `(,mode ,cmd) eglot-server-programs)))
       (message "Set eglot VHDL server: %s" server-id))))
 
 

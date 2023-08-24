@@ -1,0 +1,135 @@
+* Tree-sitter dev
+** Pending
+*** TODO vhdl-ts-forward-sexp and backward-sexp
+- [ ] Fail if point is not over a symbol
+- [ ] Fail or do something weird if point is at a comment
+- [ ] Also happens for verilog equivalent
+- [ ] Take the "then" and "if" or "else" into account for hideshow!!
+  - /home/gonz/.emacs.d/straight/repos/vhdl-ext/test/files/common/sexp.vhd:60
+
+- [ ]
+
+*** beautify
+- Pending:
+  #+begin_src elisp
+;;; Beautify
+;; TODO: Fill doc
+;; TODO: Still does not work...
+(defun vhdl-ts-beautify-region (beg end)
+  "docstring"
+  (interactive)
+
+  )
+
+;; TODO: Fill doc
+;; TODO: Still does not work...
+(defun vhdl-ts-beautify ()
+  "Force tree-sitter indentation"
+  (interactive)
+  (let ((vhdl-beautify-options `(,(nth 0 vhdl-beautify-options)
+                                 nil ; TODO: One statement per line, needed by builtin indentation.
+                                     ; `vhdl-fix-statement-region' calls `vhdl-in-literal', which changes match-data and doesn't work for ts-mode
+                                 nil ; Disable indentation, use the one for ts-mode
+                                 ,(nth 3 vhdl-beautify-options)
+                                 nil ; Use builtin untabify and trailing-whitespace removal
+                                 )))
+    ;; Replaces indentation
+    (indent-region (point-min) (point-max))
+    ;; Original function
+    (vhdl-beautify-buffer)
+    ;; Replaces untabify/delete trailing whitespace
+    (untabify (point-min) (point-max))
+    (delete-trailing-whitespace (point-min) (point-max))))
+  #+end_src
+- [ ] Add new tests with new options
+
+*** capf
+- [ ] Implement vhdl-ext-workspace-capf in workspace for tree-sitter
+  - Requires implementation of vhdl-ext-tags-get-definitions/vhdl-ext-tags-get-references
+  - [ ] Should be possible to have more information about what is being auto-completed from the context
+    - e.g.: for dot completion, if it's a hierarchical reference, or a class attribute/method
+- [ ] Include vhdl-keywords?
+  - (no need to include in company-keywords)
+
+*** xref
+- [ ] Implement tags/refs gathering in workspace
+  - `vhdl-ext-workspace-get-tags points' to `vhdl-ext-workspace-get-tags'
+  - [ ] Implement equivalent of vhdl-ext-tags-get-definitions for tree-sitter
+  - [ ] Implement equivalent of vhdl-ext-tags-get-references for tree-sitter
+  - Beware the macros
+
+*** Tests
+- [ ] Refactor/reorganize and prepare to split into separate repo for vhdl-ts-mode
+
+** Implemented
+*** hierarchy
+- Implemented, still to be merged into main
+
+*** Utils
+- [ ] Block at point
+  - Adding "sequence_of_statements" to `vhdl-ts-block-at-point-re' shadows the rest inside procedural blocks
+- [ ] forward/bacward sexp
+
+*** hideshow
+- It's regexp based, so leave it in vhdl-ext
+
+*** font-lock
+- Long work in progress
+**** TODO How to implement translate off in italic?
+;; Fontifying in blocks is bound to start/end of the block in tree-sitter parsed tree.
+;; That means that two (comment) blocks would need to be found, parsed, and one of them
+;; should contain "synthesis_translate off" and the other "synthesis_translate on".
+;; Since this seems very complex for tree-sitter, the other option could be just analyzing
+;; the whole buffer and run something like `treesit-fontify-with-override', but this doesn't
+;; seem to work. It adds text properties to text, but not sure about how to refresh it.
+
+*** imenu
+- Work in progress, inside vhdl-ts-mode
+
+*** which-func
+- Work in progress, inside vhdl-ts-mode
+
+*** navigation
+- [ ] Pending:
+  #+begin_src elisp
+;; TODO: Do something for when point is in "if", like (string=
+;; (vhdl-ts--node-at-point) "begin"), then move back point if its not
+;; beginning of buffer to search for new node!
+;; Basically Avoid getting stuck!!
+(defun vhdl-ts-goto-begin-up ()
+  "Move point to start position of current begin."
+  (let* ((begin-node (vhdl-ts--node-has-parent-recursive (vhdl-ts--node-at-point) "\\(if\\|elsif\\|else\\|if_statement\\)"))
+         (begin-pos (treesit-node-start begin-node)))
+    (when begin-pos
+      (goto-char begin-pos))))
+
+;; TODO: Doesn't work. Don't know how to make it work.
+;; Check analogous on `verilog-ts-mode'
+(defun vhdl-ts-goto-begin-down ()
+  "Move point to start position of next nested begin."
+  (let* ((begin-node (vhdl-ts--node-has-child-recursive (vhdl-ts--node-at-point) "\\(if\\|elsif\\|else\\|if_statement\\)"))
+         (begin-pos (treesit-node-start begin-node)))
+    (when begin-pos
+      (goto-char begin-pos))))
+
+(defun vhdl-ts-defun-level-up ()
+  "Move up one defun-level."
+  (let* ((node (vhdl-ts--node-has-parent-recursive (vhdl-ts--node-at-point) vhdl-ts--defun-type-regexp))
+         (pos (treesit-node-start node)))
+    (when pos
+      (goto-char pos))))
+
+;; TODO: Not sure how to implement it
+(defun vhdl-ts-defun-level-down ()
+  "Move down one defun-level."
+  (let* ((node (vhdl-ts--node-has-child-recursive (vhdl-ts--node-at-point) vhdl-ts--defun-type-regexp))
+         (pos (treesit-node-start node)))
+    (when pos
+      (goto-char pos))))
+  #+end_src
+- [ ] Finish implementing, test, check ideas, refactor code
+
+
+
+
+

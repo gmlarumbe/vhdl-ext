@@ -55,6 +55,14 @@ gen_font_lock () {
     fi
 }
 
+gen_indent_dir () {
+    if [[ $# -ge 1 ]]; then
+        run_elisp_cmd "(vhdl-ext-test-indent-gen-expected-files :tree-sitter)"
+    else
+        run_elisp_cmd "(vhdl-ext-test-indent-gen-expected-files)"
+    fi
+}
+
 run_tests () {
     local RC=
     local SELECTOR=

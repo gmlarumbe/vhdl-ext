@@ -54,7 +54,7 @@
 (defun vhdl-ext-hs-setup ()
   "Configure hideshow."
   (dolist (mode '((vhdl-mode    . vhdl-ext-hs-forward-sexp-func)
-                  (vhdl-ts-mode . vhdl-ext-hs-forward-sexp-func))) ; TODO: Eventually replace with `vhdl-ts-mode' forward-sexp function
+                  (vhdl-ts-mode . vhdl-ts-forward-sexp)))
     (add-to-list 'hs-special-modes-alist `(,(car mode)
                                            ,vhdl-ext-hs-start-regexp
                                            nil

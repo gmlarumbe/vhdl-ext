@@ -33,6 +33,8 @@ gen_font_lock: recompile
 gen_font_lock_ts: recompile
 	$(ERT_TESTS) gen_font_lock treesit
 
+gen_indent_ts: recompile
+	$(ERT_TESTS) gen_indent_dir treesit
 
 # Specific subset of tests
 subset:

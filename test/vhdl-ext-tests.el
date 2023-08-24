@@ -57,6 +57,7 @@ Otherwise, byte-compile."
 (defvar vhdl-ext-tests-files-dir (file-name-concat vhdl-ext-tests-test-dir "files"))
 (defvar vhdl-ext-tests-common-dir (file-name-concat vhdl-ext-tests-files-dir "common"))
 (defvar vhdl-ext-tests-faceup-dir (file-name-concat vhdl-ext-tests-files-dir "faceup"))
+(defvar vhdl-ext-tests-indent-dir (file-name-concat vhdl-ext-tests-files-dir "indent"))
 (defvar vhdl-ext-tests-jump-parent-dir (file-name-concat vhdl-ext-tests-files-dir "jump-parent"))
 
 (unless (member vhdl-ext-tests-test-dir load-path)
@@ -65,21 +66,14 @@ Otherwise, byte-compile."
 (require 'vhdl-ext-tests-imenu)
 (require 'vhdl-ext-tests-navigation)
 (require 'vhdl-ext-tests-font-lock)
+(require 'vhdl-ext-tests-indent)
 (require 'vhdl-ext-tests-utils)
 (require 'vhdl-ext-tests-hierarchy)
-
-(message "Emacs version: %s" emacs-version)
-(if (< emacs-major-version 29)
+(if (not vhdl-ext-tests-tree-sitter-available-p)
     (message "Skipping vhdl-ext-tests-tree-sitter...")
-  ;; Else
-  (message "(treesit-available-p): %s" (treesit-available-p))
-  (when (treesit-available-p)
-    (require 'treesit)
-    (message "(treesit-language-available-p 'vhdl): %s" (treesit-language-available-p 'vhdl))
-    (when (treesit-language-available-p 'vhdl)
-      (message "(functionp 'vhdl-ts-mode): %s" (functionp 'vhdl-ts-mode))
-      (when (functionp 'vhdl-ts-mode)
-        (require 'vhdl-ext-tests-tree-sitter)))))
+  (defvar vhdl-ext-tests-tree-sitter-dir (file-name-concat vhdl-ext-tests-files-dir "tree-sitter"))
+  (require 'vhdl-ext-tests-tree-sitter))
+
 
 ;; CI
 (when (getenv "GITHUB_WORKSPACE")
