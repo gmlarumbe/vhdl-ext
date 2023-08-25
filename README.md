@@ -293,3 +293,5 @@ $ make subset TESTS=imenu
   * Analog package to edit Verilog/SystemVerilog sources
 * [fpga](https://github.com/gmlarumbe/fpga): FPGA & ASIC Utilities for Emacs
   * Utilities for tools of major vendors of FPGA & ASIC
+* [wavedrom-mode](https://github.com/gmlarumbe/wavedrom-mode): Wavedrom integration for Emacs
+  * Edit and render WaveJSON files to create timing diagrams
