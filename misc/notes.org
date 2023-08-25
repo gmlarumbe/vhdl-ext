@@ -1,13 +1,19 @@
 * Tree-sitter dev
 ** Pending
-*** TODO vhdl-ts-forward-sexp and backward-sexp
-- [ ] Fail if point is not over a symbol
-- [ ] Fail or do something weird if point is at a comment
-- [ ] Also happens for verilog equivalent
-- [ ] Take the "then" and "if" or "else" into account for hideshow!!
-  - /home/gonz/.emacs.d/straight/repos/vhdl-ext/test/files/common/sexp.vhd:60
+*** xref
+- [ ] Implement tags/refs gathering in workspace
+  - `vhdl-ext-workspace-get-tags points' to `vhdl-ext-workspace-get-tags'
+  - [ ] Implement equivalent of vhdl-ext-tags-get-definitions for tree-sitter
+  - [ ] Implement equivalent of vhdl-ext-tags-get-references for tree-sitter
+  - Beware the macros
 
-- [ ]
+*** capf
+- [ ] Implement vhdl-ext-workspace-capf in workspace for tree-sitter
+  - Requires implementation of vhdl-ext-tags-get-definitions/vhdl-ext-tags-get-references
+  - [ ] Should be possible to have more information about what is being auto-completed from the context
+    - e.g.: for dot completion, if it's a hierarchical reference, or a class attribute/method
+- [ ] Include vhdl-keywords?
+  - (no need to include in company-keywords)
 
 *** beautify
 - Pending:
@@ -43,23 +49,21 @@
   #+end_src
 - [ ] Add new tests with new options
 
-*** capf
-- [ ] Implement vhdl-ext-workspace-capf in workspace for tree-sitter
-  - Requires implementation of vhdl-ext-tags-get-definitions/vhdl-ext-tags-get-references
-  - [ ] Should be possible to have more information about what is being auto-completed from the context
-    - e.g.: for dot completion, if it's a hierarchical reference, or a class attribute/method
-- [ ] Include vhdl-keywords?
-  - (no need to include in company-keywords)
 
-*** xref
-- [ ] Implement tags/refs gathering in workspace
-  - `vhdl-ext-workspace-get-tags points' to `vhdl-ext-workspace-get-tags'
-  - [ ] Implement equivalent of vhdl-ext-tags-get-definitions for tree-sitter
-  - [ ] Implement equivalent of vhdl-ext-tags-get-references for tree-sitter
-  - Beware the macros
 
-*** Tests
+*** TODO Tests refactoring
 - [ ] Refactor/reorganize and prepare to split into separate repo for vhdl-ts-mode
+
+*** TODO Update README and comment headers and wiki after integration of vhdl-ts-mode
+*** TODO vhdl-ts-forward-sexp and backward-sexp
+- [ ] Fail if point is not over a symbol
+- [ ] Fail or do something weird if point is at a comment
+- [ ] Also happens for verilog equivalent
+- [ ] Take the "then" and "if" or "else" into account for hideshow!!
+  - /home/gonz/.emacs.d/straight/repos/vhdl-ext/test/files/common/sexp.vhd:60
+
+- [ ]
+
 
 ** Implemented
 *** hierarchy
