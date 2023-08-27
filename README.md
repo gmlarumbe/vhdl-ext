@@ -1,4 +1,5 @@
 [![MELPA](https://melpa.org/packages/vhdl-ext-badge.svg)](https://melpa.org/#/vhdl-ext)
+[![MELPA](https://melpa.org/packages/vhdl-ts-mode-badge.svg)](https://melpa.org/#/vhdl-ts-mode)
 [![MELPA Stable](https://stable.melpa.org/packages/vhdl-ext-badge.svg)](https://stable.melpa.org/#/vhdl-ext)
 [![Build Status](https://github.com/gmlarumbe/vhdl-ext/workflows/ERT-straight/badge.svg)](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/build_straight.yml)
 [![Build Status](https://github.com/gmlarumbe/vhdl-ext/workflows/ERT-package-el/badge.svg)](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/build_package.yml)
@@ -29,9 +30,10 @@ This package includes some extensions on top of the great Emacs `vhdl-mode`.
 
 ### MELPA ###
 
-`vhdl-ext` is available on MELPA.
+`vhdl-ext` is available on MELPA. It includes `vhdl-ts-mode` as a dependency.
 
-`vhdl-ts-mode` is not yet available on MELPA. See the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Tree-sitter) for more info.
+If you only want to experiment with tree-sitter, `vhdl-ts-mode` is also available on MELPA as a separate package.
+See the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Tree-sitter) for more info.
 
 
 ### straight.el ###
@@ -71,6 +73,8 @@ By default all features are enabled:
         ports))
 (vhdl-ext-mode-setup)
 (add-hook 'vhdl-mode-hook #'vhdl-ext-mode)
+;; To use `vhdl-ts-mode' as the default major-mode also add the line below:
+(add-to-list 'auto-mode-alist '("\\.vhdl?\\'" . vhdl-ts-mode))
 ```
 
 If installed and loaded via `use-package`:
@@ -102,6 +106,10 @@ If installed and loaded via `use-package`:
           ports))
   :config
   (vhdl-ext-mode-setup))
+
+;; To use `vhdl-ts-mode' as the default major-mode also add the lines below:
+(use-package vhdl-ts-mode
+  :mode (("\\.vhdl?\\'" . vhdl-ts-mode))
 ```
 
 ## Keybindings ##
@@ -128,9 +136,14 @@ Enabling of `vhdl-ext-mode` minor-mode creates the following keybindings:
 # Features #
 
 ## Tree-sitter ##
-The package provides the major-mode `vhdl-ts-mode` for syntax highligting and indentation. It is derived from `vhdl-mode` making all `vhdl-mode` functionality still available.
+The package `vhdl-ts-mode` provides syntax highlighting,
+indentation and a backend for hierarchy extraction, definitions and
+references navigation, and some other features implemented in
+`vhdl-ext`. Using tree-sitter as a backend is recommended as it is
+much faster and efficient than internal Emacs lisp parsing.
 
-`vhdl-ts-mode` is still work in progress and aims to provide the same functionality as `vhdl-ext` but much faster and efficiently.
+`vhdl-ts-mode` is derived from `vhdl-mode` making all `vhdl-mode`
+functionality still available.
 
 For more information see the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Tree-sitter).
 
@@ -295,3 +308,5 @@ $ make subset TESTS=imenu
   * Utilities for tools of major vendors of FPGA & ASIC
 * [wavedrom-mode](https://github.com/gmlarumbe/wavedrom-mode): Wavedrom integration for Emacs
   * Edit and render WaveJSON files to create timing diagrams
+* [vunit-mode](https://github.com/embed-me/vunit-mode.git): VUnit Mode for Emacs
+  * Integration of [VUnit](https://github.com/VUnit/vunit) workflow.
