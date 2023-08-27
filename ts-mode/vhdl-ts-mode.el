@@ -74,7 +74,7 @@
   :group 'vhdl-ts
   :type 'integer)
 
-(defcustom vhdl-ts-file-extension-re "\\.vhdl?$"
+(defcustom vhdl-ts-file-extension-re "\\.vhdl?\\'"
   "VHDL file extensions.
 Defaults to .vhd and .vhdl."
   :group 'vhdl-ts

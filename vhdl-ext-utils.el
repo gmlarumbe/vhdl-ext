@@ -31,7 +31,7 @@
 (require 'company-keywords)
 
 
-(defcustom vhdl-ext-file-extension-re "\\.vhdl?$"
+(defcustom vhdl-ext-file-extension-re "\\.vhdl?\\'"
   "VHDL file extensions.
 Defaults to .vhd and .vhdl."
   :type 'string
