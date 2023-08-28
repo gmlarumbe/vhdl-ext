@@ -938,6 +938,18 @@ Complete with keywords and current buffer identifiers."
 
 
 ;;; Major-mode
+;;;; Setup
+;;;###autoload
+(defun vhdl-ts-install-grammar ()
+  "Install VHDL tree-sitter grammar.
+
+This command requires Git, a C compiler and (sometimes) a C++ compiler,
+and the linker to be installed and on PATH."
+  (interactive)
+  (let ((url "https://github.com/alemuller/tree-sitter-vhdl"))
+    (add-to-list 'treesit-language-source-alist `(vhdl ,url))
+    (treesit-install-language-grammar 'vhdl)))
+
 (defvar-keymap vhdl-ts-mode-map
   :doc "Keymap for VHDL language with tree-sitter"
   :parent vhdl-mode-map
