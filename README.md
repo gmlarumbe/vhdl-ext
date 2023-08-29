@@ -30,11 +30,7 @@ This package includes some extensions on top of the great Emacs `vhdl-mode`.
 
 ### MELPA ###
 
-`vhdl-ext` is available on MELPA. It includes `vhdl-ts-mode` as a dependency.
-
-If you only want to experiment with tree-sitter, `vhdl-ts-mode` is also available on MELPA as a separate package.
-See the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Tree-sitter) for more info.
-
+`vhdl-ext` and `vhdl-ts-mode` are available on MELPA. `vhdl-ext` includes `vhdl-ts-mode` as a dependency.
 
 ### straight.el ###
 
