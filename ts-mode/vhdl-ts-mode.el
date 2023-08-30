@@ -480,6 +480,9 @@ portB => signalB
      (component_instantiation_statement
       (label (identifier) @vhdl-ts-font-lock-instance-face)
       (component_instantiation (simple_name) @vhdl-ts-font-lock-entity-face))
+     (component_instantiation_statement
+      (label (identifier) @vhdl-ts-font-lock-instance-face)
+      (entity_instantiation (simple_name) @vhdl-ts-font-lock-entity-face))
      ;; Port connections
      (association_list
       (named_association_element

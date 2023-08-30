@@ -1,0 +1,39 @@
+«m:-------------------------------------------------------------------------------»«x:
+»«m:-- »«x:Title      : Misc Tests
+»«m:-- »«x:Project    : vhdl-ext
+»«m:-------------------------------------------------------------------------------»«x:
+»«m:-- »«x:File       : misc.vhd
+»«m:-- »«x:Author     : Gonzalo Larumbe  <gonzalomlarumbe@gmail.com>
+»«m:-- »«x:Company    : gmlarumbe
+»«m:-- »«x:Created    : 2023-08-30
+»«m:-- »«x:Last update: 2023-08-30
+»«m:-- »«x:Platform   : Archvm
+»«m:-- »«x:Standard   : VHDL'08
+»«m:-------------------------------------------------------------------------------»«x:
+»«m:-- »«x:Description:
+»«m:-------------------------------------------------------------------------------»«x:
+»«m:-- »«x:Copyright (c) 2023 gmlarumbe
+»«m:-------------------------------------------------------------------------------»«x:
+»«m:-- »«x:Revisions  :
+»«m:-- »«x:Date        Version  Author  Description
+»«m:-- »«x:2023-08-30  1.0      gonz    Created
+»«m:-------------------------------------------------------------------------------»«x:
+»
+«m:------------------------------------------------------------»«x:
+»«m:-- »«x:Entity instantiation without library prefix
+»«m:------------------------------------------------------------»«x:
+»«k:entity» «f:misc» «k:is»
+«k:end» «k:entity» «f:misc»«:vhdl-ext-font-lock-punctuation-face:;»
+
+«k:architecture» «f:RTL» «k:of» «f:misc» «k:is»
+
+«k:begin»  «m:-- »«x:architecture RTL
+»
+    «:vhdl-ext-font-lock-instance-face:I_BLOCK1_0» «:vhdl-ext-font-lock-punctuation-face::» «k:entity» «:vhdl-ext-font-lock-entity-face:block1»
+        «k:port» «k:map» «:vhdl-ext-font-lock-parenthesis-face:(»
+            «:vhdl-ext-font-lock-port-connection-face:Port0» «:vhdl-ext-font-lock-punctuation-face:=>» Port0«:vhdl-ext-font-lock-punctuation-face:,»
+            «:vhdl-ext-font-lock-port-connection-face:Port1» «:vhdl-ext-font-lock-punctuation-face:=>» Port1«:vhdl-ext-font-lock-punctuation-face:,»
+            «:vhdl-ext-font-lock-port-connection-face:Port2» «:vhdl-ext-font-lock-punctuation-face:=>» Port2
+            «:vhdl-ext-font-lock-parenthesis-face:)»«:vhdl-ext-font-lock-punctuation-face:;»
+
+«k:end» «k:architecture» «f:RTL»«:vhdl-ext-font-lock-punctuation-face:;»
