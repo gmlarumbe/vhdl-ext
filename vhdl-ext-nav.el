@@ -138,13 +138,14 @@ Used in ag/rg end of search hooks to conditionally set the xref marker stack.")
   "Variable to run the post ag/rg command hook.
 Run only when the ag/rg search was triggered by `vhdl-ext-jump-to-parent-entity'
 command.")
+(defvar vhdl-ext-jump-to-parent-entity-starting-windows nil
+  "Variable to register how many windows are open when trying to jump-to-parent")
 
 (defun vhdl-ext-jump-to-parent-entity ()
   "Find current module/interface instantiations via `ag'/`rg'.
 Configuration should be done so that `vhdl-ext-navigation-ag-rg-hook' is run
 after the search has been done."
   (interactive)
-  (setq vhdl-ext-jump-to-parent-entity-starting-windows (length(window-list)))
   (let* ((proj-dir (vhdl-ext-project-root))
          (entity-name (or (vhdl-ext-select-file-entity buffer-file-name)
                           (error "No entity found @ %s" buffer-file-name)))
@@ -156,6 +157,7 @@ after the search has been done."
     ;; Update variables used by the ag/rg search finished hooks
     (setq vhdl-ext-jump-to-parent-module-name entity-name)
     (setq vhdl-ext-jump-to-parent-module-dir proj-dir)
+    (setq vhdl-ext-jump-to-parent-entity-starting-windows (length(window-list)))
     ;; Perform project based search
     (cond
      ;; Try ripgrep
@@ -181,7 +183,7 @@ after the search has been done."
 
 (defun vhdl-ext-navigation-ag-rg-hook ()
   "Jump to the first result and push xref marker if there were any matches.
-Kill the buffer if there is only one match."
+Kill the buffer or delete window if there is only one match."
   (when vhdl-ext-jump-to-parent-trigger
     (let ((entity-name (propertize vhdl-ext-jump-to-parent-module-name 'face '(:foreground "green")))
           (dir (propertize vhdl-ext-jump-to-parent-module-dir 'face '(:foreground "light blue")))
@@ -195,10 +197,8 @@ Kill the buffer if there is only one match."
              (next-error)
              (if (> vhdl-ext-jump-to-parent-entity-starting-windows 1)
                  (kill-buffer (current-buffer))
-                (progn
                   (other-window 1)
                   (delete-window))
-               )
              (message "Jump to only match for [%s] @ %s" entity-name dir))
             ((> num-matches 1)
              (xref-push-marker-stack vhdl-ext-jump-to-parent-module-point-marker)
