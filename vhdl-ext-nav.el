@@ -144,6 +144,7 @@ command.")
 Configuration should be done so that `vhdl-ext-navigation-ag-rg-hook' is run
 after the search has been done."
   (interactive)
+  (setq vhdl-ext-jump-to-parent-entity-starting-windows (length(window-list)))
   (let* ((proj-dir (vhdl-ext-project-root))
          (entity-name (or (vhdl-ext-select-file-entity buffer-file-name)
                           (error "No entity found @ %s" buffer-file-name)))
@@ -192,7 +193,12 @@ Kill the buffer if there is only one match."
       (cond ((eq num-matches 1)
              (xref-push-marker-stack vhdl-ext-jump-to-parent-module-point-marker)
              (next-error)
-             (kill-buffer (current-buffer))
+             (if (> vhdl-ext-jump-to-parent-entity-starting-windows 1)
+                 (kill-buffer (current-buffer))
+                (progn
+                  (other-window 1)
+                  (delete-window))
+               )
              (message "Jump to only match for [%s] @ %s" entity-name dir))
             ((> num-matches 1)
              (xref-push-marker-stack vhdl-ext-jump-to-parent-module-point-marker)
