@@ -34,8 +34,8 @@
 (require 'vhdl-ext-utils)
 
 
-(defcustom vhdl-ext-jump-to-parent-module-engine "ag"
-  "Default program to find parent module instantiations.
+(defcustom vhdl-ext-jump-to-parent-entity-engine "ag"
+  "Default program to find parent entity instantiations.
 Either `rg' or `ag' are implemented."
   :type '(choice (const :tag "silver searcher" "ag")
                  (const :tag "ripgrep"         "rg"))
@@ -129,17 +129,17 @@ If REF is non-nil show references instead."
 
 
 ;;;; Jump to parent module
-(defvar vhdl-ext-jump-to-parent-module-point-marker nil
+(defvar vhdl-ext-jump-to-parent-entity-point-marker nil
   "Point marker to save the state of the buffer where the search was started.
 Used in ag/rg end of search hooks to conditionally set the xref marker stack.")
-(defvar vhdl-ext-jump-to-parent-module-name nil)
-(defvar vhdl-ext-jump-to-parent-module-dir nil)
-(defvar vhdl-ext-jump-to-parent-trigger nil
+(defvar vhdl-ext-jump-to-parent-entity-name nil)
+(defvar vhdl-ext-jump-to-parent-entity-dir nil)
+(defvar vhdl-ext-jump-to-parent-entity-trigger nil
   "Variable to run the post ag/rg command hook.
 Run only when the ag/rg search was triggered by `vhdl-ext-jump-to-parent-entity'
 command.")
 (defvar vhdl-ext-jump-to-parent-entity-starting-windows nil
-  "Variable to register how many windows are open when trying to jump-to-parent")
+  "Variable to register how many windows are open when trying to jump-to-parent.")
 
 (defun vhdl-ext-jump-to-parent-entity ()
   "Find current module/interface instantiations via `ag'/`rg'.
@@ -155,27 +155,27 @@ after the search has been done."
                                        "(((component)|(configuration)|(entity))[ ]+(" vhdl-ext-identifier-re ")\\.)?"
                                        "\\b(" entity-name ")\\b")))
     ;; Update variables used by the ag/rg search finished hooks
-    (setq vhdl-ext-jump-to-parent-module-name entity-name)
-    (setq vhdl-ext-jump-to-parent-module-dir proj-dir)
-    (setq vhdl-ext-jump-to-parent-entity-starting-windows (length(window-list)))
+    (setq vhdl-ext-jump-to-parent-entity-name entity-name)
+    (setq vhdl-ext-jump-to-parent-entity-dir proj-dir)
+    (setq vhdl-ext-jump-to-parent-entity-starting-windows (length (window-list)))
     ;; Perform project based search
     (cond
      ;; Try ripgrep
-     ((and (string= vhdl-ext-jump-to-parent-module-engine "rg")
+     ((and (string= vhdl-ext-jump-to-parent-entity-engine "rg")
            (executable-find "rg"))
       (let ((rg-extra-args '("-t" "vhdl" "--pcre2" "--multiline" "--stats")))
-        (setq vhdl-ext-jump-to-parent-module-point-marker (point-marker))
-        (setq vhdl-ext-jump-to-parent-trigger t)
+        (setq vhdl-ext-jump-to-parent-entity-point-marker (point-marker))
+        (setq vhdl-ext-jump-to-parent-entity-trigger t)
         (ripgrep-regexp entity-instance-pcre proj-dir rg-extra-args)))
      ;; Try ag
-     ((and (string= vhdl-ext-jump-to-parent-module-engine "ag")
+     ((and (string= vhdl-ext-jump-to-parent-entity-engine "ag")
            (executable-find "ag"))
       (let ((ag-arguments ag-arguments)
             (extra-ag-args '("--vhdl" "--stats")))
         (dolist (extra-ag-arg extra-ag-args)
           (add-to-list 'ag-arguments extra-ag-arg :append))
-        (setq vhdl-ext-jump-to-parent-module-point-marker (point-marker))
-        (setq vhdl-ext-jump-to-parent-trigger t)
+        (setq vhdl-ext-jump-to-parent-entity-point-marker (point-marker))
+        (setq vhdl-ext-jump-to-parent-entity-trigger t)
         (ag-regexp entity-instance-pcre proj-dir)))
      ;; Fallback
      (t
@@ -184,30 +184,30 @@ after the search has been done."
 (defun vhdl-ext-navigation-ag-rg-hook ()
   "Jump to the first result and push xref marker if there were any matches.
 Kill the buffer or delete window if there is only one match."
-  (when vhdl-ext-jump-to-parent-trigger
-    (let ((entity-name (propertize vhdl-ext-jump-to-parent-module-name 'face '(:foreground "green")))
-          (dir (propertize vhdl-ext-jump-to-parent-module-dir 'face '(:foreground "light blue")))
+  (when vhdl-ext-jump-to-parent-entity-trigger
+    (let ((entity-name (propertize vhdl-ext-jump-to-parent-entity-name 'face '(:foreground "green")))
+          (dir (propertize vhdl-ext-jump-to-parent-entity-dir 'face '(:foreground "light blue")))
           (num-matches))
       (save-excursion
         (goto-char (point-min))
         (re-search-forward "^\\([0-9]+\\) matches\\s-*$" nil :noerror)
         (setq num-matches (string-to-number (match-string-no-properties 1))))
       (cond ((eq num-matches 1)
-             (xref-push-marker-stack vhdl-ext-jump-to-parent-module-point-marker)
+             (xref-push-marker-stack vhdl-ext-jump-to-parent-entity-point-marker)
              (next-error)
              (if (> vhdl-ext-jump-to-parent-entity-starting-windows 1)
                  (kill-buffer (current-buffer))
-                  (other-window 1)
-                  (delete-window))
+               (other-window 1)
+               (delete-window))
              (message "Jump to only match for [%s] @ %s" entity-name dir))
             ((> num-matches 1)
-             (xref-push-marker-stack vhdl-ext-jump-to-parent-module-point-marker)
+             (xref-push-marker-stack vhdl-ext-jump-to-parent-entity-point-marker)
              (next-error)
              (message "Showing matches for [%s] @ %s" entity-name dir))
             (t
              (kill-buffer (current-buffer))
              (message "No matches found")))
-      (setq vhdl-ext-jump-to-parent-trigger nil))))
+      (setq vhdl-ext-jump-to-parent-entity-trigger nil))))
 
 
 (provide 'vhdl-ext-nav)

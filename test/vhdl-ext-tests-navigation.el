@@ -94,7 +94,7 @@
   (cl-letf (((symbol-function 'compilation-start)
              (lambda (command &optional mode name-function highlight-regexp)
                (butlast (split-string (shell-command-to-string command) "\n") 4))))
-    (let ((vhdl-ext-jump-to-parent-module-engine "ag")
+    (let ((vhdl-ext-jump-to-parent-entity-engine "ag")
           (ag-arguments '("--smart-case" "--stats" "--nogroup" "--ignore-dir=test/files/indent")))
       ;; block0
       (vhdl-ext-test-jump-parent-file "block0.vhd"
