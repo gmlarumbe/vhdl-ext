@@ -181,6 +181,13 @@ after the search has been done."
      (t
       (error "Did not find `rg' nor `ag' in $PATH")))))
 
+(defun vhdl-ext-navigation-ag-rg-hook-cleanup ()
+  "Handle buffer killing depending on the number of active windows."
+  (if (> vhdl-ext-jump-to-parent-entity-starting-windows 1)
+      (kill-buffer (current-buffer))
+    (other-window 1)
+    (delete-window)))
+
 (defun vhdl-ext-navigation-ag-rg-hook ()
   "Jump to the first result and push xref marker if there were any matches.
 Kill the buffer or delete window if there is only one match."
@@ -195,17 +202,14 @@ Kill the buffer or delete window if there is only one match."
       (cond ((eq num-matches 1)
              (xref-push-marker-stack vhdl-ext-jump-to-parent-entity-point-marker)
              (next-error)
-             (if (> vhdl-ext-jump-to-parent-entity-starting-windows 1)
-                 (kill-buffer (current-buffer))
-               (other-window 1)
-               (delete-window))
+             (vhdl-ext-navigation-ag-rg-hook-cleanup)
              (message "Jump to only match for [%s] @ %s" entity-name dir))
             ((> num-matches 1)
              (xref-push-marker-stack vhdl-ext-jump-to-parent-entity-point-marker)
              (next-error)
              (message "Showing matches for [%s] @ %s" entity-name dir))
             (t
-             (kill-buffer (current-buffer))
+             (vhdl-ext-navigation-ag-rg-hook-cleanup)
              (message "No matches found")))
       (setq vhdl-ext-jump-to-parent-entity-trigger nil))))
 
