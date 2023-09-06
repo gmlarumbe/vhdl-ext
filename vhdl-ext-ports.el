@@ -4,7 +4,6 @@
 
 ;; Author: Gonzalo Larumbe <gonzalomlarumbe@gmail.com>
 ;; URL: https://github.com/gmlarumbe/vhdl-ext
-;; Version: 0.2.0
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -43,7 +42,7 @@ of current port instead of toggling."
          ;;  Port2 => );
          port-found port conn sig)
     (save-excursion
-      (goto-char (line-beginning-position))
+      (beginning-of-line)
       (if (looking-at re)
           (progn
             (setq port-found t)

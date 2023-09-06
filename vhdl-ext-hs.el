@@ -4,7 +4,6 @@
 
 ;; Author: Gonzalo Larumbe <gonzalomlarumbe@gmail.com>
 ;; URL: https://github.com/gmlarumbe/vhdl-ext
-;; Version: 0.2.0
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -33,7 +32,9 @@
   (concat "\\(\\_<\\(then\\|else\\)\\_>\\|" vhdl-hs-start-regexp "\\)"))
 
 (defun vhdl-ext-hs-forward-sexp-func (count)
-  "Wrapper for `vhdl-hs-forward-sexp-func' adding hideshow for if/else blocks."
+  "Wrapper for `vhdl-hs-forward-sexp-func' adding hideshow for if/else blocks.
+
+Move forward COUNT s-expressions."
   (cond ((looking-at "\\_<then\\_>") ; if/elsif
          (vhdl-forward-sexp)
          (cond ((looking-at "\\s-*;") ; if w/o else/elsif

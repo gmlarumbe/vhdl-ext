@@ -4,7 +4,6 @@
 
 ;; Author: Gonzalo Larumbe <gonzalomlarumbe@gmail.com>
 ;; URL: https://github.com/gmlarumbe/vhdl-ext
-;; Version: 0.2.0
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -30,6 +29,7 @@
 (require 'tree-widget)
 (require 'async)
 (require 'vhdl-ext-nav)
+(require 'vhdl-ts-mode)
 
 (defgroup vhdl-ext-hierarchy nil
   "Vhdl-ext hierarchy."
@@ -112,9 +112,9 @@ Arg ITEM are hierarchy nodes."
   "Construct hierarchy struct for ENTITY.
 
 Entities and instances will be analyzed from corresponding entry in
-`vhdl-ext-hierarchy-current-flat-hier'. These entries will have an associated
+`vhdl-ext-hierarchy-current-flat-hier'.  These entries will have an associated
 project present `vhdl-project-alist' and will be of the form:
-(entity instance1:NAME1 instance2:NAME2 ...).
+ \(entity instance1:NAME1 instance2:NAME2 ...\).
 
 With current prefix, force refreshing of hierarchy database for active project.
 
@@ -133,7 +133,7 @@ Return populated `hierarchy' struct."
              (vhdl-ext-hierarchy-parse)
              (setq hierarchy-alist (vhdl-aget vhdl-ext-hierarchy-internal-alist proj)))
             (t
-             (user-error "Aborting..."))))
+             (user-error "Aborting"))))
     (unless (assoc entity hierarchy-alist)
       (user-error "Could not find %s in the flat-hierarchy for project [%s]" entity proj))
     (unless (cdr (assoc entity hierarchy-alist))
@@ -198,7 +198,7 @@ the recursive function `vhdl-ext-hierarchy-ghdl-parse-output--recursive'."
       ;; - Remove anything that ends in [arch] or [instance] (these instances detected from not found entities)
       (goto-char (point-min))
       (while (re-search-forward "\\[\\(arch\\|instance\\)\\]$" nil t)
-        (goto-char (line-beginning-position))
+        (beginning-of-line)
         (kill-line 1))
       ;; Populate flat hierarchy recursively
       (setq vhdl-ext-hierarchy-ghdl-flat-hier nil)
@@ -236,7 +236,7 @@ INDENT-LEVEL is the `current-column' of the parent of current call."
                  (setcdr instances-list `(,@(cdr instances-list) ,instance-string))
                  (vhdl-ext-hierarchy-ghdl-parse-output--recursive current-node (current-column)))
         ;; Sibling/parent, go up one recursive call
-        (goto-char (line-beginning-position))
+        (beginning-of-line)
         (setq finished t)))))
 
 (defun vhdl-ext-hierarchy-ghdl-extract (entity)
@@ -290,7 +290,7 @@ Return populated `hierarchy' struct."
       (setq vhdl-ext-hierarchy-current-flat-hier vhdl-ext-hierarchy-ghdl-flat-hier))
     ;; Construct hierarchy struct after setting `vhdl-ext-hierarchy-current-flat-hier'
     (unless (assoc entity vhdl-ext-hierarchy-current-flat-hier)
-      (user-error "Could not find %s in the flat-hierarchy for project [%s].\nTry running `vhdl-ext-hierarchy-current-buffer' with prefix arg on current buffer." entity proj))
+      (user-error "Could not find %s in the flat-hierarchy for project [%s].\nTry running `vhdl-ext-hierarchy-current-buffer' with prefix arg on current buffer" entity proj))
     (unless (cdr (assoc entity vhdl-ext-hierarchy-current-flat-hier))
       (user-error "Current entity has no instances"))
     (vhdl-ext-hierarchy-extract--construct-node entity (hierarchy-new))))
@@ -484,7 +484,7 @@ Move through headings and point at the beginning of the tag."
   (declare (indent 0) (debug t))
   `(defun ,vhdl-ext-func ()
      (interactive)
-     (goto-char (line-beginning-position)) ; Required for `outline-hide-sublevels'
+     (beginning-of-line) ; Required for `outline-hide-sublevels'
      (call-interactively ,outshine-func)
      (skip-chars-forward (car (car outshine-promotion-headings)))))
 
@@ -556,7 +556,7 @@ Expects HIERARCHY to be a indented string."
       (goto-char (point-min))
       (re-search-forward "-- \\* ")
       (when (re-search-forward "-- \\* " nil t)
-        (goto-char (line-beginning-position))
+        (beginning-of-line)
         (open-line 3)
         (forward-line 2)
         (insert "-- * Not found entity references")
