@@ -404,7 +404,7 @@ cannot be ommitted after an end."
         (beg-point . ,beg-pos)
         (end-point . ,end-pos)))))
 
-(defun vhdl-ext-point-inside-block-p (block)
+(defun vhdl-ext-point-inside-block (block)
   "Return block name if cursor is inside specified BLOCK type."
   (let ((pos (point))
         (re (cond ((eq block 'entity)        "\\<\\(entity\\)\\>")
@@ -421,12 +421,15 @@ cannot be ommitted after an end."
         block-beg-point block-end-point)
     (save-match-data
       (save-excursion
-        (and (vhdl-re-search-backward re nil t)
-             (setq block-beg-point (point))
-             (vhdl-ext-forward-sexp)
-             (setq block-end-point (point))
-             (>= pos block-beg-point)
-             (< pos block-end-point))))))
+        (when (and (vhdl-re-search-backward re nil t)
+                   (setq block-beg-point (point))
+                   (vhdl-ext-forward-sexp)
+                   (setq block-end-point (point))
+                   (>= pos block-beg-point)
+                   (< pos block-end-point))
+          `((type      . ,(symbol-name block))
+            (beg-point . ,block-beg-point)
+            (end-point . ,block-end-point)))))))
 
 ;;;; Dirs
 (defun vhdl-ext-dir-files (dir &optional follow-symlinks ignore-dirs)
