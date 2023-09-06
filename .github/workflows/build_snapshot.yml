@@ -1,6 +1,8 @@
-name: ERT-package-el
+name: ERT-straight-snapshot
 
 on:
+  push:
+  pull_request:
   workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
   schedule:
     - cron: '0 0 * * *' # daily
@@ -12,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         emacs_version:
-          - 29.1
+          - snapshot
     steps:
       - name: Set up Emacs
         # uses: purcell/setup-emacs@master
@@ -33,4 +35,4 @@ jobs:
 
       - name: Run ERT tests
         run: |
-          make PKG_MANAGER=package
+          make
