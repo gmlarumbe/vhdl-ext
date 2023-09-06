@@ -248,6 +248,7 @@ Return populated `hierarchy' struct."
   (unless (executable-find "ghdl")
     (error "Executable ghdl not found"))
   (let* ((proj (vhdl-ext-buffer-proj))
+         (proj-workdir (vhdl-ext-proj-workdir))
          (cached-hierarchy-alist (if current-prefix-arg
                                      nil
                                    (vhdl-aget vhdl-ext-hierarchy-ghdl-alist proj)))
@@ -258,7 +259,7 @@ Return populated `hierarchy' struct."
          (sources (vhdl-ext-proj-files))
          (sources-filtered `(,@(seq-take-while (lambda (elm) (not (string= elm buffer-file-name))) sources)
                                ,buffer-file-name))
-         (elab-snapshot (file-name-concat temporary-file-directory entity))
+         (elab-snapshot (make-temp-file (concat entity "-")))
          (cmd-compile (list (concat "ghdl -a "
                                     (vhdl-ext-ghdl-proj-args) " "
                                     (mapconcat #'identity sources-filtered " "))
@@ -275,7 +276,9 @@ Return populated `hierarchy' struct."
     (if cached-hierarchy-alist
         (setq vhdl-ext-hierarchy-current-flat-hier cached-hierarchy-alist)
       ;; Otherwise, compile and elaborate from project sources
-      (dolist (cmd (list cmd-compile cmd-elab cmd-hierarchy))
+      (unless (file-exists-p proj-workdir) ; First prepare directory where modules are compiled to
+        (make-directory proj-workdir :parents))
+      (dolist (cmd `(,cmd-compile ,cmd-elab ,cmd-hierarchy))
         (message (cadr cmd))
         (unless (= 0 (shell-command (car cmd) buf buf-err))
           (pop-to-buffer buf-err)
