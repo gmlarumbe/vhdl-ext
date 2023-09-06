@@ -259,7 +259,7 @@ Return populated `hierarchy' struct."
          (sources (vhdl-ext-proj-files))
          (sources-filtered `(,@(seq-take-while (lambda (elm) (not (string= elm buffer-file-name))) sources)
                                ,buffer-file-name))
-         (elab-snapshot (make-temp-file (concat entity "-")))
+         (elab-snapshot (file-name-concat temporary-file-directory entity))
          (cmd-compile (list (concat "ghdl -a "
                                     (vhdl-ext-ghdl-proj-args) " "
                                     (mapconcat #'identity sources-filtered " "))
@@ -283,7 +283,7 @@ Return populated `hierarchy' struct."
         (unless (= 0 (shell-command (car cmd) buf buf-err))
           (pop-to-buffer buf-err)
           (insert (car cmd) "\n")
-          (error err-msg)))
+          (error (if noninteractive (buffer-substring-no-properties (point-min) (point-max))) err-msg)))
       ;; Extract flat hierarchy alist from GHDL output and construct hierarchy struct
       (vhdl-ext-hierarchy-ghdl-parse-output) ; Populates `vhdl-ext-hierarchy-ghdl-flat-hier'
       (kill-buffer buf)
