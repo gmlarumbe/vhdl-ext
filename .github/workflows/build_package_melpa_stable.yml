@@ -1,4 +1,4 @@
-name: ERT-package-el
+name: ERT-MELPA-Stable
 
 on:
   workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
@@ -24,6 +24,8 @@ jobs:
       - name: Clone vhdl-ext
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0   # INFO: Fetch all history for all branches and tags
+          fetch-tags: true # INFO: Whether to fetch tags, even if fetch-depth > 0
           submodules: true
 
       - name: Install binaries
@@ -33,4 +35,4 @@ jobs:
 
       - name: Run ERT tests
         run: |
-          make pkg_el
+          make package-el-melpa-stable
