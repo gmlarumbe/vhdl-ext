@@ -52,6 +52,8 @@
   :group 'vhdl-mode)
 
 (defcustom vhdl-ext-feature-list '(font-lock
+                                   xref
+                                   capf
                                    hierarchy
                                    eglot
                                    lsp
@@ -69,6 +71,10 @@
   "Which Vhdl-ext features to enable."
   :type '(set (const :tag "Improved syntax highlighting via `font-lock'."
                 font-lock)
+              (const :tag "Xref backend to navigate definitions/references in current project."
+                xref)
+              (const :tag "Completion at point builtin function with semantic completion."
+                capf)
               (const :tag "Hierarchy extraction and visualization."
                 hierarchy)
               (const :tag "Setup LSP servers for `eglot'."
@@ -127,9 +133,13 @@ FEATURES can be a single feature or a list of features."
 (require 'vhdl-ext-which-func)
 (require 'vhdl-ext-beautify)
 (require 'vhdl-ext-font-lock)
+(require 'vhdl-ext-tags)
+(require 'vhdl-ext-capf)
+(require 'vhdl-ext-xref)
 (require 'vhdl-ext-flycheck)
 (require 'vhdl-ext-eglot)
 (require 'vhdl-ext-lsp)
+
 
 ;;; Major-mode
 (defvar vhdl-ext-mode-map
@@ -177,6 +187,8 @@ FEATURES can be a single feature or a list of features."
   (vhdl-ext-when-feature 'lsp
     (vhdl-ext-lsp-setup)
     (vhdl-ext-lsp-set-server vhdl-ext-lsp-mode-default-server))
+  (vhdl-ext-when-feature '(capf xref)
+    (vhdl-ext-tags-setup))
   ;; Jump to parent module ag/ripgrep hooks
   (add-hook 'ag-search-finished-hook #'vhdl-ext-navigation-ag-rg-hook)
   (add-hook 'ripgrep-search-finished-hook #'vhdl-ext-navigation-ag-rg-hook))

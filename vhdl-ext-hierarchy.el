@@ -287,7 +287,7 @@ Return populated `hierarchy' struct."
       ;; Extract flat hierarchy alist from GHDL output and construct hierarchy struct
       (vhdl-ext-hierarchy-ghdl-parse-output) ; Populates `vhdl-ext-hierarchy-ghdl-flat-hier'
       (kill-buffer buf)
-      (setf (alist-get proj vhdl-ext-hierarchy-ghdl-alist nil 'remove 'string=) vhdl-ext-hierarchy-ghdl-flat-hier)
+      (vhdl-ext-proj-setcdr proj vhdl-ext-hierarchy-ghdl-alist vhdl-ext-hierarchy-ghdl-flat-hier)
       (vhdl-ext-serialize vhdl-ext-hierarchy-ghdl-alist vhdl-ext-hierarchy-ghdl-cache-file)
       (vhdl-ext-serialize vhdl-entity-alist vhdl-ext-hierarchy-entity-cache-file) ; Updated after initial call to `vhdl-ext-proj-files'
       (setq vhdl-ext-hierarchy-current-flat-hier vhdl-ext-hierarchy-ghdl-flat-hier))
@@ -318,7 +318,7 @@ declaration."
     (with-temp-buffer
       (insert-file-contents file)
       (vhdl-ext-with-disabled-messages
-          (vhdl-ts-mode))
+        (vhdl-ts-mode))
       (dolist (arch-node (vhdl-ts-nodes "architecture_body"))
         (setq arch-entity-name (vhdl-ts-arch-entity-name arch-node))
         (setq instances nil)
@@ -359,7 +359,7 @@ declaration."
     (with-temp-buffer
       (insert-file-contents file)
       (vhdl-ext-with-disabled-messages
-          (vhdl-mode))
+        (vhdl-mode))
       (setq entities (vhdl-ext-scan-buffer-entities))
       (while (vhdl-re-search-forward vhdl-ext-architecture-re nil t)
         (setq entity (downcase (match-string-no-properties 4)))
@@ -583,10 +583,8 @@ If these have been set before, keep their values."
   (let ((backend (or vhdl-ext-hierarchy-backend
                      (cond ((executable-find "ghdl")
                             'ghdl)
-                           ((and (>= emacs-major-version 29)
-                                 (treesit-available-p)
-                                 (treesit-language-available-p 'vhdl)
-                                 (functionp 'vhdl-ts-mode))
+                           ((and (treesit-available-p)
+                                 (treesit-language-available-p 'vhdl))
                             'tree-sitter)
                            (t
                             'builtin))))
@@ -607,7 +605,7 @@ If these have been set before, keep their values."
   (vhdl-ext-serialize nil vhdl-ext-hierarchy-internal-cache-file)
   (vhdl-ext-serialize nil vhdl-ext-hierarchy-ghdl-cache-file)
   (vhdl-ext-serialize nil vhdl-ext-hierarchy-entity-cache-file)
-  (message "Cleared cache!"))
+  (message "Cleared hierarchy cache!"))
 
 (defun vhdl-ext-hierarchy-extract (entity)
   "Construct hierarchy for ENTITY depending on selected backend."
@@ -680,7 +678,7 @@ With current-prefix or VERBOSE, dump output log."
           (push entry flat-hierarchy)))
       (setq num-files-processed (1+ num-files-processed)))
     ;; Update hierarchy and entity alists and cache
-    (setf (alist-get proj vhdl-ext-hierarchy-internal-alist nil 'remove 'string=) flat-hierarchy)
+    (vhdl-ext-proj-setcdr proj vhdl-ext-hierarchy-internal-alist flat-hierarchy)
     (vhdl-ext-serialize vhdl-ext-hierarchy-internal-alist vhdl-ext-hierarchy-internal-cache-file)
     (vhdl-ext-serialize vhdl-entity-alist vhdl-ext-hierarchy-entity-cache-file) ; Updated after initial call to `vhdl-ext-proj-files'
     ;; Return value for async related function

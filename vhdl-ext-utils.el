@@ -75,14 +75,26 @@ Defaults to .vhd and .vhdl."
 (defconst vhdl-ext-lsp-server-ids
   (mapcar #'car vhdl-ext-lsp-available-servers))
 
+(defconst vhdl-ext-async-inject-variables-re "\\`\\(load-path\\|buffer-file-name\\|vhdl-ext-tags-\\|vhdl-project-alist\\)") ; Include current value of tags tables for correct caching
+
 
 ;;;; Macros
 (defmacro vhdl-ext-with-disabled-messages (&rest body)
   "Execute BODY without displaying messages in the echo area."
-  (declare (indent 1) (debug t))
+  (declare (indent 0) (debug t))
   `(let ((inhibit-message t))
      ,@body))
 
+(defmacro vhdl-ext-proj-setcdr (proj alist value)
+  "Set cdr of ALIST for current PROJ to VALUE.
+
+ALIST is an alist and its keys are projects in `vhdl-project-alist' as strings.
+
+If current VALUE is nil remove its key from the alist ALIST."
+  (declare (indent 0) (debug t))
+  `(setf (alist-get ,proj ,alist nil 'remove 'string=) ,value))
+
+;;;; Utils
 (defun vhdl-ext-replace-regexp (regexp to-string start end)
   "Wrapper function for programatic use of `replace-regexp'.
 Replace REGEXP with TO-STRING from START to END."
@@ -181,69 +193,6 @@ Return nil if no entity was found."
 (defun vhdl-ext-kill-buffer-hook ()
   "VHDL hook to run when killing a buffer."
   (setq vhdl-ext-buffer-list (remove (current-buffer) vhdl-ext-buffer-list)))
-
-(defun vhdl-ext-buffer-proj ()
-  "Return current buffer project if it belongs to `vhdl-project-alist'."
-  (catch 'project
-    (when (and buffer-file-name vhdl-project-alist)
-      (dolist (proj vhdl-project-alist)
-        (when (string-prefix-p (expand-file-name (nth 2 proj))
-                               (expand-file-name buffer-file-name))
-          (throw 'project (car proj)))))))
-
-(defun vhdl-ext-buffer-proj-root ()
-  "Return current buffer project root dir if it belongs to `vhdl-project-alist'."
-  (let ((proj (vhdl-ext-buffer-proj)))
-    (when proj
-      (expand-file-name (nth 1 (vhdl-aget vhdl-project-alist proj))))))
-
-(defun vhdl-ext-proj-workdir ()
-  "Return working library dir according to project of current buffer dir.
-
-Instead of fetching the value from `vhdl-project', it depends on current
-directory.  If current directory has no project in `vhdl-project-alist', fetch
-the value from `vhdl-project' instead."
-  (let* ((project (vhdl-ext-buffer-proj))
-         (root (nth 1 (vhdl-aget vhdl-project-alist (or project vhdl-project))))
-         (dir  (nth 7 (vhdl-aget vhdl-project-alist (or project vhdl-project)))))
-    (when (and root dir)
-      (file-name-concat root dir))))
-
-(defun vhdl-ext-proj-worklib ()
-  "Return the working library name of the current directory project.
-
-Instead of fetching the value from `vhdl-project', it depends on current
-directory.  If current directory has no project in `vhdl-project-alist', fetch
-the value from `vhdl-project' instead.
-
-Return \"work\" if no project is defined.
-
-See `vhdl-work-library'."
-  (let ((project (vhdl-ext-buffer-proj)))
-    (vhdl-resolve-env-variable
-     (or (nth 6 (vhdl-aget vhdl-project-alist (or project vhdl-project)))
-         vhdl-default-library))))
-
-(defun vhdl-ext-proj-files (&optional rescan)
-  "Return file list of the current buffer project.
-
-If optional arg RESCAN is non-nil, force refreshing of current project filelist."
-  (let ((project (vhdl-ext-buffer-proj)))
-    (unless project
-      (user-error "Not in a VHDL project buffer"))
-    ;; Scan project if it's not cached or asked for
-    (when (or rescan
-              (not (vhdl-aget vhdl-file-alist project)))
-      (vhdl-scan-project-contents project))
-    ;; Retrieve filelist
-    (nreverse (mapcar #'expand-file-name
-                      (mapcar #'car
-                              (vhdl-aget vhdl-file-alist project))))))
-
-(defun vhdl-ext-proj-files-rescan ()
-  "Rescan files of current project."
-  (interactive)
-  (vhdl-ext-proj-files :rescan))
 
 (defun vhdl-ext-inside-if-else ()
   "Return non-nil if point is inside an if-else block."
@@ -429,7 +378,72 @@ cannot be ommitted after an end."
             (beg-point . ,block-beg-point)
             (end-point . ,block-end-point)))))))
 
-;;;; Dirs
+;;;; Project
+(defun vhdl-ext-buffer-proj ()
+  "Return current buffer project if it belongs to `vhdl-project-alist'."
+  (catch 'project
+    (when (and buffer-file-name vhdl-project-alist)
+      (dolist (proj vhdl-project-alist)
+        (when (string-prefix-p (expand-file-name (nth 2 proj))
+                               (expand-file-name buffer-file-name))
+          (throw 'project (car proj)))))))
+
+(defun vhdl-ext-buffer-proj-root ()
+  "Return current buffer project root dir if it belongs to `vhdl-project-alist'."
+  (let ((proj (vhdl-ext-buffer-proj)))
+    (when proj
+      (expand-file-name (nth 1 (vhdl-aget vhdl-project-alist proj))))))
+
+(defun vhdl-ext-proj-workdir ()
+  "Return working library dir according to project of current buffer dir.
+
+Instead of fetching the value from `vhdl-project', it depends on current
+directory.  If current directory has no project in `vhdl-project-alist', fetch
+the value from `vhdl-project' instead."
+  (let* ((project (or (vhdl-ext-buffer-proj) vhdl-project))
+         (root (nth 1 (vhdl-aget vhdl-project-alist project)))
+         (dir  (nth 7 (vhdl-aget vhdl-project-alist project))))
+    (when (and root dir)
+      (file-name-concat root dir))))
+
+(defun vhdl-ext-proj-worklib ()
+  "Return the working library name of the current directory project.
+
+Instead of fetching the value from `vhdl-project', it depends on current
+directory.  If current directory has no project in `vhdl-project-alist', fetch
+the value from `vhdl-project' instead.
+
+Return \"work\" if no project is defined.
+
+See `vhdl-work-library'."
+  (let ((project (vhdl-ext-buffer-proj)))
+    (vhdl-resolve-env-variable
+     (or (nth 6 (vhdl-aget vhdl-project-alist (or project vhdl-project)))
+         vhdl-default-library))))
+
+(defun vhdl-ext-proj-files (&optional rescan)
+  "Return file list of the current buffer project.
+
+If optional arg RESCAN is non-nil, force refreshing of current project filelist."
+  (let ((project (vhdl-ext-buffer-proj)))
+    (unless project
+      (user-error "Not in a VHDL project buffer"))
+    ;; Scan project if it's not cached or asked for
+    (when (or rescan
+              (not (vhdl-aget vhdl-file-alist project)))
+      (vhdl-scan-project-contents project))
+    ;; Retrieve filelist
+    (nreverse (mapcar #'expand-file-name
+                      (mapcar #'car
+                              (vhdl-aget vhdl-file-alist project))))))
+
+(defun vhdl-ext-proj-files-rescan ()
+  "Rescan files of current project."
+  (interactive)
+  (vhdl-ext-proj-files :rescan))
+
+
+;;;; Dirs/files
 (defun vhdl-ext-dir-files (dir &optional follow-symlinks ignore-dirs)
   "Find VHDL files recursively on DIR.
 
