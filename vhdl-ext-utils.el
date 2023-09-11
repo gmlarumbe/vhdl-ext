@@ -482,6 +482,18 @@ search."
     (when files
       (flatten-tree files))))
 
+(defun vhdl-ext-filelist-from-file (file)
+  "Return filelist from FILE as a list of strings."
+  (with-temp-buffer
+    (insert-file-contents file)
+    (delete "" (split-string (buffer-substring-no-properties (point-min) (point-max)) "\n"))))
+
+(defun vhdl-ext-file-from-filefile (filelist out-file)
+  "Write FILELIST to FILE as one line per file."
+  (with-temp-file out-file
+    (insert (mapconcat #'identity filelist "\n"))))
+
+
 ;;;; Cache
 (defun vhdl-ext-serialize (data filename)
   "Serialize DATA to FILENAME."

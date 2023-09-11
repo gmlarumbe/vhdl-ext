@@ -33,7 +33,7 @@
   :group 'vhdl-ext)
 
 (defcustom vhdl-ext-xref-match-face 'font-lock-warning-face
-  "Vhdl-ext GHDL processes extra arguments."
+  "Vhdl-ext face used to highlight matches in xref ."
   :type '(repeat string)
   :group 'vhdl-ext-xref)
 
