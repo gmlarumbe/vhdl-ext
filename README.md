@@ -23,7 +23,6 @@ This package includes some extensions on top of the great Emacs `vhdl-mode`.
 * [Enhanced support for `which-func`](#which-func)
 * [Improve code folding via `hideshow`](#code-folding)
 * [Auto-configure `time-stamp`](#time-stamp)
-* [Auto-configure `company-keywords`](#company-keywords)
 * [Port connection utilities](#port-connections)
 
 ## Installation ##
@@ -65,7 +64,6 @@ By default all features are enabled:
         which-func
         hideshow
         time-stamp
-        company-keywords
         ports))
 (vhdl-ext-mode-setup)
 (add-hook 'vhdl-mode-hook #'vhdl-ext-mode)
@@ -98,7 +96,6 @@ If installed and loaded via `use-package`:
           which-func
           hideshow
           time-stamp
-          company-keywords
           ports))
   :config
   (vhdl-ext-mode-setup))
@@ -254,11 +251,6 @@ Automatic update of header timestamp after file saving.
    - `vhdl-ext-time-stamp-mode`
 
 For configuration see [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Time-stamp)
-
-
-## Company keywords ##
-
-Setup `company` to complete with VHDL keywords.
 
 
 ## Port connections ##

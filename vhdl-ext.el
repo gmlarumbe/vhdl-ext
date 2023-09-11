@@ -6,7 +6,7 @@
 ;; URL: https://github.com/gmlarumbe/vhdl-ext
 ;; Version: 0.2.0
 ;; Keywords: VHDL, IDE, Tools
-;; Package-Requires: ((emacs "29.1") (vhdl-ts-mode "0.0.0") (eglot "1.9") (lsp-mode "8.0.0") (ag "0.48") (ripgrep "0.4.0") (hydra "0.15.0") (flycheck "32") (company "0.9.13") (outshine "3.0.1") (async "1.9.7"))
+;; Package-Requires: ((emacs "29.1") (vhdl-ts-mode "0.0.0") (eglot "1.9") (lsp-mode "8.0.0") (ag "0.48") (ripgrep "0.4.0") (hydra "0.15.0") (flycheck "32") (outshine "3.0.1") (async "1.9.7"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -37,7 +37,6 @@
 ;;  - Enhanced support for `which-func'
 ;;  - Improve code folding via `hideshow'
 ;;  - Auto-configure `time-stamp'
-;;  - Automatically add VHDL keywords to `company-keywords' backend
 ;;  - Port connections utilities
 ;;
 ;;  Experimental:
@@ -66,7 +65,6 @@
                                    which-func
                                    hideshow
                                    time-stamp
-                                   company-keywords
                                    ports)
   "Which Vhdl-ext features to enable."
   :type '(set (const :tag "Improved syntax highlighting via `font-lock'."
@@ -99,8 +97,6 @@
                 hideshow)
               (const :tag "`time-stamp' configuration."
                 time-stamp)
-              (const :tag "Add `vhdl-keywords' to `company-keywords' backend."
-                company-keywords)
               (const :tag "Port connections utilities."
                 ports))
   :group 'vhdl-ext)
@@ -178,8 +174,6 @@ FEATURES can be a single feature or a list of features."
     (vhdl-ext-hierarchy-setup))
   (vhdl-ext-when-feature 'hideshow
     (vhdl-ext-hs-setup))
-  (vhdl-ext-when-feature 'company-keywords
-    (vhdl-ext-company-keywords-add))
   (vhdl-ext-when-feature 'font-lock
     (vhdl-ext-font-lock-setup))
   (vhdl-ext-when-feature 'eglot
