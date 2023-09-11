@@ -217,7 +217,6 @@ temp-buffer."
                                   :desc (vhdl-ext-tags-desc)
                                   :file file)))))
 
-;;;###autoload
 (defun vhdl-ext-tags-get (&optional verbose)
   "Get tags of current project.
 With current-prefix or VERBOSE, dump output log."

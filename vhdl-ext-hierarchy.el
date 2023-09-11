@@ -642,7 +642,6 @@ struct and an indented string."
           ;; Fallback
           (t (error "Must set a proper display frontend in `vhdl-ext-hierarchy-frontend'")))))
 
-;;;###autoload
 (defun vhdl-ext-hierarchy-parse (&optional verbose)
   "Return flat hierarchy of modules and instances of project.
 
@@ -684,7 +683,6 @@ With current-prefix or VERBOSE, dump output log."
     ;; Return value for async related function
     (list vhdl-ext-hierarchy-internal-alist vhdl-entity-alist)))
 
-;;;###autoload
 (defun vhdl-ext-hierarchy-parse-async (&optional verbose)
   "Return flat hierarchy of modules and instances of project asynchronously.
 
@@ -707,7 +705,6 @@ With current-prefix or VERBOSE, dump output log."
      (setq vhdl-ext-hierarchy-internal-alist (car result))
      (setq vhdl-entity-alist (cadr result)))))
 
-;;;###autoload
 (defun vhdl-ext-hierarchy-current-buffer ()
   "Extract and display hierarchy for module of `current-buffer'."
   (interactive)

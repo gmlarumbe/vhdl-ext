@@ -168,7 +168,6 @@ See URL `http://vhdltool.com'."
     (add-to-list 'flycheck-checkers checker))
   (vhdl-ext-flycheck-set-linter vhdl-ext-flycheck-linter))
 
-;;;###autoload
 (defun vhdl-ext-flycheck-mode (&optional uarg)
   "`flycheck-mode' VHDL wrapper function.
 If called with UARG select among available linters and enable flycheck."

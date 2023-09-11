@@ -110,13 +110,11 @@ ARGS is a property list."
   :compile-re vhdl-ext-compile-ghdl-re
   :buf-name vhdl-ext-compile-ghdl-buf)
 
-;;;###autoload (autoload 'vhdl-ext-compile-ghdl "vhdl-ext-compile.el")
 (vhdl-ext-compile-define-fn vhdl-ext-compile-ghdl
   :docstring "Compile GHDL COMMAND with error regexp highlighting."
   :buf vhdl-ext-compile-ghdl-buf
   :comp-mode vhdl-ext-compile-ghdl-mode)
 
-;;;###autoload
 (defun vhdl-ext-compile-ghdl-project ()
   "Compile current project from `vhdl-project-alist' using GHDL.
 
