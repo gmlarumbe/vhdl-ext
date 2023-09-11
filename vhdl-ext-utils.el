@@ -26,7 +26,6 @@
 
 (require 'project)
 (require 'vhdl-mode)
-(require 'company-keywords)
 
 
 (defcustom vhdl-ext-file-extension-re "\\.vhdl?\\'"
@@ -535,11 +534,6 @@ search."
                                " ")))
     (concat args (when extra-args (concat " " extra-args))" " dirs-args)))
 
-;;;; Misc
-(defun vhdl-ext-company-keywords-add ()
-  "Add `vhdl-keywords' to `company-keywords' backend."
-  (dolist (mode '(vhdl-mode vhdl-ts-mode))
-    (add-to-list 'company-keywords-alist `(,mode ,@vhdl-keywords))))
 
 ;;;; Overrides
 ;; TODO: To be fixed @ emacs/main
