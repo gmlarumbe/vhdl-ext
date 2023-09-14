@@ -3,15 +3,17 @@
 [![Build Status](https://github.com/gmlarumbe/vhdl-ext/workflows/ERT-straight/badge.svg)](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/build_straight.yml)
 [![Build Status](https://github.com/gmlarumbe/vhdl-ext/workflows/package-el-basic/badge.svg)](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/build_package_melpa_basic.yml)
 [![Build Status](https://github.com/gmlarumbe/vhdl-ext/workflows/ERT-MELPA-Stable/badge.svg)](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/build_package_melpa_stable.yml)
-[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 
 # vhdl-ext.el - VHDL Extensions for Emacs #
 
-This package includes some extensions on top of the great Emacs `vhdl-mode`.
+This package provides useful extensions on top of [`vhdl-mode`](https://iis-people.ee.ethz.ch/~zimmi/emacs/vhdl-mode.html)
+and [`vhdl-ts-mode`](https://github.com/gmlarumbe/vhdl-ts-mode).
 
-* [Tree-sitter powered `vhdl-ts-mode`](#tree-sitter)
+* [Tree-sitter `vhdl-ts-mode` support](#tree-sitter)
 * [Improve syntax highlighting](#syntax-highlighting)
+* [Find definitions and references](#find-definitions-and-references)
+* [Auto-completion](#auto-completion)
 * [Hierarchy extraction and navigation](#hierarchy-extraction)
 * [LSP configuration for `lsp-mode` and `eglot`](#language-server-protocol)
 * [Support for many linters via `flycheck`](#linting)
@@ -25,11 +27,21 @@ This package includes some extensions on top of the great Emacs `vhdl-mode`.
 * [Auto-configure `time-stamp`](#time-stamp)
 * [Port connection utilities](#port-connections)
 
+## Requirements ##
+
+- Emacs 29.1+
+- Feature-specific binaries
+
+Tree-sitter is optional but recommended and only required if using `vhdl-ts-mode` for some of the features above.
+
+For more info, see the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Requirements).
+
+
 ## Installation ##
 
 ### MELPA ###
 
-`vhdl-ext` and `vhdl-ts-mode` are available on MELPA. `vhdl-ext` includes `vhdl-ts-mode` as a dependency.
+`vhdl-ext` is available on MELPA.
 
 ### straight.el ###
 
@@ -48,10 +60,11 @@ By default all features are enabled:
 
 ```elisp
 ;; Can also be set through `M-x RET customize-group RET vhdl-ext':
-;;  - Vhdl Ext Feature List (provides info of different features)
 ;; Comment out/remove the ones you do not need
 (setq vhdl-ext-feature-list
       '(font-lock
+        xref
+        capf
         hierarchy
         eglot
         lsp
@@ -65,25 +78,23 @@ By default all features are enabled:
         hideshow
         time-stamp
         ports))
+(require 'vhdl-ext)
 (vhdl-ext-mode-setup)
 (add-hook 'vhdl-mode-hook #'vhdl-ext-mode)
-;; To use `vhdl-ts-mode' as the default major-mode also add the line below:
-(add-to-list 'auto-mode-alist '("\\.vhdl?\\'" . vhdl-ts-mode))
 ```
 
 If installed and loaded via `use-package`:
 
 ```elisp
 (use-package vhdl-ext
-  :after vhdl-mode
-  :demand
   :hook ((vhdl-mode . vhdl-ext-mode))
   :init
   ;; Can also be set through `M-x RET customize-group RET vhdl-ext':
-  ;;  - Vhdl Ext Feature List (provides info of different features)
   ;; Comment out/remove the ones you do not need
   (setq vhdl-ext-feature-list
         '(font-lock
+          xref
+          capf
           hierarchy
           eglot
           lsp
@@ -99,16 +110,21 @@ If installed and loaded via `use-package`:
           ports))
   :config
   (vhdl-ext-mode-setup))
-
-;; To use `vhdl-ts-mode' as the default major-mode also add the lines below:
-(use-package vhdl-ts-mode
-  :mode (("\\.vhdl?\\'" . vhdl-ts-mode))
 ```
 
 ## Keybindings ##
 
 Enabling of `vhdl-ext-mode` minor-mode creates the following keybindings:
 
+* Features
+  * <kbd>C-M-i</kbd> `vhdl-ext-beautify-block-at-point`
+  * <kbd>C-c M-i</kbd> `vhdl-ext-beautify-instance-at-point`
+  * <kbd>C-c C-v</kbd> `vhdl-ext-hierarchy-current-buffer`
+  * <kbd>C-c C-t</kbd> `vhdl-ext-hydra/body`
+  * <kbd>C-c C-f</kbd> `vhdl-ext-flycheck-mode`
+  * <kbd>C-c \<f5\></kbd> `vhdl-ext-compile-ghdl-project`
+
+* Navigation
   * <kbd>C-M-f</kbd> `vhdl-ext-forward-sexp`
   * <kbd>C-M-b</kbd> `vhdl-ext-backward-sexp`
   * <kbd>C-M-u</kbd> `vhdl-ext-find-entity-instance-bwd`
@@ -116,43 +132,58 @@ Enabling of `vhdl-ext-mode` minor-mode creates the following keybindings:
   * <kbd>C-M-.</kbd> `vhdl-ext-jump-to-parent-entity`
   * <kbd>C-c M-.</kbd> `vhdl-ext-jump-to-entity-at-point-def`
   * <kbd>C-c M-?</kbd> `vhdl-ext-jump-to-entity-at-point-ref`
-  * <kbd>C-M-i</kbd> `vhdl-ext-beautify-block-at-point`
-  * <kbd>C-c M-i</kbd> `vhdl-ext-beautify-instance-at-point`
-  * <kbd>C-c C-t</kbd> `vhdl-ext-hydra/body`
-  * <kbd>C-c C-f</kbd> `vhdl-ext-flycheck-mode`
-  * <kbd>C-c \<f5\></kbd> `vhdl-ext-compile-ghdl-project`
+
+* Port connections
   * <kbd>C-c C-c t</kbd> `vhdl-ext-ports-toggle-connect`
   * <kbd>C-c C-c r</kbd> `vhdl-ext-ports-connect-recursively`
-  * <kbd>C-c C-v</kbd> `vhdl-ext-hierarchy-current-buffer`
 
 
 # Features #
 
 ## Tree-sitter ##
-The package `vhdl-ts-mode` provides syntax highlighting,
-indentation and a backend for hierarchy extraction, definitions and
-references navigation, and some other features implemented in
-`vhdl-ext`. Using tree-sitter as a backend is recommended as it is
-much faster and efficient than internal Emacs lisp parsing.
 
-`vhdl-ts-mode` is derived from `vhdl-mode` making all `vhdl-mode`
-functionality still available.
+Some of the features that `vhdl-ext` provides are based either on
+builtin `vhdl-mode` Emacs lisp parsing or on tree-sitter
+`vhdl-ts-mode`:
 
-For more information see the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Tree-sitter).
+- Hierarchy extraction can use both builtin Elisp parsing and tree-sitter
+   - Using tree-sitter as a backend is recommended as it is much faster, efficient and accurate
+- Tags collection for completion and navigation of definitions and references requires tree-sitter
+
+For information about installation of `vhdl-ts-mode` check its
+[repo](https://github.com/gmlarumbe/vhdl-ts-mode).
 
 
 ## Syntax highlighting ##
 
-<img src="https://user-images.githubusercontent.com/51021955/215353070-8a21f758-407d-4455-bdac-bf92310c59e4.gif" width=400 height=300>
+<img src="https://user-images.githubusercontent.com/51021955/215353070-8a21f758-407d-4455-bdac-bf92310c59e4.gif" width=80%>
 
 For configuration information, see the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Syntax-highlighting).
+
+
+## Find definitions and references ##
+
+`vhdl-ext` provides a builtin `xref` backend to navigate definitions and references of current project in `vhdl-project-alist`.
+
+<img src="https://github.com/gmlarumbe/vhdl-ext/assets/51021955/7fde4bc6-0c84-4da0-8e37-6a0e0dac36f6" width=80%>
+
+For configuration information, see the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Xref).
+
+
+## Auto-completion ##
+
+Complete with tags from current VHDL project.
+
+<img src="https://github.com/gmlarumbe/vhdl-ext/assets/51021955/4c908a17-df9e-4fb3-8263-e5e302700ac9" width=80%>
+
+For configuration information, see the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Completion).
 
 
 ## Hierarchy extraction ##
 
 Hierarchy extraction of entity at current buffer.
 
-<img src="https://github.com/gmlarumbe/vhdl-ext/assets/51021955/79018dc4-833a-4ce6-9f2b-3195ba75481d" width=400 height=300>
+<img src="https://github.com/gmlarumbe/vhdl-ext/assets/51021955/79018dc4-833a-4ce6-9f2b-3195ba75481d" width=80%>
 
 For configuration information, see the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Hierarchy).
 
@@ -184,7 +215,7 @@ For configuration and usage instructions, see the [wiki](https://github.com/gmla
 
 Beautify block and instances at point:
 
-<img src="https://github.com/gmlarumbe/vhdl-ext/assets/51021955/cffb0c9d-3a39-4e58-b422-fb275db124a8" width=400 height=300>
+<img src="https://github.com/gmlarumbe/vhdl-ext/assets/51021955/cffb0c9d-3a39-4e58-b422-fb275db124a8" width=80%>
 
 Interactive functions:
 
@@ -199,7 +230,7 @@ Batch-mode functions:
 
 ## Navigation ##
 
-<img src="https://user-images.githubusercontent.com/51021955/215353135-446b678b-e3be-42f3-8009-5d5bd7c5e5bd.gif" width=400 height=300>
+<img src="https://user-images.githubusercontent.com/51021955/215353135-446b678b-e3be-42f3-8009-5d5bd7c5e5bd.gif" width=80%>
 
 * Navigate instances inside an entity
 * Jump to definition/references of entity at point
@@ -211,7 +242,7 @@ For detailed info see the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Navi
 ## Templates ##
 Snippet selection via `hydra`.
 
-<img src="https://user-images.githubusercontent.com/51021955/215353124-7e374754-cd91-4924-9b4b-3c6a29cad921.gif" width=400 height=300>
+<img src="https://user-images.githubusercontent.com/51021955/215353124-7e374754-cd91-4924-9b4b-3c6a29cad921.gif" width=80%>
 
 * `vhdl-ext-hydra/body`: <kbd>C-c C-t</kbd>
 
@@ -221,7 +252,7 @@ Snippet selection via `hydra`.
 Provides functions to perform compilations with syntax highlighting
 and jump to error:
 
-<img src="https://github.com/gmlarumbe/vhdl-ext/assets/51021955/845980ab-c54b-4e89-b53f-056140be87a7" width=400 height=300>
+<img src="https://github.com/gmlarumbe/vhdl-ext/assets/51021955/845980ab-c54b-4e89-b53f-056140be87a7" width=80%>
 
 * `vhdl-ext-compile-ghdl-project`: <kbd>C-c \<f5\></kbd>
 
@@ -231,7 +262,7 @@ See more info in the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Compilati
 ## Imenu ##
 Support detection of instances.
 
-<img src="https://user-images.githubusercontent.com/51021955/215353082-9a187daf-7f76-4c9b-8563-7beba6e1aa6a.gif" width=400 height=300>
+<img src="https://user-images.githubusercontent.com/51021955/215353082-9a187daf-7f76-4c9b-8563-7beba6e1aa6a.gif" width=80%>
 
 
 ## Which-func ##
@@ -257,7 +288,7 @@ For configuration see [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Time-sta
 
 Toggle connections of ports under instance at point:
 
-<img src="https://github.com/gmlarumbe/vhdl-ext/assets/51021955/14536463-a6c4-410f-a890-081f7deb668e" width=400 height=400>
+<img src="https://github.com/gmlarumbe/vhdl-ext/assets/51021955/14536463-a6c4-410f-a890-081f7deb668e" width=70%>
 
   * `vhdl-ext-ports-toggle-connect`: <kbd>C-c C-c t</kbd>
   * `vhdl-ext-ports-connect-recursively`: <kbd>C-c C-c r</kbd>
@@ -272,29 +303,45 @@ For new functionality add new ERT tests if possible.
 Consider [sponsoring](https://github.com/sponsors/gmlarumbe) to help
 maintaining the project and for the development of new features. *Thank you!*
 
-## ERT Tests setup ###
+### Setup ###
 
-To run the whole ERT test suite change directory to the `vhdl-ext` root and run the `test` target:
+To run the whole ERT test suite change directory to the `vhdl-ext`
+root and make sure `test-hdl` Git submodule has been loaded:
 
 ```shell
-$ cd ~/.emacs.d/vhdl-ext
+git submodule update --init
+```
+
+### Targets ###
+
+Then run the default target:
+
+```shell
 $ make
 ```
 
-To run a subset of tests (e.g. imenu):
+To run a subset of tests (e.g. navigation):
 
 ```shell
-$ cd ~/.emacs.d/verilog-ext
-$ make subset TESTS=imenu
+$ make TESTS=navigation
+```
+
+To regenerate all the expected outputs for the tests:
+
+```shell
+$ make gen
+```
+
+To regenerate the expected outputs for a group of tests (e.g. navigation):
+
+```shell
+$ make gen TESTS=navigation
 ```
 
 ## Other packages ##
-
-* [verilog-ext](https://github.com/gmlarumbe/verilog-ext): SystemVerilog Extensions for Emacs
-  * Analog package to edit Verilog/SystemVerilog sources
-* [fpga](https://github.com/gmlarumbe/fpga): FPGA & ASIC Utilities for Emacs
-  * Utilities for tools of major vendors of FPGA & ASIC
-* [wavedrom-mode](https://github.com/gmlarumbe/wavedrom-mode): Wavedrom integration for Emacs
-  * Edit and render WaveJSON files to create timing diagrams
-* [vunit-mode](https://github.com/embed-me/vunit-mode.git): VUnit Mode for Emacs
-  * Integration of [VUnit](https://github.com/VUnit/vunit) workflow.
+* [verilog-ts-mode](https://github.com/gmlarumbe/verilog-ts-mode): SystemVerilog Tree-sitter mode
+* [vhdl-ts-mode](https://github.com/gmlarumbe/vhdl-ts-mode): VHDL Tree-sitter mode
+* [verilog-ext](https://github.com/gmlarumbe/verilog-ext): SystemVerilog Extensions
+* [fpga](https://github.com/gmlarumbe/fpga): FPGA & ASIC Utilities for tools of major vendors and open source
+* [wavedrom-mode](https://github.com/gmlarumbe/wavedrom-mode): edit and render WaveJSON files to create timing diagrams
+* [vunit-mode](https://github.com/embed-me/vunit-mode.git): Integration of [VUnit](https://github.com/VUnit/vunit) workflow
