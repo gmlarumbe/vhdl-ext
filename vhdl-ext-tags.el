@@ -220,7 +220,7 @@ temp-buffer."
 (defun vhdl-ext-tags-get (&optional verbose)
   "Get tags of current project.
 With current-prefix or VERBOSE, dump output log."
-  (interactive "P")
+  (interactive "p")
   (let* ((proj (vhdl-ext-buffer-proj))
          (files (vhdl-ext-proj-files))
          (num-files (length files))
@@ -271,7 +271,7 @@ With current-prefix or VERBOSE, dump output log."
 (defun vhdl-ext-tags-get-async (&optional verbose)
   "Create tags table asynchronously.
 With current-prefix or VERBOSE, dump output log."
-  (interactive "P")
+  (interactive "p")
   (unless (vhdl-ext-buffer-proj-root)
     (user-error "Not in a VHDL project buffer"))
   (message "Starting tag collection for %s" (vhdl-ext-buffer-proj-root))
@@ -297,7 +297,7 @@ With current-prefix or VERBOSE, dump output log."
   "Clear tags cache files for current project.
 
 With prefix arg, clear cache for ALL projects."
-  (interactive "P")
+  (interactive "p")
   (if (not all)
       (let ((proj (vhdl-ext-buffer-proj)))
         (unless proj

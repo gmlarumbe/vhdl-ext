@@ -649,7 +649,7 @@ Populates `vhdl-ext-hierarchy-internal-alist' for subsequent hierarchy
 extraction and display.
 
 With current-prefix or VERBOSE, dump output log."
-  (interactive "P")
+  (interactive "p")
   (let* ((proj (vhdl-ext-buffer-proj))
          (files (vhdl-ext-proj-files))
          (num-files (length files))
@@ -690,7 +690,7 @@ Populates `vhdl-ext-hierarchy-internal-alist' for subsequent hierarchy
 extraction and display.
 
 With current-prefix or VERBOSE, dump output log."
-  (interactive "P")
+  (interactive "p")
   (message "Starting hierarchy parsing for %s" (vhdl-ext-buffer-proj))
   (async-start
    `(lambda ()

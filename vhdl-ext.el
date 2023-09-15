@@ -209,8 +209,12 @@ FEATURES can be a single feature or a list of features."
             (setq vhdl-ext-flycheck-dirs nil)
             (setq vhdl-ext-flycheck-files nil))
           (setq flycheck-ghdl-language-standard (vhdl-ext-get-standard)) ; Global for all projects
-          (setq flycheck-ghdl-workdir (vhdl-ext-proj-workdir)) ; Project dependant
-          (setq flycheck-ghdl-work-lib (vhdl-ext-proj-worklib))) ; Project dependant
+          (setq flycheck-ghdl-workdir (vhdl-ext-proj-workdir))           ; Project dependant
+          (setq flycheck-ghdl-work-lib (vhdl-ext-proj-worklib)))         ; Project dependant
+        (vhdl-ext-when-feature 'capf
+          (vhdl-ext-capf-set))
+        (vhdl-ext-when-feature 'xref
+          (vhdl-ext-xref-set))
         ;; `vhdl-mode'-only customization (exclude `vhdl-ts-mode')
         (when (eq major-mode 'vhdl-mode)
           ;; Imenu
