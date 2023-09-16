@@ -246,7 +246,7 @@ With current-prefix or VERBOSE, dump output log."
         (vhdl-ext-tags-table-push-defs-ts :table table :inst-table inst-table :file file))
       (setq num-files-processed (1+ num-files-processed)))
     (vhdl-ext-proj-setcdr proj vhdl-ext-tags-defs-table table)
-    (vhdl-ext-proj-setcdr proj vhdl-ext-tags-refs-table inst-table)
+    (vhdl-ext-proj-setcdr proj vhdl-ext-tags-inst-table inst-table)
     (vhdl-ext-serialize vhdl-ext-tags-defs-table vhdl-ext-tags-defs-table-cache-file)
     (vhdl-ext-serialize vhdl-ext-tags-inst-table vhdl-ext-tags-inst-table-cache-file)
     ;; References
