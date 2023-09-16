@@ -110,27 +110,28 @@ Use FILE and POS arguments for comparison."
 
 ;;;; Tree-sitter
 (defconst vhdl-ext-tags-definitions-ts-re
-  (regexp-opt
-   '("entity_declaration"
-     "architecture_body"
-     "package_declaration"
-     "package_body"
-     "component_declaration"
-     "constant_interface_declaration" ; Generics
-     "signal_interface_declaration"   ; Ports
-     "signal_declaration"
-     "constant_declaration"
-     "full_type_declaration"
-     "element_declaration"
-     "variable_declaration"
-     "procedure_declaration"
-     "function_declaration"
-     "function_body"
-     "procedure_body"
-     "configuration_declaration"
-     "context_declaration"
-     "component_instantiation_statement")
-   'symbols)
+  (eval-when-compile
+    (regexp-opt
+     '("entity_declaration"
+       "architecture_body"
+       "package_declaration"
+       "package_body"
+       "component_declaration"
+       "constant_interface_declaration" ; Generics
+       "signal_interface_declaration"   ; Ports
+       "signal_declaration"
+       "constant_declaration"
+       "full_type_declaration"
+       "element_declaration"
+       "variable_declaration"
+       "procedure_declaration"
+       "function_declaration"
+       "function_body"
+       "procedure_body"
+       "configuration_declaration"
+       "context_declaration"
+       "component_instantiation_statement")
+     'symbols))
   "Regexp of tree-sitter node types to be used for tags definitions.
 
 Need to be quoted as symbols to avoid unwanted matches.
