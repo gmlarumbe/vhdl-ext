@@ -649,7 +649,7 @@ Populates `vhdl-ext-hierarchy-internal-alist' for subsequent hierarchy
 extraction and display.
 
 With current-prefix or VERBOSE, dump output log."
-  (interactive "p")
+  (interactive "P")
   (let* ((proj (vhdl-ext-buffer-proj))
          (files (vhdl-ext-proj-files))
          (num-files (length files))
@@ -690,7 +690,7 @@ Populates `vhdl-ext-hierarchy-internal-alist' for subsequent hierarchy
 extraction and display.
 
 With current-prefix or VERBOSE, dump output log."
-  (interactive "p")
+  (interactive "P")
   (message "Starting hierarchy parsing for %s" (vhdl-ext-buffer-proj))
   (async-start
    `(lambda ()
@@ -699,7 +699,7 @@ With current-prefix or VERBOSE, dump output log."
       ;; Preserve cache on child Emacs process
       (setq vhdl-ext-hierarchy-internal-alist (vhdl-ext-unserialize vhdl-ext-hierarchy-internal-cache-file))
       (setq vhdl-entity-alist (vhdl-ext-unserialize vhdl-ext-hierarchy-entity-cache-file))
-      (vhdl-ext-hierarchy-parse ,verbose))
+      (vhdl-ext-hierarchy-parse ,@verbose))
    (lambda (result)
      (message "Finished analyzing hierarchy!")
      (setq vhdl-ext-hierarchy-internal-alist (car result))
