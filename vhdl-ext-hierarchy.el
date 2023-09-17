@@ -319,17 +319,16 @@ declaration."
       (insert-file-contents file)
       (vhdl-ext-with-disabled-messages
         (vhdl-ts-mode))
-      (dolist (arch-node (vhdl-ts-nodes "architecture_body"))
+      (dolist (arch-node (vhdl-ts-nodes "architecture_body") module-instances-alist)
         (setq arch-entity-name (vhdl-ts-arch-entity-name arch-node))
         (setq instances nil)
         (dolist (inst-node (vhdl-ts-arch-instances-nodes arch-node))
           (push (concat (vhdl-ts--node-identifier-name inst-node) ":" (vhdl-ts--node-instance-name inst-node)) instances))
         (if (setq module-instances-alist-entry (assoc arch-entity-name module-instances-alist))
             ;; Merge all the instances of current architecture for associated entity
-            (setcdr module-instances-alist-entry `(,@(cdr module-instances-alist-entry) ,@(reverse instances)))
+            (setcdr module-instances-alist-entry `(,@(cdr module-instances-alist-entry) ,@(nreverse instances)))
           ;; Create new entry for the entity
-          (push `(,arch-entity-name ,@(reverse instances)) module-instances-alist))))
-    module-instances-alist))
+          (push `(,arch-entity-name ,@(nreverse instances)) module-instances-alist))))))
 
 (defun vhdl-ext-hierarchy-tree-sitter-extract (module)
   "Extract hierarchy of MODULE using tree-sitter as a backend.
@@ -379,10 +378,10 @@ declaration."
             (push (concat (match-string-no-properties 6) ":" (match-string-no-properties 1)) instances))
           (if (setq module-instances-alist-entry (assoc entity module-instances-alist))
               ;; Merge all the instances of current architecture for associated entity
-              (setcdr module-instances-alist-entry `(,@(cdr module-instances-alist-entry) ,@(reverse instances)))
+              (setcdr module-instances-alist-entry `(,@(cdr module-instances-alist-entry) ,@(nreverse instances)))
             ;; Create new entry for the entity
-            (push `(,entity ,@(reverse instances)) module-instances-alist)))))
-    (reverse module-instances-alist)))
+            (push `(,entity ,@(nreverse instances)) module-instances-alist)))))
+    (nreverse module-instances-alist)))
 
 (defun vhdl-ext-hierarchy-builtin-extract (entity)
   "Extract hierarchy of ENTITY using builtin Elisp backend.

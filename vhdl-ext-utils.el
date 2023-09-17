@@ -129,7 +129,7 @@ Return list with found entities or nil if not found."
       (goto-char (point-min))
       (while (vhdl-re-search-forward vhdl-ext-entity-re nil t)
         (push (downcase (match-string-no-properties 2)) entities)))
-    (reverse (delete-dups entities))))
+    (nreverse (delete-dups entities))))
 
 (defun vhdl-ext-read-file-entities (&optional file)
   "Find entities in current buffer.
