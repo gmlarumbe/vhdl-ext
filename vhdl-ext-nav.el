@@ -161,7 +161,7 @@ after the search has been done."
      ;; Try ripgrep
      ((and (string= vhdl-ext-jump-to-parent-entity-engine "rg")
            (executable-find "rg"))
-      (let ((rg-extra-args '("-t" "vhdl" "--pcre2" "--multiline" "--stats")))
+      (let ((rg-extra-args '("-t" "vhdl" "--pcre2" "--multiline" "--stats" "--ignore-case")))
         (setq vhdl-ext-jump-to-parent-entity-point-marker (point-marker))
         (setq vhdl-ext-jump-to-parent-entity-trigger t)
         (ripgrep-regexp entity-instance-pcre proj-dir rg-extra-args)))
@@ -169,7 +169,7 @@ after the search has been done."
      ((and (string= vhdl-ext-jump-to-parent-entity-engine "ag")
            (executable-find "ag"))
       (let ((ag-arguments ag-arguments)
-            (extra-ag-args '("--vhdl" "--stats")))
+            (extra-ag-args '("--vhdl" "--stats" "--ignore-case")))
         (dolist (extra-ag-arg extra-ag-args)
           (add-to-list 'ag-arguments extra-ag-arg :append))
         (setq vhdl-ext-jump-to-parent-entity-point-marker (point-marker))
