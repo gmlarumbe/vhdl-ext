@@ -122,6 +122,7 @@ Enabling of `vhdl-ext-mode` minor-mode creates the following keybindings:
   * <kbd>C-c C-v</kbd> `vhdl-ext-hierarchy-current-buffer`
   * <kbd>C-c C-t</kbd> `vhdl-ext-hydra/body`
   * <kbd>C-c C-f</kbd> `vhdl-ext-flycheck-mode`
+  * <kbd>C-c C-u></kbd> `vhdl-ext-tags-get`
   * <kbd>C-c \<f5\></kbd> `vhdl-ext-compile-ghdl-project`
 
 * Navigation
@@ -163,7 +164,7 @@ For configuration information, see the [wiki](https://github.com/gmlarumbe/vhdl-
 
 ## Find definitions and references ##
 
-`vhdl-ext` provides a builtin `xref` backend to navigate definitions and references of current project in `vhdl-project-alist`.
+`vhdl-ext` provides a builtin `xref` backend to navigate definitions and references of current project in `vhdl-ext-project-alist`.
 
 <img src="https://github.com/gmlarumbe/vhdl-ext/assets/51021955/7fde4bc6-0c84-4da0-8e37-6a0e0dac36f6" width=80%>
 

@@ -144,7 +144,7 @@ command.")
 Configuration should be done so that `vhdl-ext-navigation-ag-rg-hook' is run
 after the search has been done."
   (interactive)
-  (let* ((proj-dir (vhdl-ext-project-root))
+  (let* ((proj-dir (vhdl-ext-buffer-proj-root))
          (entity-name (or (vhdl-ext-select-file-entity buffer-file-name)
                           (error "No entity found @ %s" buffer-file-name)))
          ;; Regexp fetched from `vhdl-ext-instance-re', replaced "\\s-" with "[ ]"

@@ -37,7 +37,44 @@ Defaults to .vhd and .vhdl."
 (defcustom vhdl-ext-ghdl-extra-args nil
   "Vhdl-ext GHDL processes extra arguments."
   :type '(repeat string)
-  :group 'vhdl-ext-hierarchy)
+  :group 'vhdl-ext)
+
+(defcustom vhdl-ext-cache-do-compression t
+  "If set to non-nil compress cache files.
+Requires having \"gzip\" and \"gunzip\" in the PATH."
+  :type 'boolean
+  :group 'vhdl-ext)
+
+(defcustom vhdl-ext-project-alist nil
+  "`vhdl-ext' project alist.
+
+Used for per-project functionality in `vhdl-ext'.
+
+Its elements have the following structure: their car is a string with the name
+of the project and their cdr a property list with the following properties:
+ - :root - base directory of the project (mandatory)
+ - :dirs - directories to search for project files (list of strings)
+ - :ignore-dirs - directories to ignore (list of strings)
+ - :files - files to be used for the project, keep in order for GHDL
+            compilations (list of strings)
+ - :ignore-files - files to be ignored for project (list of stings)
+
+GHDL related:
+ - :worklib - defaults to \"work\"
+ - :workdir - output compilation directory for worklib
+ - :lib-search-path - extra directories to look for compiled libraries."
+  :type '(repeat
+          (list (string :tag "Project")
+                (plist :tag "Properties"
+                       :options ((:root string)
+                                 (:dirs (repeat directory))
+                                 (:ignore-dirs (repeat directory))
+                                 (:files (repeat file))
+                                 (:ignore-files (repeat file))
+                                 (:worklib string)
+                                 (:workdir directory)
+                                 (:lib-search-path (repeat directory))))))
+  :group 'vhdl-ext)
 
 
 (defconst vhdl-ext-blank-optional-re "[[:blank:]\n]*")
@@ -74,8 +111,6 @@ Defaults to .vhd and .vhdl."
 (defconst vhdl-ext-lsp-server-ids
   (mapcar #'car vhdl-ext-lsp-available-servers))
 
-(defconst vhdl-ext-async-inject-variables-re "\\`\\(load-path\\|buffer-file-name\\|vhdl-ext-tags-\\|vhdl-project-alist\\)") ; Include current value of tags tables for correct caching
-
 
 ;;;; Macros
 (defmacro vhdl-ext-with-disabled-messages (&rest body)
@@ -84,10 +119,19 @@ Defaults to .vhd and .vhdl."
   `(let ((inhibit-message t))
      ,@body))
 
+(defmacro vhdl-ext-with-no-hooks (&rest body)
+  "Execute BODY without running any VHDL related hooks."
+  (declare (indent 0) (debug t))
+  `(let ((prog-mode-hook nil)
+         (vhdl-mode-hook nil)
+         (vhdl-ts-mode-hook nil))
+     ,@body))
+
 (defmacro vhdl-ext-proj-setcdr (proj alist value)
   "Set cdr of ALIST for current PROJ to VALUE.
 
-ALIST is an alist and its keys are projects in `vhdl-project-alist' as strings.
+ALIST is an alist and its keys are projects in `vhdl-ext-project-alist' as
+strings.
 
 If current VALUE is nil remove its key from the alist ALIST."
   (declare (indent 0) (debug t))
@@ -121,15 +165,22 @@ the replacement text (see `replace-match' for more info)."
       (while (search-forward string endpos t)
         (replace-match to-string fixedcase)))))
 
-(defun vhdl-ext-scan-buffer-entities ()
-  "Find entities in current buffer.
-Return list with found entities or nil if not found."
-  (let (entities)
+(defun vhdl-ext-scan-buffer-entities-and-lines ()
+  "Find entities and their definition files in current buffer.
+Return list with found entities and their line number or nil if not found."
+  (let (entities-and-files)
     (save-excursion
       (goto-char (point-min))
       (while (vhdl-re-search-forward vhdl-ext-entity-re nil t)
-        (push (downcase (match-string-no-properties 2)) entities)))
-    (nreverse (delete-dups entities))))
+        (push `(,(match-string-no-properties 2)
+                ,(line-number-at-pos))
+              entities-and-files)))
+    (nreverse (delete-dups entities-and-files))))
+
+(defun vhdl-ext-scan-buffer-entities ()
+  "Find entities in current buffer.
+Return list with found entities or nil if not found."
+  (mapcar #'car (vhdl-ext-scan-buffer-entities-and-lines)))
 
 (defun vhdl-ext-read-file-entities (&optional file)
   "Find entities in current buffer.
@@ -158,12 +209,6 @@ Return nil if no entity was found."
     (if (cdr entities)
         (completing-read "Select entity: " entities)
       (car entities))))
-
-(defun vhdl-ext-project-root ()
-  "Find current project root, depending on available packages."
-  (or (and (project-current)
-           (project-root (project-current)))
-      default-directory))
 
 (defun vhdl-ext-update-buffer-file-and-dir-list ()
   "Update `vhdl-mode' list of open buffers, files, and dir lists."
@@ -377,74 +422,12 @@ cannot be ommitted after an end."
             (beg-point . ,block-beg-point)
             (end-point . ,block-end-point)))))))
 
-;;;; Project
-(defun vhdl-ext-buffer-proj ()
-  "Return current buffer project if it belongs to `vhdl-project-alist'."
-  (catch 'project
-    (when (and buffer-file-name vhdl-project-alist)
-      (dolist (proj vhdl-project-alist)
-        (when (string-prefix-p (expand-file-name (nth 2 proj))
-                               (expand-file-name buffer-file-name))
-          (throw 'project (car proj)))))))
-
-(defun vhdl-ext-buffer-proj-root ()
-  "Return current buffer project root dir if it belongs to `vhdl-project-alist'."
-  (let ((proj (vhdl-ext-buffer-proj)))
-    (when proj
-      (expand-file-name (nth 1 (vhdl-aget vhdl-project-alist proj))))))
-
-(defun vhdl-ext-proj-workdir ()
-  "Return working library dir according to project of current buffer dir.
-
-Instead of fetching the value from `vhdl-project', it depends on current
-directory.  If current directory has no project in `vhdl-project-alist', fetch
-the value from `vhdl-project' instead."
-  (let* ((project (or (vhdl-ext-buffer-proj) vhdl-project))
-         (root (nth 1 (vhdl-aget vhdl-project-alist project)))
-         (dir  (nth 7 (vhdl-aget vhdl-project-alist project))))
-    (when (and root dir)
-      (file-name-concat root dir))))
-
-(defun vhdl-ext-proj-worklib ()
-  "Return the working library name of the current directory project.
-
-Instead of fetching the value from `vhdl-project', it depends on current
-directory.  If current directory has no project in `vhdl-project-alist', fetch
-the value from `vhdl-project' instead.
-
-Return \"work\" if no project is defined.
-
-See `vhdl-work-library'."
-  (let ((project (vhdl-ext-buffer-proj)))
-    (vhdl-resolve-env-variable
-     (or (nth 6 (vhdl-aget vhdl-project-alist (or project vhdl-project)))
-         vhdl-default-library))))
-
-(defun vhdl-ext-proj-files (&optional rescan)
-  "Return file list of the current buffer project.
-
-If optional arg RESCAN is non-nil, force refreshing of current project filelist."
-  (let ((project (vhdl-ext-buffer-proj)))
-    (unless project
-      (user-error "Not in a VHDL project buffer"))
-    ;; Scan project if it's not cached or asked for
-    (when (or rescan
-              (not (vhdl-aget vhdl-file-alist project)))
-      (vhdl-scan-project-contents project))
-    ;; Retrieve filelist
-    (nreverse (mapcar #'expand-file-name
-                      (mapcar #'car
-                              (vhdl-aget vhdl-file-alist project))))))
-
-(defun vhdl-ext-proj-files-rescan ()
-  "Rescan files of current project."
-  (interactive)
-  (vhdl-ext-proj-files :rescan))
-
 
 ;;;; Dirs/files
-(defun vhdl-ext-dir-files (dir &optional follow-symlinks ignore-dirs)
-  "Find VHDL files recursively on DIR.
+(defun vhdl-ext-dir-files (dir &optional recursive follow-symlinks ignore-dirs)
+  "Find VHDL files on DIR.
+
+If RECURSIVE is non-nil find files recursively.
 
 Follow symlinks if optional argument FOLLOW-SYMLINKS is non-nil.
 
@@ -453,9 +436,9 @@ symlink #.test.vhd).
 
 Optional arg IGNORE-DIRS specifies which directories should be excluded from
 search."
-  (let* ((files (directory-files-recursively dir
-                                             vhdl-ext-file-extension-re
-                                             nil nil follow-symlinks))
+  (let* ((files (if recursive
+                    (directory-files-recursively dir vhdl-ext-file-extension-re nil nil follow-symlinks)
+                  (directory-files dir t vhdl-ext-file-extension-re)))
          (files-after-ignored (seq-filter (lambda (file)
                                             ;; Each file checks if it has its prefix in the list of ignored directories
                                             (let (ignore-file)
@@ -488,47 +471,157 @@ search."
     (delete "" (split-string (buffer-substring-no-properties (point-min) (point-max)) "\n"))))
 
 (defun vhdl-ext-file-from-filefile (filelist out-file)
-  "Write FILELIST to FILE as one line per file."
+  "Write FILELIST to OUT-FILE as one line per file."
   (with-temp-file out-file
     (insert (mapconcat #'identity filelist "\n"))))
+
+(defun vhdl-ext-expand-file-list (file-list &optional rel-dir)
+  "Expand files in FILE-LIST.
+
+Expand with respect to REL-DIR if non-nil."
+  (mapcar (lambda (file)
+            (expand-file-name file rel-dir))
+          file-list))
+
+
+;;;; Project
+(defun vhdl-ext-buffer-proj ()
+  "Return current buffer project if it belongs to `vhdl-ext-project-alist'."
+  (catch 'project
+    (when (and buffer-file-name vhdl-ext-project-alist)
+      (dolist (proj vhdl-ext-project-alist)
+        (when (string-prefix-p (expand-file-name (plist-get (cdr proj) :root))
+                               (expand-file-name buffer-file-name))
+          (throw 'project (car proj)))))))
+
+(defun vhdl-ext-buffer-proj-root (&optional project)
+  "Return current buffer PROJECT root if it belongs to `vhdl-ext-project-alist'."
+  (let ((proj (or project (vhdl-ext-buffer-proj))))
+    (when proj
+      (expand-file-name (plist-get (vhdl-aget vhdl-ext-project-alist proj) :root)))))
+
+(defun vhdl-ext-proj-workdir (&optional project)
+  "Return working library dir according to PROJECT of current buffer dir."
+  (let* ((proj (or project (vhdl-ext-buffer-proj)))
+         (root (vhdl-ext-buffer-proj-root proj))
+         (workdir (plist-get (vhdl-aget vhdl-ext-project-alist proj) :workdir)))
+    (when (and root workdir)
+      (file-name-concat root workdir))))
+
+(defun vhdl-ext-proj-worklib (&optional project)
+  "Return the working library name of the current directory PROJECT.
+
+Return `vhdl-default-library' (normally \"work\") if no project is defined.
+
+See `vhdl-work-library'."
+  (let ((proj (or project (vhdl-ext-buffer-proj))))
+    (or (plist-get (vhdl-aget vhdl-ext-project-alist proj) :worklib)
+        vhdl-default-library)))
+
+(defun vhdl-ext-proj-files (&optional project)
+  "Return list of files for PROJECT.
+
+These depend on the value of property list of `vhdl-ext-project-alist'.
+ :dirs - list of strings with optional \"-r\" to find files recursively
+ :ignore-dirs - list of strings of dirs to be ignored
+ :files - list of strings with the files
+ :ignore-files - list of strings of ignored files"
+  (let* ((proj (or project (vhdl-ext-buffer-proj)))
+         (proj-plist (vhdl-aget vhdl-ext-project-alist proj))
+         (proj-root (when proj-plist (expand-file-name (plist-get proj-plist :root))))
+         (proj-dirs (plist-get proj-plist :dirs))
+         (proj-ignore-dirs (plist-get proj-plist :ignore-dirs))
+         (proj-files (plist-get proj-plist :files))
+         (proj-ignore-files (plist-get proj-plist :ignore-files))
+         files-dirs files-all)
+    ;; Basic checks
+    (unless proj
+      (user-error "Not in a VHDL project buffer, check `vhdl-ext-project-alist'"))
+    (unless proj-root
+      (user-error "Project root not set for project %s" proj))
+    ;; Expand filenames
+    (when proj-dirs
+      (setq proj-dirs (vhdl-ext-expand-file-list proj-dirs proj-root)))
+    (when proj-ignore-dirs
+      (setq proj-ignore-dirs (vhdl-ext-expand-file-list proj-ignore-dirs proj-root)))
+    (when proj-files
+      (setq proj-files (vhdl-ext-expand-file-list proj-files proj-root)))
+    (when proj-ignore-files
+      (setq proj-ignore-files (vhdl-ext-expand-file-list proj-ignore-files proj-root)))
+    ;; Analyze directories
+    (when proj-dirs
+      (mapc (lambda (dir)
+              (if (string= "-r" (car (split-string dir)))
+                  (setq files-dirs (append files-dirs (vhdl-ext-dir-files dir :recursive :follow-symlinks proj-ignore-dirs)))
+                (setq files-dirs (append files-dirs (vhdl-ext-dir-files dir nil :follow-symlinks proj-ignore-dirs)))))
+            proj-dirs))
+    ;; Merge and filter
+    (setq files-all (append files-dirs proj-files))
+    (seq-filter (lambda (file)
+                  (not (member file proj-ignore-files)))
+                files-all)))
 
 
 ;;;; Cache
 (defun vhdl-ext-serialize (data filename)
-  "Serialize DATA to FILENAME."
-  (let ((dir (file-name-directory filename)))
+  "Serialize DATA to FILENAME.
+
+Compress cache files if gzip is available."
+  (let ((dir (file-name-directory filename))
+        (gzip-proc-name "vhdl-ext-serialize-compress")
+        (gzip-buf "*vhdl-ext-serialize-compress*"))
     (unless (file-exists-p dir)
       (make-directory dir :parents))
-    (if (file-writable-p filename)
-        (with-temp-file filename
-          (insert (let (print-length) (prin1-to-string data))))
-      (message "Vhdl-ext cache '%s' not writeable" filename))))
+    (if (not (file-writable-p filename))
+        (message "Vhdl-ext cache '%s' not writeable" filename)
+      (with-temp-file filename
+        (insert (let (print-length) (prin1-to-string data))))
+      (when (and vhdl-ext-cache-do-compression
+                 (executable-find "gzip"))
+        ;; Async compressing
+        (start-process-shell-command gzip-proc-name gzip-buf (format "gzip -9f %s" filename))))))
 
 (defun vhdl-ext-unserialize (filename)
   "Read data serialized by `vhdl-ext-serialize' from FILENAME."
-  (with-demoted-errors
-      "Error during file deserialization: %S"
-    (when (file-exists-p filename)
-      (with-temp-buffer
-        (insert-file-contents filename)
-        ;; this will blow up if the contents of the file aren't
-        ;; lisp data structures
-        (read (buffer-string))))))
-
+  (let* ((compressed-filename (concat filename ".gz"))
+         (temp-filename (make-temp-file (concat (file-name-nondirectory filename) "-")))
+         (gzip-buf "*vhdl-ext-serialize-decompress*")
+         (decompress-cmd (format "gunzip -c %s > %s" compressed-filename temp-filename))) ; Keep original compressed file
+    (with-demoted-errors
+        "Error during file deserialization: %S"
+      ;; INFO: Tried using zlib with `zlib-available-p' and
+      ;; `zlib-decompress-region', which are faster.  However, these require the
+      ;; buffer to be unibyte (i.e. have only ASCII characters). That could not
+      ;; be the case for paths with non-latin characters
+      ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Disabling-Multibyte.html
+      (if (and vhdl-ext-cache-do-compression
+               (executable-find "gunzip")
+               (file-exists-p compressed-filename))
+          ;; External gunzip program: This doesn't need to be asynchronous as it will only be done during initial setup
+          (unless (eq 0 (call-process-shell-command decompress-cmd nil gzip-buf t))
+            (error "Error uncompressing %s" compressed-filename))
+        (setq temp-filename filename))
+      (when (file-exists-p temp-filename)
+        (with-temp-buffer
+          (insert-file-contents temp-filename)
+          (delete-file temp-filename)
+          ;; this will blow up if the contents of the file aren't lisp data structures
+          (read (buffer-string)))))))
 
 ;;;; GHDL
 (defun vhdl-ext-ghdl-proj-args ()
   "Return arguments of GHDL command for current buffer project."
-  (let* ((workdir (vhdl-ext-proj-workdir))
+  (let* ((proj (vhdl-ext-buffer-proj))
+         (workdir (vhdl-ext-proj-workdir proj))
          (args (mapconcat #'identity
                           `("-fno-color-diagnostics"
                             ,(concat "--std=" (vhdl-ext-get-standard))
                             ,(concat "--workdir=" workdir)
-                            ,(concat "--work=" (vhdl-ext-proj-worklib)))
+                            ,(concat "--work=" (vhdl-ext-proj-worklib proj)))
                           " "))
          (extra-args (when vhdl-ext-ghdl-extra-args
                        (mapconcat #'identity vhdl-ext-ghdl-extra-args " ")))
-         (dirs (mapcar #'expand-file-name (car (vhdl-aget vhdl-directory-alist (vhdl-ext-buffer-proj)))))
+         (dirs (mapcar #'expand-file-name (plist-get (vhdl-aget vhdl-ext-project-alist proj) :lib-search-path)))
          (dirs-args (mapconcat (lambda (dir) (concat "-P" dir))
                                dirs
                                " ")))

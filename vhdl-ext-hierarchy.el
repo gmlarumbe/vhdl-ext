@@ -55,6 +55,19 @@
 
 
 ;;;; Utils
+(defvar vhdl-ext-hierarchy-entity-alist nil
+  "Per project entity alist.")
+
+(defconst vhdl-ext-hierarchy-async-inject-variables-re
+  (eval-when-compile
+    (regexp-opt '("load-path"
+                  "buffer-file-name"
+                  "default-directory"
+                  "vhdl-ext-feature-list"
+                  "vhdl-ext-project-alist"
+                  "vhdl-ext-hierarchy-backend")
+                'symbols)))
+
 ;;;;; hierarchy.el
 (defconst vhdl-ext-hierarchy-entity-cache-file (file-name-concat user-emacs-directory "vhdl-ext/entity")
   "The file where Vhdl-ext entities will be written to.
@@ -94,14 +107,14 @@ E.g: return \"top.block.subblock\" for \"top.block.subblock.leaf\"."
 Arg ITEM are hierarchy nodes."
   (let* ((prefix (vhdl-ext-hierarchy--get-node-prefix item))
          (leaf (vhdl-ext-hierarchy--get-node-leaf item))
-         (children (cdr (assoc (car (split-string leaf ":")) vhdl-ext-hierarchy-current-flat-hier))))
+         (children (cdr (assoc-string (car (split-string leaf ":")) vhdl-ext-hierarchy-current-flat-hier t))))
     (mapcar (lambda (child) (concat (when prefix (concat prefix ".")) leaf "." child)) children)))
 
 (defun vhdl-ext-hierarchy-extract--construct-node (node hierarchy)
   "Recursively build HIERARCHY for NODE using childrenfn."
   (let ((children (mapcar (lambda (child)
                             (concat node "." child))
-                          (cdr (assoc (vhdl-ext-hierarchy--get-node-leaf node) vhdl-ext-hierarchy-current-flat-hier)))))
+                          (cdr (assoc-string (vhdl-ext-hierarchy--get-node-leaf node) vhdl-ext-hierarchy-current-flat-hier t)))))
     (when children
       (hierarchy-add-tree hierarchy node nil #'vhdl-ext-hierarchy-extract--childrenfn)
       (dolist (child children)
@@ -113,7 +126,7 @@ Arg ITEM are hierarchy nodes."
 
 Entities and instances will be analyzed from corresponding entry in
 `vhdl-ext-hierarchy-current-flat-hier'.  These entries will have an associated
-project present `vhdl-project-alist' and will be of the form:
+project present `vhdl-ext-project-alist' and will be of the form:
  \(entity instance1:NAME1 instance2:NAME2 ...\).
 
 With current prefix, force refreshing of hierarchy database for active project.
@@ -129,14 +142,14 @@ Return populated `hierarchy' struct."
              (message "Forcing refresh of hierarchy database for [%s]" proj)
              (vhdl-ext-hierarchy-parse)
              (setq hierarchy-alist (vhdl-aget vhdl-ext-hierarchy-internal-alist proj)))
-            ((y-or-n-p (format "Empty hierarchy database for [%s]. Run `vhdl-ext-hierarchy-parse'?" proj))
+            ((y-or-n-p (format "Empty hierarchy database for [%s].  Run `vhdl-ext-hierarchy-parse'?" proj))
              (vhdl-ext-hierarchy-parse)
              (setq hierarchy-alist (vhdl-aget vhdl-ext-hierarchy-internal-alist proj)))
             (t
              (user-error "Aborting"))))
-    (unless (assoc entity hierarchy-alist)
+    (unless (assoc-string entity hierarchy-alist t)
       (user-error "Could not find %s in the flat-hierarchy for project [%s]" entity proj))
-    (unless (cdr (assoc entity hierarchy-alist))
+    (unless (cdr (assoc-string entity hierarchy-alist t))
       (user-error "Current entity has no instances"))
     ;; Extract hierarchy
     (setq vhdl-ext-hierarchy-current-flat-hier hierarchy-alist)
@@ -161,6 +174,44 @@ Used to convert hierarchy formats for displaying on different frontends."
           (insert-char unicode-spc offset-blank-spaces)
           (forward-line)))
       (buffer-substring-no-properties (point-min) (point-max)))))
+
+;;;;; Entity-alist
+(defun vhdl-ext-hierarchy-build-entity-alist (files proj)
+  "Build alist of entities for FILES in project PROJ.
+
+Used for hierarchy.el frontend to visit file of entity at point."
+  (let (proj-entity-alist)
+    (dolist (file files)
+      (cond (;; Builtin or GHDL without tree-sitter support
+             (or (eq vhdl-ext-hierarchy-backend 'builtin)
+                 (and (eq vhdl-ext-hierarchy-backend 'ghdl)
+                      (not (treesit-language-available-p 'vhdl))))
+             (with-temp-buffer
+               (insert-file-contents file)
+               (vhdl-ext-with-disabled-messages
+                 (vhdl-ext-with-no-hooks
+                   (vhdl-mode)))
+               (dolist (entity-and-line (vhdl-ext-scan-buffer-entities-and-lines))
+                 (push `(,(car entity-and-line)
+                         ,file
+                         ,(cadr entity-and-line))
+                       proj-entity-alist))))
+            (;; Tree-sitter or GHDL with tree-sitter support
+             (or (eq vhdl-ext-hierarchy-backend 'tree-sitter)
+                 (and (eq vhdl-ext-hierarchy-backend 'ghdl)
+                      (treesit-language-available-p 'vhdl)))
+             (with-temp-buffer
+               (insert-file-contents file)
+               (treesit-parser-create 'vhdl)
+               (dolist (entity-node (vhdl-ts-nodes "\\<entity_declaration\\>"))
+                 (push `(,(vhdl-ts--node-identifier-name entity-node)
+                         ,file
+                         ,(line-number-at-pos (treesit-node-start entity-node)))
+                       proj-entity-alist))))
+            ;; Default, wrong backend
+            (t
+             (error "Wrong backend selected"))))
+    (setf (alist-get proj vhdl-ext-hierarchy-entity-alist nil 'remove 'string=) proj-entity-alist)))
 
 
 ;;;; Backends/extraction
@@ -232,7 +283,7 @@ INDENT-LEVEL is the `current-column' of the parent of current call."
           ;; Add child to parent in `vhdl-ext-hierarchy-ghdl-flat-hier' and find its children
           (progn (unless (member (cons current-node nil) vhdl-ext-hierarchy-ghdl-flat-hier)
                    (push (cons current-node nil) vhdl-ext-hierarchy-ghdl-flat-hier))
-                 (setq instances-list (assoc parent vhdl-ext-hierarchy-ghdl-flat-hier))
+                 (setq instances-list (assoc-string parent vhdl-ext-hierarchy-ghdl-flat-hier t))
                  (setcdr instances-list `(,@(cdr instances-list) ,instance-string))
                  (vhdl-ext-hierarchy-ghdl-parse-output--recursive current-node (current-column)))
         ;; Sibling/parent, go up one recursive call
@@ -248,7 +299,7 @@ Return populated `hierarchy' struct."
   (unless (executable-find "ghdl")
     (error "Executable ghdl not found"))
   (let* ((proj (vhdl-ext-buffer-proj))
-         (proj-workdir (vhdl-ext-proj-workdir))
+         (proj-workdir (vhdl-ext-proj-workdir proj))
          (cached-hierarchy-alist (if current-prefix-arg
                                      nil
                                    (vhdl-aget vhdl-ext-hierarchy-ghdl-alist proj)))
@@ -256,7 +307,7 @@ Return populated `hierarchy' struct."
          (buf vhdl-ext-hierarchy-ghdl-buffer-name)
          (buf-err vhdl-ext-hierarchy-ghdl-shell-cmds-buffer-name)
          (err-msg (format "ghdl returned with errors\nCheck %s buffer" buf-err))
-         (sources (vhdl-ext-proj-files))
+         (sources (vhdl-ext-proj-files proj))
          (sources-filtered `(,@(seq-take-while (lambda (elm) (not (string= elm buffer-file-name))) sources)
                                ,buffer-file-name))
          (elab-snapshot (file-name-concat temporary-file-directory entity))
@@ -289,12 +340,12 @@ Return populated `hierarchy' struct."
       (kill-buffer buf)
       (vhdl-ext-proj-setcdr proj vhdl-ext-hierarchy-ghdl-alist vhdl-ext-hierarchy-ghdl-flat-hier)
       (vhdl-ext-serialize vhdl-ext-hierarchy-ghdl-alist vhdl-ext-hierarchy-ghdl-cache-file)
-      (vhdl-ext-serialize vhdl-entity-alist vhdl-ext-hierarchy-entity-cache-file) ; Updated after initial call to `vhdl-ext-proj-files'
+      (vhdl-ext-serialize vhdl-ext-hierarchy-entity-alist vhdl-ext-hierarchy-entity-cache-file) ; Updated after initial call to `vhdl-ext-proj-files'
       (setq vhdl-ext-hierarchy-current-flat-hier vhdl-ext-hierarchy-ghdl-flat-hier))
     ;; Construct hierarchy struct after setting `vhdl-ext-hierarchy-current-flat-hier'
-    (unless (assoc entity vhdl-ext-hierarchy-current-flat-hier)
+    (unless (assoc-string entity vhdl-ext-hierarchy-current-flat-hier t)
       (user-error "Could not find %s in the flat-hierarchy for project [%s].\nTry running `vhdl-ext-hierarchy-current-buffer' with prefix arg on current buffer" entity proj))
-    (unless (cdr (assoc entity vhdl-ext-hierarchy-current-flat-hier))
+    (unless (cdr (assoc-string entity vhdl-ext-hierarchy-current-flat-hier t))
       (user-error "Current entity has no instances"))
     (vhdl-ext-hierarchy-extract--construct-node entity (hierarchy-new))))
 
@@ -307,7 +358,7 @@ Each alist element car is a found entity in the file.
 These elements cdr are the list of that entity's instances.
 For each entity on the file, get instances of its first associated architecture.
 
-There is however one limitation with regexp builtin parsing.  Since code is not
+There is however one limitation with tree-sitter parsing.  Since code is not
 elaborated, all the instances of all the architectures associated to an entity
 in a file will be merged in the flat hierarchy.
 
@@ -317,14 +368,13 @@ declaration."
   (let (arch-entity-name instances module-instances-alist module-instances-alist-entry)
     (with-temp-buffer
       (insert-file-contents file)
-      (vhdl-ext-with-disabled-messages
-        (vhdl-ts-mode))
+      (treesit-parser-create 'vhdl)
       (dolist (arch-node (vhdl-ts-nodes "architecture_body") module-instances-alist)
         (setq arch-entity-name (vhdl-ts-arch-entity-name arch-node))
         (setq instances nil)
         (dolist (inst-node (vhdl-ts-arch-instances-nodes arch-node))
           (push (concat (vhdl-ts--node-identifier-name inst-node) ":" (vhdl-ts--node-instance-name inst-node)) instances))
-        (if (setq module-instances-alist-entry (assoc arch-entity-name module-instances-alist))
+        (if (setq module-instances-alist-entry (assoc-string arch-entity-name module-instances-alist t))
             ;; Merge all the instances of current architecture for associated entity
             (setcdr module-instances-alist-entry `(,@(cdr module-instances-alist-entry) ,@(nreverse instances)))
           ;; Create new entry for the entity
@@ -358,10 +408,11 @@ declaration."
     (with-temp-buffer
       (insert-file-contents file)
       (vhdl-ext-with-disabled-messages
-        (vhdl-mode))
+        (vhdl-ext-with-no-hooks
+          (vhdl-mode)))
       (setq entities (vhdl-ext-scan-buffer-entities))
       (while (vhdl-re-search-forward vhdl-ext-architecture-re nil t)
-        (setq entity (downcase (match-string-no-properties 4)))
+        (setq entity (match-string-no-properties 4))
         (when (member entity entities)
           (setq instances nil)
           ;; To calculate the architecture end point, we could call
@@ -376,7 +427,7 @@ declaration."
                              (match-beginning 0))))
           (while (vhdl-ext-find-entity-instance-fwd arch-end)
             (push (concat (match-string-no-properties 6) ":" (match-string-no-properties 1)) instances))
-          (if (setq module-instances-alist-entry (assoc entity module-instances-alist))
+          (if (setq module-instances-alist-entry (assoc-string entity module-instances-alist t))
               ;; Merge all the instances of current architecture for associated entity
               (setcdr module-instances-alist-entry `(,@(cdr module-instances-alist-entry) ,@(nreverse instances)))
             ;; Create new entry for the entity
@@ -397,9 +448,8 @@ and instances."
 (defun vhdl-ext-hierarchy-twidget-nav-open (&optional other-window)
   "Find definition of node/module at point.
 
-Looks at value of `vhdl-entity-alist' to check definition place of entities.
-Requires scanning of current project through `vhdl-ext-proj-files' calling
-`vhdl-scan-project-contents'.
+Looks at value of `vhdl-ext-hierarchy-entity-alist' to check definition place of
+entities.
 
 If optional arg OTHER-WINDOW is non-nil find definition in other window."
   (interactive)
@@ -409,10 +459,11 @@ If optional arg OTHER-WINDOW is non-nil find definition in other window."
                   (thing-at-point 'symbol :no-props)))
         entities-files file line)
     (when entity
-      (setq entities-files (vhdl-aget vhdl-entity-alist
+      (setq entities-files (vhdl-aget vhdl-ext-hierarchy-entity-alist
+                                      ;; INFO: Assumes that hierarchy buffer name is `vhdl-ext-buffer-proj' with stars
                                       (string-remove-prefix "*" (string-remove-suffix "*" (buffer-name)))))
-      (setq file (nth 2 (assoc entity entities-files)))
-      (setq line (nth 3 (assoc entity entities-files)))
+      (setq file (nth 1 (assoc-string entity entities-files t)))
+      (setq line (nth 2 (assoc-string entity entities-files t)))
       (if (and file line)
           (progn
             (if other-window
@@ -421,7 +472,7 @@ If optional arg OTHER-WINDOW is non-nil find definition in other window."
             (goto-char (point-min))
             (forward-line (1- line))
             (recenter '(4) t))
-        (user-error "Could not find %s in `vhdl-entity-alist'" entity)))))
+        (user-error "Could not find %s in `vhdl-ext-hierarchy-entity-alist'" entity)))))
 
 (defun vhdl-ext-hierarchy-twidget-nav-open-other-window ()
   "Find definition of node/module at point in other window."
@@ -594,7 +645,7 @@ If these have been set before, keep their values."
     ;; Cache
     (setq vhdl-ext-hierarchy-internal-alist (vhdl-ext-unserialize vhdl-ext-hierarchy-internal-cache-file))
     (setq vhdl-ext-hierarchy-ghdl-alist (vhdl-ext-unserialize vhdl-ext-hierarchy-ghdl-cache-file))
-    (setq vhdl-entity-alist (vhdl-ext-unserialize vhdl-ext-hierarchy-entity-cache-file))))
+    (setq vhdl-ext-hierarchy-entity-alist (vhdl-ext-unserialize vhdl-ext-hierarchy-entity-cache-file))))
 
 (defun vhdl-ext-hierarchy-clear-cache ()
   "Clear hierarchy cache file."
@@ -650,21 +701,20 @@ extraction and display.
 With current-prefix or VERBOSE, dump output log."
   (interactive "P")
   (let* ((proj (vhdl-ext-buffer-proj))
-         (files (vhdl-ext-proj-files))
+         (files (vhdl-ext-proj-files proj))
          (num-files (length files))
          (num-files-processed 0)
          (log-file (concat vhdl-ext-hierarchy-internal-cache-file ".log"))
-         msg progress flat-hierarchy data)
+         (hier-progress-reporter (make-progress-reporter "[Hierarchy parsing]: " 0 num-files))
+         flat-hierarchy data)
     (unless files
-      (error "No files found for current buffer project.  Set `vhdl-project-alist' accordingly?"))
+      (error "No files found for current buffer project.  Set `vhdl-ext-project-alist' accordingly?"))
     (when verbose
       (delete-file log-file))
     (dolist (file files)
-      (setq progress (/ (* num-files-processed 100) num-files))
-      (setq msg (format "(%0d%%) [Hierarchy parsing] Processing %s" progress file))
       (when verbose
-        (append-to-file (concat msg "\n") nil log-file))
-      (message "%s" msg)
+        (append-to-file (format "(%0d%%) [Hierarchy parsing] Processing %s\n" (/ (* num-files-processed 100) num-files) file) nil log-file))
+      (progress-reporter-update hier-progress-reporter num-files-processed (format "[%s]" file))
       (setq data (cond ((eq vhdl-ext-hierarchy-backend 'tree-sitter)
                         (vhdl-ext-hierarchy-tree-sitter-parse-file file))
                        ((eq vhdl-ext-hierarchy-backend 'builtin)
@@ -677,10 +727,11 @@ With current-prefix or VERBOSE, dump output log."
       (setq num-files-processed (1+ num-files-processed)))
     ;; Update hierarchy and entity alists and cache
     (vhdl-ext-proj-setcdr proj vhdl-ext-hierarchy-internal-alist flat-hierarchy)
+    (vhdl-ext-hierarchy-build-entity-alist files proj)
     (vhdl-ext-serialize vhdl-ext-hierarchy-internal-alist vhdl-ext-hierarchy-internal-cache-file)
-    (vhdl-ext-serialize vhdl-entity-alist vhdl-ext-hierarchy-entity-cache-file) ; Updated after initial call to `vhdl-ext-proj-files'
+    (vhdl-ext-serialize vhdl-ext-hierarchy-entity-alist vhdl-ext-hierarchy-entity-cache-file) ; Updated after initial call to `vhdl-ext-proj-files'
     ;; Return value for async related function
-    (list vhdl-ext-hierarchy-internal-alist vhdl-entity-alist)))
+    (list vhdl-ext-hierarchy-internal-alist vhdl-ext-hierarchy-entity-alist)))
 
 (defun vhdl-ext-hierarchy-parse-async (&optional verbose)
   "Return flat hierarchy of modules and instances of project asynchronously.
@@ -693,16 +744,16 @@ With current-prefix or VERBOSE, dump output log."
   (message "Starting hierarchy parsing for %s" (vhdl-ext-buffer-proj))
   (async-start
    `(lambda ()
-      ,(async-inject-variables "\\`\\(load-path\\|buffer-file-name\\|default-directory\\|vhdl-ext-feature-list\\|vhdl-project-alist\\)")
+      ,(async-inject-variables vhdl-ext-hierarchy-async-inject-variables-re)
       (require 'vhdl-ext)
       ;; Preserve cache on child Emacs process
       (setq vhdl-ext-hierarchy-internal-alist (vhdl-ext-unserialize vhdl-ext-hierarchy-internal-cache-file))
-      (setq vhdl-entity-alist (vhdl-ext-unserialize vhdl-ext-hierarchy-entity-cache-file))
+      (setq vhdl-ext-hierarchy-entity-alist (vhdl-ext-unserialize vhdl-ext-hierarchy-entity-cache-file))
       (vhdl-ext-hierarchy-parse ,@verbose))
    (lambda (result)
      (message "Finished analyzing hierarchy!")
      (setq vhdl-ext-hierarchy-internal-alist (car result))
-     (setq vhdl-entity-alist (cadr result)))))
+     (setq vhdl-ext-hierarchy-entity-alist (cadr result)))))
 
 (defun vhdl-ext-hierarchy-current-buffer ()
   "Extract and display hierarchy for module of `current-buffer'."

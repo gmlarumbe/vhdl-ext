@@ -29,7 +29,7 @@
 ;; - (vhdl-ext-compile-ghdl (concat "ghdl -s " buffer-file-name))
 ;;
 ;; It also includes a function to compile current project of
-;; `vhdl-project-alist' with GHDL: `vhdl-ext-compile-ghdl-project'
+;; `vhdl-ext-project-alist' with GHDL: `vhdl-ext-compile-ghdl-project'
 ;;
 ;;; Code:
 
@@ -116,31 +116,31 @@ ARGS is a property list."
   :comp-mode vhdl-ext-compile-ghdl-mode)
 
 (defun vhdl-ext-compile-ghdl-project ()
-  "Compile current project from `vhdl-project-alist' using GHDL.
+  "Compile current project from `vhdl-ext-project-alist' using GHDL.
 
-Files in `vhdl-project-alist' need to be in the correct order.
+Files in `vhdl-ext-project-alist' need to be in the correct order.
 According to GHDL documentation:
  - GHDL analyzes each filename in the given order, and stops the analysis in
 case of error (the following files are not analyzed)."
   (interactive)
-  (let* ((project (vhdl-ext-buffer-proj))
-         (root (nth 1 (vhdl-aget vhdl-project-alist (or project vhdl-project))))
-         (workdir (vhdl-ext-proj-workdir))
-         sources sources-filtered)
-    ;; Get sources and put them in the expected order
-    (setq sources (vhdl-ext-proj-files))
-    (setq sources-filtered (seq-take-while (lambda (elm) (not (string= elm buffer-file-name))) sources))
+  (let* ((proj (vhdl-ext-buffer-proj))
+         (root (vhdl-ext-buffer-proj-root proj))
+         (workdir (vhdl-ext-proj-workdir proj))
+         ;; Get files and put them in the expected order
+         (files (vhdl-ext-proj-files proj))
+         (files-filtered (seq-take-while (lambda (elm) (not (string= elm buffer-file-name))) files)))
     ;; Create workdir if it does not exist
     (unless (and (file-exists-p workdir)
                  (file-directory-p workdir))
       (make-directory workdir :parents))
     ;; Compile current buffer
-    (vhdl-ext-compile-ghdl (concat "cd " root " && "
-                                   "ghdl -a "
-                                   "-fno-color-diagnostics "
-                                   (vhdl-ext-ghdl-proj-args) " "
-                                   (mapconcat #'identity sources-filtered " ") " "
-                                   buffer-file-name))))
+    (vhdl-ext-compile-ghdl (mapconcat #'identity
+                                      `("cd" ,root "&&"
+                                        "ghdl" "-a" "-fno-color-diagnostics"
+                                        ,(vhdl-ext-ghdl-proj-args)
+                                        ,(mapconcat #'identity files-filtered " ")
+                                        ,buffer-file-name)
+                                      " "))))
 
 
 (provide 'vhdl-ext-compile)

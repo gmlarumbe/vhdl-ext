@@ -162,6 +162,8 @@ FEATURES can be a single feature or a list of features."
     (vhdl-ext-when-feature 'ports
       (define-key map (kbd "C-c C-c t") 'vhdl-ext-ports-toggle-connect)
       (define-key map (kbd "C-c C-c r") 'vhdl-ext-ports-connect-recursively))
+    (vhdl-ext-when-feature '(capf xref)
+      (define-key map (kbd "C-c C-u") 'vhdl-ext-tags-get))
     map)
   "Key map for the `vhdl-ext'.")
 

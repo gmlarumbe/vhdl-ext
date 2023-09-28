@@ -32,9 +32,8 @@
   "Vhdl-ext xref customization."
   :group 'vhdl-ext)
 
-(defcustom vhdl-ext-xref-match-face 'font-lock-warning-face
-  "Vhdl-ext face used to highlight matches in xref ."
-  :type '(repeat string)
+(defface vhdl-ext-xref-match-face '((t :inherit match))
+  "Vhdl-ext face used to highlight matches in xref."
   :group 'vhdl-ext-xref)
 
 
@@ -62,9 +61,9 @@
       (dolist (loc entry-locs-sorted)
         (setq file (plist-get loc :file))
         (setq line (plist-get loc :line))
-        (setq column nil)
+        (setq column (plist-get loc :col))
         (setq desc (replace-regexp-in-string (concat "\\_<" symbol "\\_>")
-                                             (propertize symbol 'face vhdl-ext-xref-match-face)
+                                             (propertize symbol 'face 'vhdl-ext-xref-match-face)
                                              (plist-get loc :desc)
                                              :fixedcase))
         (push (xref-make desc (xref-make-file-location file line column)) xref-entries)))

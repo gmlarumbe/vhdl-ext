@@ -78,10 +78,10 @@ See URL `https://github.com/ghdl/ghdl'."
   :command ("ghdl"
             "-s" ; only do the syntax checking
             (option "--std=" flycheck-ghdl-language-standard concat) ; Set by `vhdl-ext' based on `vhdl-standard'
-            (option "--workdir=" flycheck-ghdl-workdir concat) ; Set by `vhdl-ext' based on `vhdl-project-alist'
+            (option "--workdir=" flycheck-ghdl-workdir concat) ; Set by `vhdl-ext' based on `vhdl-ext-project-alist'
             (option "--ieee=" flycheck-ghdl-ieee-library concat)
             ;; Additional options
-            (option "--work=" flycheck-ghdl-work-lib concat) ; Set by `vhdl-ext' based on `vhdl-project-alist'
+            (option "--work=" flycheck-ghdl-work-lib concat) ; Set by `vhdl-ext' based on `vhdl-ext-project-alist'
             (eval vhdl-ext-flycheck-ghdl-extra-args)
             ;; Extra dirs and files
             (option-list "-P" vhdl-ext-flycheck-ghdl-include-path concat)
@@ -115,7 +115,7 @@ See URL `https://github.com/VHDL-LS/rust_hdl'."
 (defun vhdl-ext-flycheck-vhdl-tool-directory-fn (_checker)
   "Return directory where vhdl-tool is executed.
 Needed to keep in sync where the server and the client are run."
-  (vhdl-ext-project-root))
+  (vhdl-ext-buffer-proj-root))
 
 ;; https://git.vhdltool.com/vhdl-tool/configs/src/master/emacs
 (flycheck-define-checker vhdl-tool
@@ -139,9 +139,9 @@ See URL `http://vhdltool.com'."
      (unless (locate-dominating-file buffer-file-name flycheck-vhdl-lang-config-file)
        (error "Could not find \"vhdl_lang.toml\" in project root!")))
     ('vhdl-tool
-     (let ((buf (concat " *vhdl-tool-server@" (vhdl-ext-project-root) "*")))
+     (let ((buf (concat " *vhdl-tool-server@" (vhdl-ext-buffer-proj-root) "*")))
        (unless (get-buffer-process buf)
-         (start-process-shell-command buf buf (concat "cd " (vhdl-ext-project-root) " && vhdl-tool server"))
+         (start-process-shell-command buf buf (concat "cd " (vhdl-ext-buffer-proj-root) " && vhdl-tool server"))
          (message "Started process @ %s" buf))))))
 
 (defun vhdl-ext-flycheck-set-linter (&optional linter)
