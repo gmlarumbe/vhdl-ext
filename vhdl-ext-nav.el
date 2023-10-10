@@ -141,6 +141,7 @@ command.")
 
 (defun vhdl-ext-jump-to-parent-entity ()
   "Find current module/interface instantiations via `ag'/`rg'.
+
 Configuration should be done so that `vhdl-ext-navigation-ag-rg-hook' is run
 after the search has been done."
   (interactive)

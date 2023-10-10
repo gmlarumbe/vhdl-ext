@@ -69,11 +69,11 @@
                 'symbols)))
 
 ;;;;; hierarchy.el
-(defconst vhdl-ext-hierarchy-entity-cache-file (file-name-concat user-emacs-directory "vhdl-ext/entity")
+(defconst vhdl-ext-hierarchy-entity-cache-file (file-name-concat vhdl-ext-cache-dir "entity")
   "The file where Vhdl-ext entities will be written to.
 Used to navigate definitions with `vhdl-ext-hierarchy-twidget-nav-open'.")
 
-(defconst vhdl-ext-hierarchy-internal-cache-file (file-name-concat user-emacs-directory "vhdl-ext/hierarchy-builtin")
+(defconst vhdl-ext-hierarchy-internal-cache-file (file-name-concat vhdl-ext-cache-dir "hierarchy-builtin")
   "The file where Vhdl-ext builtin/tree-sitter hierarchies will be written to.")
 
 (defvar vhdl-ext-hierarchy-internal-alist nil
@@ -223,7 +223,7 @@ Used for hierarchy.el frontend to visit file of entity at point."
 (defconst vhdl-ext-hierarchy-ghdl-sim-args '("--ieee-asserts=disable-at-0"
                                              "--disp-tree=inst"))
 
-(defconst vhdl-ext-hierarchy-ghdl-cache-file (file-name-concat user-emacs-directory "vhdl-ext/hierarchy-ghdl")
+(defconst vhdl-ext-hierarchy-ghdl-cache-file (file-name-concat vhdl-ext-cache-dir "hierarchy-ghdl")
   "The file where Vhdl-ext GHDL hierarchy will be written to.")
 
 (defvar vhdl-ext-hierarchy-ghdl-flat-hier nil)
@@ -340,6 +340,7 @@ Return populated `hierarchy' struct."
       (kill-buffer buf)
       (vhdl-ext-proj-setcdr proj vhdl-ext-hierarchy-ghdl-alist vhdl-ext-hierarchy-ghdl-flat-hier)
       (vhdl-ext-serialize vhdl-ext-hierarchy-ghdl-alist vhdl-ext-hierarchy-ghdl-cache-file)
+      (vhdl-ext-hierarchy-build-entity-alist sources-filtered proj)
       (vhdl-ext-serialize vhdl-ext-hierarchy-entity-alist vhdl-ext-hierarchy-entity-cache-file) ; Updated after initial call to `vhdl-ext-proj-files'
       (setq vhdl-ext-hierarchy-current-flat-hier vhdl-ext-hierarchy-ghdl-flat-hier))
     ;; Construct hierarchy struct after setting `vhdl-ext-hierarchy-current-flat-hier'
@@ -362,8 +363,8 @@ There is however one limitation with tree-sitter parsing.  Since code is not
 elaborated, all the instances of all the architectures associated to an entity
 in a file will be merged in the flat hierarchy.
 
-Instances have module:INST format to make them unique for `hierarchy'
-displaying.  Modules have no instance name since they are parsed on its
+Instances have entity:INST format to make them unique for `hierarchy'
+displaying.  Entities have no instance name since they are parsed on its
 declaration."
   (let (arch-entity-name instances module-instances-alist module-instances-alist-entry)
     (with-temp-buffer
@@ -445,6 +446,17 @@ and instances."
 
 ;;;; Frontends/navigation
 ;;;;; hierarchy.el
+(defun vhdl-ext-hierarchy-twidget-buf--name ()
+  "Return buffer name for twidget hierarchy buffer."
+  (concat "*" (vhdl-ext-buffer-proj) "*"))
+
+(defun vhdl-ext-hierarchy-twidget--buf-project ()
+  "Return current project from twidget buffer name.
+
+Assumes that hierarchy buffer name is `vhdl-ext-buffer-proj' with stars.
+See `vhdl-ext-hierarchy-twidget-buf--name'."
+  (string-remove-prefix "*" (string-remove-suffix "*" (buffer-name))))
+
 (defun vhdl-ext-hierarchy-twidget-nav-open (&optional other-window)
   "Find definition of node/module at point.
 
@@ -459,9 +471,7 @@ If optional arg OTHER-WINDOW is non-nil find definition in other window."
                   (thing-at-point 'symbol :no-props)))
         entities-files file line)
     (when entity
-      (setq entities-files (vhdl-aget vhdl-ext-hierarchy-entity-alist
-                                      ;; INFO: Assumes that hierarchy buffer name is `vhdl-ext-buffer-proj' with stars
-                                      (string-remove-prefix "*" (string-remove-suffix "*" (buffer-name)))))
+      (setq entities-files (vhdl-aget vhdl-ext-hierarchy-entity-alist (vhdl-ext-hierarchy-twidget--buf-project)))
       (setq file (nth 1 (assoc-string entity entities-files t)))
       (setq line (nth 2 (assoc-string entity entities-files t)))
       (if (and file line)
@@ -523,7 +533,7 @@ Show only module name, discard instance name after colon (mod:INST)."
    (hierarchy-tree-display
     hierarchy
     (lambda (item _) (insert (car (split-string (vhdl-ext-hierarchy--get-node-leaf item) ":"))))
-    (get-buffer-create (concat "*" (vhdl-ext-buffer-proj) "*"))))
+    (get-buffer-create (vhdl-ext-hierarchy-twidget-buf--name))))
   ;; Navigation mode and initial expansion
   (vhdl-ext-hierarchy-twidget-nav-mode)
   (when vhdl-ext-hierarchy-twidget-init-expand
@@ -626,7 +636,19 @@ Expects HIERARCHY to be a indented string."
       (vhdl-ext-hierarchy-outshine-nav-mode))
     (pop-to-buffer buf)))
 
-;;;; Common/autoloads
+;;;; Core
+(defun vhdl-ext-hierarchy-serialize ()
+  "Write variables to their cache files."
+  (vhdl-ext-serialize vhdl-ext-hierarchy-internal-alist vhdl-ext-hierarchy-internal-cache-file)
+  (vhdl-ext-serialize vhdl-ext-hierarchy-ghdl-alist vhdl-ext-hierarchy-ghdl-cache-file)
+  (vhdl-ext-serialize vhdl-ext-hierarchy-entity-alist vhdl-ext-hierarchy-entity-cache-file))
+
+(defun vhdl-ext-hierarchy-unserialize ()
+  "Read cache files into their corresponding variables."
+  (setq vhdl-ext-hierarchy-internal-alist (vhdl-ext-unserialize vhdl-ext-hierarchy-internal-cache-file))
+  (setq vhdl-ext-hierarchy-ghdl-alist (vhdl-ext-unserialize vhdl-ext-hierarchy-ghdl-cache-file))
+  (setq vhdl-ext-hierarchy-entity-alist (vhdl-ext-unserialize vhdl-ext-hierarchy-entity-cache-file)))
+
 (defun vhdl-ext-hierarchy-setup ()
   "Setup hierarchy backend/frontend depending on available binaries/packages.
 If these have been set before, keep their values."
@@ -643,19 +665,27 @@ If these have been set before, keep their values."
     (setq vhdl-ext-hierarchy-backend backend)
     (setq vhdl-ext-hierarchy-frontend frontend)
     ;; Cache
-    (setq vhdl-ext-hierarchy-internal-alist (vhdl-ext-unserialize vhdl-ext-hierarchy-internal-cache-file))
-    (setq vhdl-ext-hierarchy-ghdl-alist (vhdl-ext-unserialize vhdl-ext-hierarchy-ghdl-cache-file))
-    (setq vhdl-ext-hierarchy-entity-alist (vhdl-ext-unserialize vhdl-ext-hierarchy-entity-cache-file))))
+    (vhdl-ext-hierarchy-unserialize)))
 
-(defun vhdl-ext-hierarchy-clear-cache ()
-  "Clear hierarchy cache file."
-  (interactive)
-  (setq vhdl-ext-hierarchy-internal-alist nil)
-  (setq vhdl-ext-hierarchy-ghdl-alist nil)
-  (vhdl-ext-serialize nil vhdl-ext-hierarchy-internal-cache-file)
-  (vhdl-ext-serialize nil vhdl-ext-hierarchy-ghdl-cache-file)
-  (vhdl-ext-serialize nil vhdl-ext-hierarchy-entity-cache-file)
-  (message "Cleared hierarchy cache!"))
+(defun vhdl-ext-hierarchy-clear-cache (&optional all)
+  "Clear hierarchy cache files for current project.
+
+With prefix arg, clear cache for ALL projects."
+  (interactive "P")
+  (if (not all)
+      (let ((proj (vhdl-ext-buffer-proj)))
+        (unless proj
+          (user-error "Not in a VHDL project buffer"))
+        (vhdl-ext-proj-setcdr proj vhdl-ext-hierarchy-internal-alist nil)
+        (vhdl-ext-proj-setcdr proj vhdl-ext-hierarchy-ghdl-alist nil)
+        (vhdl-ext-proj-setcdr proj vhdl-ext-hierarchy-entity-alist nil)
+        (vhdl-ext-hierarchy-serialize)
+        (message "[%s] Cleared hierarchy cache!" proj))
+    (setq vhdl-ext-hierarchy-internal-alist nil)
+    (setq vhdl-ext-hierarchy-ghdl-alist nil)
+    (setq vhdl-ext-hierarchy-entity-alist nil)
+    (vhdl-ext-hierarchy-serialize)
+    (message "Cleared hierarchy cache!")))
 
 (defun vhdl-ext-hierarchy-extract (entity)
   "Construct hierarchy for ENTITY depending on selected backend."
@@ -756,7 +786,7 @@ With current-prefix or VERBOSE, dump output log."
      (setq vhdl-ext-hierarchy-entity-alist (cadr result)))))
 
 (defun vhdl-ext-hierarchy-current-buffer ()
-  "Extract and display hierarchy for module of `current-buffer'."
+  "Extract and display hierarchy for entity of `current-buffer'."
   (interactive)
   (let* ((entity (vhdl-ext-select-file-entity))
          (hierarchy (vhdl-ext-hierarchy-extract entity)))

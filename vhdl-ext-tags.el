@@ -43,6 +43,12 @@
 ;;
 ;;; Code:
 
+(require 'async)
+(require 'map)
+(require 'vhdl-ts-mode)
+(require 'vhdl-ext-utils)
+
+
 (defcustom vhdl-ext-tags-fontify-matches t
   "Set to non-nil to fontify matches for xref.
 
@@ -50,11 +56,6 @@ This setting slightly increases processing time of `vhdl-ext-tags-get'."
   :type 'boolean
   :group 'vhdl-ext)
 
-
-(require 'async)
-(require 'map)
-(require 'vhdl-ts-mode)
-(require 'vhdl-ext-utils)
 
 (defvar vhdl-ext-tags-file-hashes nil)
 
@@ -70,25 +71,24 @@ This setting slightly increases processing time of `vhdl-ext-tags-get'."
 (defvar vhdl-ext-tags-inst-current-file nil)
 (defvar vhdl-ext-tags-refs-current-file nil)
 
-(defconst vhdl-ext-tags-cache-dir (file-name-concat user-emacs-directory "vhdl-ext")
-  "The directory where vhdl-ext cache files will be placed at.")
-
-(defconst vhdl-ext-tags-defs-file-tables-cache-file (file-name-concat vhdl-ext-tags-cache-dir "defs-file-tables")
+(defconst vhdl-ext-tags-defs-file-tables-cache-file (file-name-concat vhdl-ext-cache-dir "defs-file-tables")
   "The file where `vhdl-ext' defs-file-tables will be written to.")
-(defconst vhdl-ext-tags-refs-file-tables-cache-file (file-name-concat vhdl-ext-tags-cache-dir "refs-file-tables")
+(defconst vhdl-ext-tags-refs-file-tables-cache-file (file-name-concat vhdl-ext-cache-dir "refs-file-tables")
   "The file where `vhdl-ext' refs-file-tables will be written to.")
-(defconst vhdl-ext-tags-inst-file-tables-cache-file (file-name-concat vhdl-ext-tags-cache-dir "inst-file-tables")
+(defconst vhdl-ext-tags-inst-file-tables-cache-file (file-name-concat vhdl-ext-cache-dir "inst-file-tables")
   "The file where `vhdl-ext' inst-file-tables will be written to.")
 
-(defconst vhdl-ext-tags-defs-table-cache-file (file-name-concat vhdl-ext-tags-cache-dir "defs-table")
+(defconst vhdl-ext-tags-defs-table-cache-file (file-name-concat vhdl-ext-cache-dir "defs-table")
   "The file where `vhdl-ext' defs-table will be written to.")
-(defconst vhdl-ext-tags-refs-table-cache-file (file-name-concat vhdl-ext-tags-cache-dir "refs-table")
+(defconst vhdl-ext-tags-refs-table-cache-file (file-name-concat vhdl-ext-cache-dir "refs-table")
   "The file where `vhdl-ext' refs-table will be written to.")
-(defconst vhdl-ext-tags-inst-table-cache-file (file-name-concat vhdl-ext-tags-cache-dir "inst-table")
+(defconst vhdl-ext-tags-inst-table-cache-file (file-name-concat vhdl-ext-cache-dir "inst-table")
   "The file where `vhdl-ext' inst-table will be written to.")
 
-(defconst vhdl-ext-tags-file-hashes-cache-file (file-name-concat vhdl-ext-tags-cache-dir "file-hashes")
+(defconst vhdl-ext-tags-file-hashes-cache-file (file-name-concat vhdl-ext-cache-dir "file-hashes")
   "The file where `vhdl-ext' file-hashes will be written to.")
+
+(defconst vhdl-ext-tags-cache-log-file (file-name-concat vhdl-ext-cache-dir "tags.log"))
 
 (defconst vhdl-ext-tags-async-inject-variables-re
   (eval-when-compile
@@ -298,6 +298,8 @@ Update hash table `vhdl-ext-tags-refs-current-file'."
                    :col ,(current-column))
                  vhdl-ext-tags-refs-current-file)))))
 
+
+;;;; Tags collection and cache
 (defun vhdl-ext-tags-proj-init (proj)
   "Initialize value of PROJ variables and hash-tables needed for tags collection."
   (dolist (var '(vhdl-ext-tags-file-hashes
@@ -393,7 +395,7 @@ With current-prefix or VERBOSE, dump output log."
          (files-removed (seq-difference (map-keys (vhdl-aget vhdl-ext-tags-file-hashes proj)) files))
          (num-files (+ (length files-removed) (length files)))
          (num-files-processed 0)
-         (log-file (file-name-concat vhdl-ext-tags-cache-dir "tags.log"))
+         (log-file vhdl-ext-tags-cache-log-file)
          (tags-progress-reporter (make-progress-reporter "[Tags collection]: " 0 num-files)))
     (vhdl-ext-tags-proj-init proj)
     (when verbose
@@ -414,19 +416,20 @@ With current-prefix or VERBOSE, dump output log."
   "Create tags table asynchronously.
 With current-prefix or VERBOSE, dump output log."
   (interactive "P")
-  (unless (vhdl-ext-buffer-proj-root)
-    (user-error "Not in a VHDL project buffer"))
-  (message "Starting tag collection for %s" (vhdl-ext-buffer-proj-root))
-  (async-start
-   `(lambda ()
-      ,(async-inject-variables vhdl-ext-tags-async-inject-variables-re)
-      (require 'vhdl-ext)
-      (vhdl-ext-tags-unserialize)   ; Read environment in child process
-      (vhdl-ext-tags-get ,@verbose) ; Update variables in child process
-      (vhdl-ext-tags-serialize))    ; Update cache file in childe process
-   (lambda (_result)
-     (vhdl-ext-tags-unserialize)
-     (message "Finished collection of tags!")))) ; Update parent process from cache file
+  (let ((proj-root (vhdl-ext-buffer-proj-root)))
+    (unless proj-root
+      (user-error "Not in a VHDL project buffer"))
+    (message "Starting tag collection for %s" proj-root)
+    (async-start
+     `(lambda ()
+        ,(async-inject-variables vhdl-ext-tags-async-inject-variables-re)
+        (require 'vhdl-ext)
+        (vhdl-ext-tags-unserialize)   ; Read environment in child process
+        (vhdl-ext-tags-get ,@verbose) ; Update variables in child process
+        (vhdl-ext-tags-serialize))    ; Update cache file in childe process
+     (lambda (_result)
+       (vhdl-ext-tags-unserialize)
+       (message "Finished collection of tags!"))))) ; Update parent process from cache file
 
 (defun vhdl-ext-tags-serialize ()
   "Write variables to their cache files."

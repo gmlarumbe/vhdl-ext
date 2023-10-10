@@ -121,7 +121,7 @@ See available types in `vhdl-ext-tags-definitions-ts-re'."
          (entry (or (and defs-table (gethash cand defs-table))
                     (and inst-table (gethash cand inst-table))))
          (locs (plist-get entry :locs))
-         (type (plist-get (car locs) :type)))
+         (type (plist-get (car locs) :type))) ; INFO: Getting the type of the first appearance
     (pcase type
       ("entity_declaration"                "<ent>")
       ("architecture_body"                 "<arch>")

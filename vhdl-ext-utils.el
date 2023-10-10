@@ -102,6 +102,9 @@ GHDL related:
 (defvar vhdl-ext-dir-list nil)
 (defvar vhdl-ext-file-list nil)
 
+(defconst vhdl-ext-cache-dir (file-name-concat user-emacs-directory "vhdl-ext")
+  "The directory where vhdl-ext cache files will be placed at.")
+
 (defconst vhdl-ext-lsp-available-servers
   '((ve-hdl-checker . ("hdl_checker" "--lsp"))
     (ve-rust-hdl    . "vhdl_ls")
@@ -506,7 +509,7 @@ Expand with respect to REL-DIR if non-nil."
          (root (vhdl-ext-buffer-proj-root proj))
          (workdir (plist-get (vhdl-aget vhdl-ext-project-alist proj) :workdir)))
     (when (and root workdir)
-      (file-name-concat root workdir))))
+      (expand-file-name workdir root))))
 
 (defun vhdl-ext-proj-worklib (&optional project)
   "Return the working library name of the current directory PROJECT.
@@ -539,9 +542,7 @@ These depend on the value of property list of `vhdl-ext-project-alist'.
       (user-error "Not in a VHDL project buffer, check `vhdl-ext-project-alist'"))
     (unless proj-root
       (user-error "Project root not set for project %s" proj))
-    ;; Expand filenames
-    (when proj-dirs
-      (setq proj-dirs (vhdl-ext-expand-file-list proj-dirs proj-root)))
+    ;; Expand filenames (except for proj-dirs since they need to parse the -r recursive flag)
     (when proj-ignore-dirs
       (setq proj-ignore-dirs (vhdl-ext-expand-file-list proj-ignore-dirs proj-root)))
     (when proj-files
@@ -552,10 +553,11 @@ These depend on the value of property list of `vhdl-ext-project-alist'.
     (when proj-dirs
       (mapc (lambda (dir)
               (if (string= "-r" (car (split-string dir)))
-                  (setq files-dirs (append files-dirs (vhdl-ext-dir-files dir :recursive :follow-symlinks proj-ignore-dirs)))
-                (setq files-dirs (append files-dirs (vhdl-ext-dir-files dir nil :follow-symlinks proj-ignore-dirs)))))
+                  (setq files-dirs (append files-dirs (vhdl-ext-dir-files (expand-file-name (cadr (split-string dir)) proj-root) :recursive :follow-symlinks proj-ignore-dirs)))
+                (setq files-dirs (append files-dirs (vhdl-ext-dir-files (expand-file-name dir proj-root) nil :follow-symlinks proj-ignore-dirs)))))
             proj-dirs))
     ;; Merge and filter
+    (setq files-dirs (delete-dups files-dirs))
     (setq files-all (append files-dirs proj-files))
     (seq-filter (lambda (file)
                   (not (member file proj-ignore-files)))

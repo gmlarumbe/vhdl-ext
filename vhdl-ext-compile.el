@@ -136,7 +136,7 @@ case of error (the following files are not analyzed)."
     ;; Compile current buffer
     (vhdl-ext-compile-ghdl (mapconcat #'identity
                                       `("cd" ,root "&&"
-                                        "ghdl" "-a" "-fno-color-diagnostics"
+                                        "ghdl" "-a"
                                         ,(vhdl-ext-ghdl-proj-args)
                                         ,(mapconcat #'identity files-filtered " ")
                                         ,buffer-file-name)
