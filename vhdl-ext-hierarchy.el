@@ -339,10 +339,11 @@ Return populated `hierarchy' struct."
       (vhdl-ext-hierarchy-ghdl-parse-output) ; Populates `vhdl-ext-hierarchy-ghdl-flat-hier'
       (kill-buffer buf)
       (vhdl-ext-proj-setcdr proj vhdl-ext-hierarchy-ghdl-alist vhdl-ext-hierarchy-ghdl-flat-hier)
-      (vhdl-ext-serialize vhdl-ext-hierarchy-ghdl-alist vhdl-ext-hierarchy-ghdl-cache-file)
       (vhdl-ext-hierarchy-build-entity-alist sources-filtered proj)
-      (vhdl-ext-serialize vhdl-ext-hierarchy-entity-alist vhdl-ext-hierarchy-entity-cache-file) ; Updated after initial call to `vhdl-ext-proj-files'
-      (setq vhdl-ext-hierarchy-current-flat-hier vhdl-ext-hierarchy-ghdl-flat-hier))
+      (setq vhdl-ext-hierarchy-current-flat-hier vhdl-ext-hierarchy-ghdl-flat-hier)
+      (when vhdl-ext-cache-enable
+        (vhdl-ext-serialize vhdl-ext-hierarchy-ghdl-alist vhdl-ext-hierarchy-ghdl-cache-file)
+        (vhdl-ext-serialize vhdl-ext-hierarchy-entity-alist vhdl-ext-hierarchy-entity-cache-file))) ; Updated after initial call to `vhdl-ext-proj-files'
     ;; Construct hierarchy struct after setting `vhdl-ext-hierarchy-current-flat-hier'
     (unless (assoc-string entity vhdl-ext-hierarchy-current-flat-hier t)
       (user-error "Could not find %s in the flat-hierarchy for project [%s].\nTry running `vhdl-ext-hierarchy-current-buffer' with prefix arg on current buffer" entity proj))
@@ -665,7 +666,8 @@ If these have been set before, keep their values."
     (setq vhdl-ext-hierarchy-backend backend)
     (setq vhdl-ext-hierarchy-frontend frontend)
     ;; Cache
-    (vhdl-ext-hierarchy-unserialize)))
+    (when vhdl-ext-cache-enable
+      (vhdl-ext-hierarchy-unserialize))))
 
 (defun vhdl-ext-hierarchy-clear-cache (&optional all)
   "Clear hierarchy cache files for current project.
@@ -758,8 +760,9 @@ With current-prefix or VERBOSE, dump output log."
     ;; Update hierarchy and entity alists and cache
     (vhdl-ext-proj-setcdr proj vhdl-ext-hierarchy-internal-alist flat-hierarchy)
     (vhdl-ext-hierarchy-build-entity-alist files proj)
-    (vhdl-ext-serialize vhdl-ext-hierarchy-internal-alist vhdl-ext-hierarchy-internal-cache-file)
-    (vhdl-ext-serialize vhdl-ext-hierarchy-entity-alist vhdl-ext-hierarchy-entity-cache-file) ; Updated after initial call to `vhdl-ext-proj-files'
+    (when vhdl-ext-cache-enable
+      (vhdl-ext-serialize vhdl-ext-hierarchy-internal-alist vhdl-ext-hierarchy-internal-cache-file)
+      (vhdl-ext-serialize vhdl-ext-hierarchy-entity-alist vhdl-ext-hierarchy-entity-cache-file)) ; Updated after initial call to `vhdl-ext-proj-files'
     ;; Return value for async related function
     (list vhdl-ext-hierarchy-internal-alist vhdl-ext-hierarchy-entity-alist)))
 

@@ -153,6 +153,9 @@ after the search has been done."
          (entity-instance-pcre (concat "^[ ]*(" vhdl-ext-identifier-re ")[ ]*:[ ]*" ; Instance name
                                        "(((component)|(configuration)|(entity))[ ]+(" vhdl-ext-identifier-re ")\\.)?"
                                        "\\b(" entity-name ")\\b")))
+    ;; Check we are in a project
+    (unless proj-dir
+      (user-error "Not in a VHDL project buffer"))
     ;; Update variables used by the ag/rg search finished hooks
     (setq vhdl-ext-jump-to-parent-entity-name entity-name)
     (setq vhdl-ext-jump-to-parent-entity-dir proj-dir)

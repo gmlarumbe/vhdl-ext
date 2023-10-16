@@ -39,6 +39,11 @@ Defaults to .vhd and .vhdl."
   :type '(repeat string)
   :group 'vhdl-ext)
 
+(defcustom vhdl-ext-cache-enable t
+  "Enable use of cache files if set to non-nil."
+  :type 'boolean
+  :group 'vhdl-ext)
+
 (defcustom vhdl-ext-cache-do-compression t
   "If set to non-nil compress cache files.
 Requires having \"gzip\" and \"gunzip\" in the PATH."
@@ -126,7 +131,7 @@ GHDL related:
   "Execute BODY without running any VHDL related hooks."
   (declare (indent 0) (debug t))
   `(let ((prog-mode-hook nil)
-         (vhdl-mode-hook nil)
+         (vhdl-mode-hook '(vhdl-ext-mode))
          (vhdl-ts-mode-hook nil))
      ,@body))
 

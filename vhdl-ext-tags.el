@@ -457,8 +457,9 @@ With current-prefix or VERBOSE, dump output log."
 
 (defun vhdl-ext-tags-setup ()
   "Setup tags feature: cache read at startup and write before exit."
-  (vhdl-ext-tags-unserialize)
-  (add-hook 'kill-emacs-hook #'vhdl-ext-tags-serialize))
+  (when vhdl-ext-cache-enable
+    (vhdl-ext-tags-unserialize)
+    (add-hook 'kill-emacs-hook #'vhdl-ext-tags-serialize)))
 
 (defun vhdl-ext-tags-clear-cache (&optional all)
   "Clear tags cache files for current project.
