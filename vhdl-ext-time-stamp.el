@@ -1,4 +1,4 @@
-;;; vhdl-ext-time-stamp.el --- Vhdl-ext Timestamp  -*- lexical-binding: t -*-
+;;; vhdl-ext-time-stamp.el --- Vhdl-ext Time-stamp  -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2022-2023 Gonzalo Larumbe
 
@@ -20,7 +20,7 @@
 
 ;;; Commentary:
 
-;; Timestamp setup
+;; `time-stamp' setup.
 
 ;; Serves the same function as `vhdl-modify-date-on-saving' but with extra
 ;; parameters and built-in `time-stamp' package for more flexibility.
@@ -40,17 +40,17 @@
   :group 'vhdl-ext-time-stamp)
 
 (defcustom vhdl-ext-time-stamp-regex "^-- Last update: "
-  "Timestamp regexp."
+  "`time-stamp' regexp."
   :type 'string
   :group 'vhdl-ext-time-stamp)
 
 (defcustom vhdl-ext-time-stamp-pattern (concat vhdl-ext-time-stamp-regex "%%$")
-  "Timestamp pattern.  See `time-stamp-pattern'."
+  "`time-stamp' pattern.  See `time-stamp-pattern'."
   :type 'string
   :group 'vhdl-ext-time-stamp)
 
 (defcustom vhdl-ext-time-stamp-format  "%:y-%02m-%02d"
-  "Timestamp format.  See `time-stamp-format'."
+  "`time-stamp' format.  See `time-stamp-format'."
   :type 'string
   :group 'vhdl-ext-time-stamp)
 

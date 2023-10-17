@@ -1,4 +1,4 @@
-;;; vhdl-ext-utils.el --- VHDL Utils -*- lexical-binding: t -*-
+;;; vhdl-ext-utils.el --- Vhdl-ext Utils -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2022-2023 Gonzalo Larumbe
 
@@ -20,33 +20,33 @@
 
 ;;; Commentary:
 
-;; Utils
+;; Common utils used in different features.
 
 ;;; Code:
 
-(require 'project)
 (require 'vhdl-mode)
 
-
+;;;; Custom
 (defcustom vhdl-ext-file-extension-re "\\.vhdl?\\'"
-  "VHDL file extensions.
+  "VHDL file extension regexp.
 Defaults to .vhd and .vhdl."
   :type 'string
   :group 'vhdl-ext)
 
 (defcustom vhdl-ext-ghdl-extra-args nil
-  "Vhdl-ext GHDL processes extra arguments."
+  "Vhdl-ext extra arguments for GHDL processes."
   :type '(repeat string)
   :group 'vhdl-ext)
 
 (defcustom vhdl-ext-cache-enable t
-  "Enable use of cache files if set to non-nil."
+  "If set to non-nil enable use of cache files."
   :type 'boolean
   :group 'vhdl-ext)
 
 (defcustom vhdl-ext-cache-do-compression t
   "If set to non-nil compress cache files.
-Requires having \"gzip\" and \"gunzip\" in the PATH."
+
+Requires having \"gzip\" and \"gunzip\" in the $PATH."
   :type 'boolean
   :group 'vhdl-ext)
 
@@ -62,7 +62,7 @@ of the project and their cdr a property list with the following properties:
  - :ignore-dirs - directories to ignore (list of strings)
  - :files - files to be used for the project, keep in order for GHDL
             compilations (list of strings)
- - :ignore-files - files to be ignored for project (list of stings)
+ - :ignore-files - files to be ignored for project (list of strings)
 
 GHDL related:
  - :worklib - defaults to \"work\"
@@ -82,6 +82,8 @@ GHDL related:
   :group 'vhdl-ext)
 
 
+;;;; Consts/Vars
+;;;;; Regexps
 (defconst vhdl-ext-blank-optional-re "[[:blank:]\n]*")
 (defconst vhdl-ext-blank-mandatory-re "[[:blank:]\n]+")
 (defconst vhdl-ext-identifier-re "[a-zA-Z_][a-zA-Z0-9_-]*")
@@ -103,21 +105,22 @@ GHDL related:
 (defconst vhdl-ext-architecture-re "^\\s-*\\(?1:architecture\\)\\s-+\\(?2:\\(?3:\\(?:\\w\\|\\s_\\)+\\)\\s-+of\\s-+\\(?4:\\(?:\\w\\|\\s_\\)+\\)\\)")
 (defconst vhdl-ext-context-re "^\\s-*\\(context\\)\\s-+\\(\\(\\w\\|\\s_\\)+\\)")
 
-(defvar vhdl-ext-buffer-list nil)
-(defvar vhdl-ext-dir-list nil)
-(defvar vhdl-ext-file-list nil)
-
-(defconst vhdl-ext-cache-dir (file-name-concat user-emacs-directory "vhdl-ext")
-  "The directory where vhdl-ext cache files will be placed at.")
-
+;;;;; LSP
 (defconst vhdl-ext-lsp-available-servers
   '((ve-hdl-checker . ("hdl_checker" "--lsp"))
     (ve-rust-hdl    . "vhdl_ls")
     (ve-ghdl-ls     . "ghdl-ls")
     (ve-vhdl-tool   . ("vhdl-tool" "lsp")))
   "Vhdl-ext available LSP servers.")
-(defconst vhdl-ext-lsp-server-ids
-  (mapcar #'car vhdl-ext-lsp-available-servers))
+(defconst vhdl-ext-lsp-server-ids (mapcar #'car vhdl-ext-lsp-available-servers))
+
+;;;;; Misc
+(defvar vhdl-ext-buffer-list nil)
+(defvar vhdl-ext-dir-list nil)
+(defvar vhdl-ext-file-list nil)
+
+(defconst vhdl-ext-cache-dir (file-name-concat user-emacs-directory "vhdl-ext")
+  "The directory where vhdl-ext cache files will be placed at.")
 
 
 ;;;; Macros
@@ -128,7 +131,7 @@ GHDL related:
      ,@body))
 
 (defmacro vhdl-ext-with-no-hooks (&rest body)
-  "Execute BODY without running any VHDL related hooks."
+  "Execute BODY without running any additional VHDL hooks."
   (declare (indent 0) (debug t))
   `(let ((prog-mode-hook nil)
          (vhdl-mode-hook '(vhdl-ext-mode))
@@ -138,128 +141,13 @@ GHDL related:
 (defmacro vhdl-ext-proj-setcdr (proj alist value)
   "Set cdr of ALIST for current PROJ to VALUE.
 
-ALIST is an alist and its keys are projects in `vhdl-ext-project-alist' as
-strings.
+If current VALUE is nil remove its key from ALIST.
 
-If current VALUE is nil remove its key from the alist ALIST."
+ALIST keys are strings that define projects in `vhdl-ext-project-alist'."
   (declare (indent 0) (debug t))
   `(setf (alist-get ,proj ,alist nil 'remove 'string=) ,value))
 
-;;;; Utils
-(defun vhdl-ext-replace-regexp (regexp to-string start end)
-  "Wrapper function for programatic use of `replace-regexp'.
-Replace REGEXP with TO-STRING from START to END."
-  (let* ((marker (make-marker))
-         (endpos (when end (set-marker marker end))))
-    (save-excursion
-      (goto-char start)
-      (while (re-search-forward regexp endpos t)
-        (replace-match to-string)))))
-
-(defun vhdl-ext-replace-regexp-whole-buffer (regexp to-string)
-  "Replace REGEXP with TO-STRING on whole `current-buffer'."
-  (vhdl-ext-replace-regexp regexp to-string (point-min) nil))
-
-(defun vhdl-ext-replace-string (string to-string start end &optional fixedcase)
-  "Wrapper function for programatic use of `replace-string'.
-Replace STRING with TO-STRING from START to END.
-
-If optional arg FIXEDCASE is non-nil, do not alter the case of
-the replacement text (see `replace-match' for more info)."
-  (let* ((marker (make-marker))
-         (endpos (when end (set-marker marker end))))
-    (save-excursion
-      (goto-char start)
-      (while (search-forward string endpos t)
-        (replace-match to-string fixedcase)))))
-
-(defun vhdl-ext-scan-buffer-entities-and-lines ()
-  "Find entities and their definition files in current buffer.
-Return list with found entities and their line number or nil if not found."
-  (let (entities-and-files)
-    (save-excursion
-      (goto-char (point-min))
-      (while (vhdl-re-search-forward vhdl-ext-entity-re nil t)
-        (push `(,(match-string-no-properties 2)
-                ,(line-number-at-pos))
-              entities-and-files)))
-    (nreverse (delete-dups entities-and-files))))
-
-(defun vhdl-ext-scan-buffer-entities ()
-  "Find entities in current buffer.
-Return list with found entities or nil if not found."
-  (mapcar #'car (vhdl-ext-scan-buffer-entities-and-lines)))
-
-(defun vhdl-ext-read-file-entities (&optional file)
-  "Find entities in current buffer.
-Find entities in FILE if optional arg is non-nil.
-Return list with found entities or nil if not found."
-  (let ((buf (if file
-                 (get-file-buffer file)
-               (current-buffer)))
-        (debug nil))
-    (if buf
-        (with-current-buffer buf
-          (vhdl-ext-scan-buffer-entities))
-      ;; If FILE buffer is not being visited, use a temporary buffer
-      (with-temp-buffer
-        (when debug
-          (clone-indirect-buffer-other-window "*debug*" t))
-        (insert-file-contents file)
-        (vhdl-ext-scan-buffer-entities)))))
-
-(defun vhdl-ext-select-file-entity (&optional file)
-  "Select file entity from FILE.
-If only one entity was found return it as a string.
-If more than one entity was found, select between available ones.
-Return nil if no entity was found."
-  (let ((entities (vhdl-ext-read-file-entities file)))
-    (if (cdr entities)
-        (completing-read "Select entity: " entities)
-      (car entities))))
-
-(defun vhdl-ext-update-buffer-file-and-dir-list ()
-  "Update `vhdl-mode' list of open buffers, files, and dir lists."
-  (let (vhdl-buffers vhdl-dirs vhdl-files)
-    (dolist (buf (buffer-list (current-buffer)))
-      (with-current-buffer buf
-        (when (or (eq major-mode 'vhdl-mode)
-                  (eq major-mode 'vhdl-ts-mode))
-          (push buf vhdl-buffers)
-          (unless (member default-directory vhdl-dirs)
-            (push default-directory vhdl-dirs))
-          (when (and buffer-file-name
-                     (string-match vhdl-ext-file-extension-re (concat "." (file-name-extension buffer-file-name))))
-            (push buffer-file-name vhdl-files)))))
-    (setq vhdl-ext-buffer-list vhdl-buffers)
-    (setq vhdl-ext-dir-list vhdl-dirs)
-    (setq vhdl-ext-file-list vhdl-files)))
-
-(defun vhdl-ext-get-standard ()
-  "Get current standard as a string from `vhdl-standard'."
-  (let ((std (car vhdl-standard)))
-    (if (equal std 8)
-        (format "0%s" std)
-      (format "%s" std))))
-
-(defun vhdl-ext-kill-buffer-hook ()
-  "VHDL hook to run when killing a buffer."
-  (setq vhdl-ext-buffer-list (remove (current-buffer) vhdl-ext-buffer-list)))
-
-(defun vhdl-ext-inside-if-else ()
-  "Return non-nil if point is inside an if-else block."
-  (let (beg-pos end-pos)
-    (vhdl-prepare-search-2
-     (save-excursion
-       (when (vhdl-re-search-backward "\\_<\\(then\\|else\\)\\_>" nil t)
-         (setq beg-pos (point))
-         (vhdl-forward-sexp)
-         (setq end-pos (point)))))
-    (when (and beg-pos end-pos
-               (> (point) beg-pos)
-               (< (point) end-pos))
-      (cons beg-pos end-pos))))
-
+;;;; Wrappers
 (defun vhdl-ext-forward-sexp (&optional count)
   "Move forward one SEXP.
 With prefix arg, move COUNT sexps."
@@ -358,6 +246,148 @@ cannot be ommitted after an end."
           (t
            (vhdl-backward-sexp count)))))
 
+(defun vhdl-ext-get-standard ()
+  "Get current standard as a string from `vhdl-standard'."
+  (let ((std (car vhdl-standard)))
+    (if (equal std 8)
+        (format "0%s" std)
+      (format "%s" std))))
+
+;;;; String/regexp
+(defun vhdl-ext-replace-regexp (regexp to-string start end)
+  "Wrapper function for programatic use of `replace-regexp'.
+Replace REGEXP with TO-STRING from START to END."
+  (let* ((marker (make-marker))
+         (endpos (when end (set-marker marker end))))
+    (save-excursion
+      (goto-char start)
+      (while (re-search-forward regexp endpos t)
+        (replace-match to-string)))))
+
+(defun vhdl-ext-replace-regexp-whole-buffer (regexp to-string)
+  "Replace REGEXP with TO-STRING on whole `current-buffer'."
+  (vhdl-ext-replace-regexp regexp to-string (point-min) nil))
+
+(defun vhdl-ext-replace-string (string to-string start end &optional fixedcase)
+  "Wrapper function for programatic use of `replace-string'.
+Replace STRING with TO-STRING from START to END.
+
+If optional arg FIXEDCASE is non-nil, do not alter the case of
+the replacement text (see `replace-match' for more info)."
+  (let* ((marker (make-marker))
+         (endpos (when end (set-marker marker end))))
+    (save-excursion
+      (goto-char start)
+      (while (search-forward string endpos t)
+        (replace-match to-string fixedcase)))))
+
+;;;; Dirs/files
+(defun vhdl-ext-dir-files (dir &optional recursive follow-symlinks ignore-dirs)
+  "Find VHDL files on DIR.
+
+If RECURSIVE is non-nil find files recursively.
+
+Follow symlinks if optional argument FOLLOW-SYMLINKS is non-nil.
+
+Discard non-regular files (e.g. Emacs temporary non-saved buffer files like
+symlink #.test.vhd).
+
+Optional arg IGNORE-DIRS specifies which directories should be excluded from
+search."
+  (let* ((files (if recursive
+                    (directory-files-recursively dir vhdl-ext-file-extension-re nil nil follow-symlinks)
+                  (directory-files dir t vhdl-ext-file-extension-re)))
+         (files-after-ignored (seq-filter (lambda (file)
+                                            ;; Each file checks if it has its prefix in the list of ignored directories
+                                            (let (ignore-file)
+                                              (dolist (dir ignore-dirs)
+                                                (when (string-prefix-p (expand-file-name dir) (expand-file-name file))
+                                                  (setq ignore-file t)))
+                                              (not ignore-file)))
+                                          files))
+         (files-regular (seq-filter #'file-regular-p files-after-ignored)))
+    files-regular))
+
+(defun vhdl-ext-dirs-files (dirs &optional follow-symlinks ignore-dirs)
+  "Find VHDL files recursively on DIRS.
+DIRS is a list of directory strings.
+
+Follow symlinks if optional argument FOLLOW-SYMLINKS is non-nil.
+
+Optional arg IGNORE-DIRS specifies which directories should be excluded from
+search."
+  (let (files)
+    (dolist (dir dirs)
+      (push (vhdl-ext-dir-files dir follow-symlinks ignore-dirs) files))
+    (when files
+      (flatten-tree files))))
+
+(defun vhdl-ext-filelist-from-file (file)
+  "Return filelist from FILE as a list of strings."
+  (with-temp-buffer
+    (insert-file-contents file)
+    (delete "" (split-string (buffer-substring-no-properties (point-min) (point-max)) "\n"))))
+
+(defun vhdl-ext-file-from-filefile (filelist out-file)
+  "Write FILELIST to OUT-FILE as one line per file."
+  (with-temp-file out-file
+    (insert (mapconcat #'identity filelist "\n"))))
+
+(defun vhdl-ext-expand-file-list (file-list &optional rel-dir)
+  "Expand files in FILE-LIST.
+
+Expand with respect to REL-DIR if non-nil."
+  (mapcar (lambda (file)
+            (expand-file-name file rel-dir))
+          file-list))
+
+;;;; File entities
+(defun vhdl-ext-scan-buffer-entities-and-lines ()
+  "Find entities and their definition files in current buffer.
+Return list with found entities and their line number or nil if not found."
+  (let (entities-and-files)
+    (save-excursion
+      (goto-char (point-min))
+      (while (vhdl-re-search-forward vhdl-ext-entity-re nil t)
+        (push `(,(match-string-no-properties 2)
+                ,(line-number-at-pos))
+              entities-and-files)))
+    (nreverse (delete-dups entities-and-files))))
+
+(defun vhdl-ext-scan-buffer-entities ()
+  "Find entities in current buffer.
+Return list with found entities or nil if not found."
+  (mapcar #'car (vhdl-ext-scan-buffer-entities-and-lines)))
+
+(defun vhdl-ext-read-file-entities (&optional file)
+  "Find entities in current buffer.
+Find entities in FILE if optional arg is non-nil.
+Return list with found entities or nil if not found."
+  (let ((buf (if file
+                 (get-file-buffer file)
+               (current-buffer)))
+        (debug nil))
+    (if buf
+        (with-current-buffer buf
+          (vhdl-ext-scan-buffer-entities))
+      ;; If FILE buffer is not being visited, use a temporary buffer
+      (with-temp-buffer
+        (when debug
+          (clone-indirect-buffer-other-window "*debug*" t))
+        (insert-file-contents file)
+        (vhdl-ext-scan-buffer-entities)))))
+
+(defun vhdl-ext-select-file-entity (&optional file)
+  "Select file entity from FILE.
+If only one entity was found return it as a string.
+If more than one entity was found, select between available ones.
+Return nil if no entity was found."
+  (let ((entities (vhdl-ext-read-file-entities file)))
+    (if (cdr entities)
+        (completing-read "Select entity: " entities)
+      (car entities))))
+
+;;;; Block at point / point inside block
 (defconst vhdl-ext-block-at-point-re
   (eval-when-compile
     (regexp-opt
@@ -430,66 +460,41 @@ cannot be ommitted after an end."
             (beg-point . ,block-beg-point)
             (end-point . ,block-end-point)))))))
 
+(defun vhdl-ext-inside-if-else ()
+  "Return non-nil if point is inside an if-else block."
+  (let (beg-pos end-pos)
+    (vhdl-prepare-search-2
+     (save-excursion
+       (when (vhdl-re-search-backward "\\_<\\(then\\|else\\)\\_>" nil t)
+         (setq beg-pos (point))
+         (vhdl-forward-sexp)
+         (setq end-pos (point)))))
+    (when (and beg-pos end-pos
+               (> (point) beg-pos)
+               (< (point) end-pos))
+      (cons beg-pos end-pos))))
 
-;;;; Dirs/files
-(defun vhdl-ext-dir-files (dir &optional recursive follow-symlinks ignore-dirs)
-  "Find VHDL files on DIR.
+;;;; Buffers/hooks
+(defun vhdl-ext-update-buffer-file-and-dir-list ()
+  "Update `vhdl-mode' list of open buffers, files, and dir lists."
+  (let (vhdl-buffers vhdl-dirs vhdl-files)
+    (dolist (buf (buffer-list (current-buffer)))
+      (with-current-buffer buf
+        (when (or (eq major-mode 'vhdl-mode)
+                  (eq major-mode 'vhdl-ts-mode))
+          (push buf vhdl-buffers)
+          (unless (member default-directory vhdl-dirs)
+            (push default-directory vhdl-dirs))
+          (when (and buffer-file-name
+                     (string-match vhdl-ext-file-extension-re (concat "." (file-name-extension buffer-file-name))))
+            (push buffer-file-name vhdl-files)))))
+    (setq vhdl-ext-buffer-list vhdl-buffers)
+    (setq vhdl-ext-dir-list vhdl-dirs)
+    (setq vhdl-ext-file-list vhdl-files)))
 
-If RECURSIVE is non-nil find files recursively.
-
-Follow symlinks if optional argument FOLLOW-SYMLINKS is non-nil.
-
-Discard non-regular files (e.g. Emacs temporary non-saved buffer files like
-symlink #.test.vhd).
-
-Optional arg IGNORE-DIRS specifies which directories should be excluded from
-search."
-  (let* ((files (if recursive
-                    (directory-files-recursively dir vhdl-ext-file-extension-re nil nil follow-symlinks)
-                  (directory-files dir t vhdl-ext-file-extension-re)))
-         (files-after-ignored (seq-filter (lambda (file)
-                                            ;; Each file checks if it has its prefix in the list of ignored directories
-                                            (let (ignore-file)
-                                              (dolist (dir ignore-dirs)
-                                                (when (string-prefix-p (expand-file-name dir) (expand-file-name file))
-                                                  (setq ignore-file t)))
-                                              (not ignore-file)))
-                                          files))
-         (files-regular (seq-filter #'file-regular-p files-after-ignored)))
-    files-regular))
-
-(defun vhdl-ext-dirs-files (dirs &optional follow-symlinks ignore-dirs)
-  "Find VHDL files recursively on DIRS.
-DIRS is a list of directory strings.
-
-Follow symlinks if optional argument FOLLOW-SYMLINKS is non-nil.
-
-Optional arg IGNORE-DIRS specifies which directories should be excluded from
-search."
-  (let (files)
-    (dolist (dir dirs)
-      (push (vhdl-ext-dir-files dir follow-symlinks ignore-dirs) files))
-    (when files
-      (flatten-tree files))))
-
-(defun vhdl-ext-filelist-from-file (file)
-  "Return filelist from FILE as a list of strings."
-  (with-temp-buffer
-    (insert-file-contents file)
-    (delete "" (split-string (buffer-substring-no-properties (point-min) (point-max)) "\n"))))
-
-(defun vhdl-ext-file-from-filefile (filelist out-file)
-  "Write FILELIST to OUT-FILE as one line per file."
-  (with-temp-file out-file
-    (insert (mapconcat #'identity filelist "\n"))))
-
-(defun vhdl-ext-expand-file-list (file-list &optional rel-dir)
-  "Expand files in FILE-LIST.
-
-Expand with respect to REL-DIR if non-nil."
-  (mapcar (lambda (file)
-            (expand-file-name file rel-dir))
-          file-list))
+(defun vhdl-ext-kill-buffer-hook ()
+  "VHDL hook to run when killing a buffer."
+  (setq vhdl-ext-buffer-list (remove (current-buffer) vhdl-ext-buffer-list)))
 
 
 ;;;; Project
@@ -635,7 +640,7 @@ Compress cache files if gzip is available."
          (dirs-args (mapconcat (lambda (dir) (concat "-P" dir))
                                dirs
                                " ")))
-    (concat args (when extra-args (concat " " extra-args))" " dirs-args)))
+    (mapconcat #'identity `(,args ,extra-args ,dirs-args) " ")))
 
 
 ;;;; Overrides

@@ -145,7 +145,7 @@ portB => signalB
   (eval-when-compile
     (regexp-opt '("psl" "pragma" "synopsys" "synthesis") 'symbols)))
 (defconst vhdl-ext-font-lock-highlight-variable-declaration-names nil)
-(defconst vhdl-ext-then-regexp "\\_<then\\_>")
+(defconst vhdl-ext-font-lock-then-regexp "\\_<then\\_>")
 
 
 ;;;; Functions
@@ -170,8 +170,8 @@ Take `vhdl-ext-font-lock-directive-keywords-re' words into account instead of
 only pragma."
   (and (save-excursion
          (re-search-backward
-          (concat
-           "^\\s-*--\\s-*" vhdl-ext-font-lock-directive-keywords-re "\\s-*translate_\\(on\\|off\\)\\s-*\n") nil t))
+          (concat "^\\s-*--\\s-*" vhdl-ext-font-lock-directive-keywords-re "\\s-*translate_\\(on\\|off\\)\\s-*\n")
+          nil t))
        (equal "off" (match-string 1))
        (point)))
 
@@ -181,8 +181,8 @@ Take `vhdl-ext-font-lock-directive-keywords-re' words into account instead of
 only pragma.
 Regex search bound to LIMIT."
   (when (re-search-forward
-         (concat
-          "^\\s-*--\\s-*" vhdl-ext-font-lock-directive-keywords-re "\\s-*translate_off\\s-*\n") limit t)
+         (concat "^\\s-*--\\s-*" vhdl-ext-font-lock-directive-keywords-re "\\s-*translate_off\\s-*\n")
+         limit t)
     (match-beginning 0)))
 
 (defun vhdl-ext-font-lock-end-translate-off (limit)
@@ -190,8 +190,8 @@ Regex search bound to LIMIT."
 Take `vhdl-ext-font-lock-directive-keywords-re' words into account instead of
 only pragma.
 Regex search bound to LIMIT."
-  (re-search-forward
-   (concat "^\\s-*--\\s-*" vhdl-ext-font-lock-directive-keywords-re "\\s-*translate_on\\s-*\n") limit t))
+  (re-search-forward (concat "^\\s-*--\\s-*" vhdl-ext-font-lock-directive-keywords-re "\\s-*translate_on\\s-*\n")
+                     limit t))
 
 (defun vhdl-ext-font-lock-match-translate-off (limit)
   "Similar as analogous `vhdl-match-translate-off' function.
@@ -243,13 +243,13 @@ Regex search bound to LIMIT."
    ;; highlight keywords and standardized types, attributes, enumeration, values, and subprograms
    (list (concat "'" vhdl-attributes-regexp)
          1 'vhdl-font-lock-attribute-face)
-   (list vhdl-types-regexp       1 'font-lock-type-face)
-   (list vhdl-functions-regexp   1 'font-lock-builtin-face)
-   (list vhdl-packages-regexp    1 'font-lock-builtin-face)
-   (list vhdl-enum-values-regexp 1 'vhdl-font-lock-enumvalue-face)
-   (list vhdl-constants-regexp   1 'font-lock-constant-face)
-   (list vhdl-ext-then-regexp    0 'vhdl-ext-font-lock-then-face) ; Place before `vhdl-keywords-regexp' to override its face
-   (list vhdl-keywords-regexp    1 'font-lock-keyword-face)))
+   (list vhdl-types-regexp                 1 'font-lock-type-face)
+   (list vhdl-functions-regexp             1 'font-lock-builtin-face)
+   (list vhdl-packages-regexp              1 'font-lock-builtin-face)
+   (list vhdl-enum-values-regexp           1 'vhdl-font-lock-enumvalue-face)
+   (list vhdl-constants-regexp             1 'font-lock-constant-face)
+   (list vhdl-ext-font-lock-then-regexp    0 'vhdl-ext-font-lock-then-face) ; Place before `vhdl-keywords-regexp' to override its face
+   (list vhdl-keywords-regexp              1 'font-lock-keyword-face)))
 
 (defconst vhdl-ext-font-lock-keywords-2
   (append
@@ -417,24 +417,21 @@ Regex search bound to LIMIT."
    (list vhdl-ext-font-lock-parenthesis-re 0 vhdl-ext-font-lock-parenthesis-face)
    (list vhdl-ext-font-lock-curly-braces-re 0 vhdl-ext-font-lock-curly-braces-face)))
 
-;; highlight everything together
-(defconst vhdl-ext-font-lock-keywords
-  (append
-   vhdl-ext-font-lock-keywords-6
-   vhdl-ext-font-lock-keywords-0
-   vhdl-ext-font-lock-keywords-1
-   vhdl-ext-font-lock-keywords-4 ; Empty by default
-   vhdl-ext-font-lock-keywords-3
-   vhdl-ext-font-lock-keywords-2
-   vhdl-ext-font-lock-keywords-5))
-
 ;;;; Setup
 (defun vhdl-ext-font-lock-setup ()
   "Setup syntax highlighting of VHDL buffers.
+
 Add `vhdl-ext-mode' font lock keywords before running
 `vhdl-mode' in order to populate `font-lock-keywords-alist'
 before `font-lock' is loaded."
-  (font-lock-add-keywords 'vhdl-mode vhdl-ext-font-lock-keywords 'set))
+  (let ((keywords (append vhdl-ext-font-lock-keywords-6
+                          vhdl-ext-font-lock-keywords-0
+                          vhdl-ext-font-lock-keywords-1
+                          vhdl-ext-font-lock-keywords-4 ; Empty by default
+                          vhdl-ext-font-lock-keywords-3
+                          vhdl-ext-font-lock-keywords-2
+                          vhdl-ext-font-lock-keywords-5)))
+    (font-lock-add-keywords 'vhdl-mode keywords 'set)))
 
 
 (provide 'vhdl-ext-font-lock)

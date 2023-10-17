@@ -25,11 +25,11 @@
 ;; This file provides functions to perform compilations with syntax highlighting
 ;; and jump to error based on `compilation-mode'.
 ;;
-;; Some usage examples:
-;; - (vhdl-ext-compile-ghdl (concat "ghdl -s " buffer-file-name))
+;; - Interactive functions examples:
+;;   - `vhdl-ext-compile-project-ghdl': compile with GHDL current project of `vhdl-ext-project-alist'
 ;;
-;; It also includes a function to compile current project of
-;; `vhdl-ext-project-alist' with GHDL: `vhdl-ext-compile-ghdl-project'
+;; - Non-interactive function usage examples:
+;;   - (vhdl-ext-compile-ghdl (concat "ghdl -s " buffer-file-name))
 ;;
 ;;; Code:
 
@@ -115,10 +115,11 @@ ARGS is a property list."
   :buf vhdl-ext-compile-ghdl-buf
   :comp-mode vhdl-ext-compile-ghdl-mode)
 
-(defun vhdl-ext-compile-ghdl-project ()
+(defun vhdl-ext-compile-project-ghdl ()
   "Compile current project from `vhdl-ext-project-alist' using GHDL.
 
 Files in `vhdl-ext-project-alist' need to be in the correct order.
+
 According to GHDL documentation:
  - GHDL analyzes each filename in the given order, and stops the analysis in
 case of error (the following files are not analyzed)."
@@ -126,7 +127,7 @@ case of error (the following files are not analyzed)."
   (let* ((proj (vhdl-ext-buffer-proj))
          (root (vhdl-ext-buffer-proj-root proj))
          (workdir (vhdl-ext-proj-workdir proj))
-         ;; Get files and put them in the expected order
+         ;; Get files and analyze up to current buffer file
          (files (vhdl-ext-proj-files proj))
          (files-filtered (seq-take-while (lambda (elm) (not (string= elm buffer-file-name))) files)))
     ;; Create workdir if it does not exist

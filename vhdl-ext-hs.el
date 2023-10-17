@@ -20,13 +20,13 @@
 
 ;;; Commentary:
 
-;; Add support for code folding of if/else blocks
+;; `hideshow' configuration for code folding:
+;;   - Add support for code folding of if/else blocks
 
 ;;; Code:
 
 (require 'vhdl-mode)
 (require 'hideshow)
-
 
 (defconst vhdl-ext-hs-start-regexp
   (concat "\\(\\_<\\(then\\|else\\)\\_>\\|" vhdl-hs-start-regexp "\\)"))
@@ -53,7 +53,7 @@ Move forward COUNT s-expressions."
          (vhdl-hs-forward-sexp-func count))))
 
 (defun vhdl-ext-hs-setup ()
-  "Configure hideshow."
+  "Configure `hideshow'."
   (dolist (mode '((vhdl-mode    . vhdl-ext-hs-forward-sexp-func)
                   (vhdl-ts-mode . vhdl-ts-forward-sexp)))
     (add-to-list 'hs-special-modes-alist `(,(car mode)

@@ -20,7 +20,7 @@
 
 ;;; Commentary:
 
-;; Find definitions and references builtin backend.
+;; Find definitions and references `xref' backend.
 
 ;;; Code:
 
@@ -99,12 +99,13 @@ Still experimental.  Removes the rest of xref backends."
 
 (defun vhdl-ext-xref-set (&optional disable)
   "Setup `vhdl-ext' to use builtin `xref' backend.
+
 If optional arg DISABLE is provided, remove the hook that enabled the backend.
-Still experimental:
-- Removes the rest of xref backends by being a hook for `vhdl-ext-mode'
-instead of to `vhdl-mode', since the first one is loaded later and overwrites
-the hook value.  Otherwise, hooks are not ran in a specific order, and rely on
-the priority argument."
+
+Removes the rest of xref backends by being a hook for `vhdl-ext-mode' instead of
+to `vhdl-mode', since the first one is loaded later and overwrites the hook
+value.  Otherwise, hooks are not ran in a specific order, and rely on the
+priority argument."
   (if disable
       (remove-hook 'vhdl-ext-mode-hook #'vhdl-ext-xref-backend-enable)
     (add-hook 'vhdl-ext-mode-hook #'vhdl-ext-xref-backend-enable)))

@@ -32,6 +32,7 @@
 (require 'vhdl-ext-utils)
 
 
+;;;; Custom
 (defcustom vhdl-ext-jump-to-parent-entity-engine "ag"
   "Default program to find parent entity instantiations.
 Either `rg' or `ag' are implemented."
@@ -40,8 +41,10 @@ Either `rg' or `ag' are implemented."
   :group 'vhdl-ext)
 
 
+;;;; Defuns
 (defun vhdl-ext-find-entity-instance (&optional limit bwd interactive-p)
   "Search for a VHDL entity/instance.
+
 Optional LIMIT argument bounds the search.
 
 If optional argument BWD is non-nil search backwards instead.

@@ -20,7 +20,7 @@
 
 ;;; Commentary:
 
-;; Templates
+;; Templates for insertion with `hydra'.
 
 ;;; Code:
 

@@ -73,7 +73,8 @@ FILES is a list of strings containing the filepaths."
     (dolist (file files)
       (with-temp-file file
         (insert-file-contents file)
-        (vhdl-mode)
+        (vhdl-ext-with-no-hooks
+          (vhdl-mode))
         (vhdl-beautify-buffer)))))
 
 (defun vhdl-ext-beautify-dir-files (dir)

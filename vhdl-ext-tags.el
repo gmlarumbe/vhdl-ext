@@ -324,7 +324,7 @@ Steps:
    (FILE-WAS-REMOVED should be non-nil)
  - Check current file hash and compare to previous stored ones to check if it
    has changed
- - If it did, consider 3 different scenarios:
+ - Consider 3 different scenarios:
     - File did not change: skip that file and check next one
     - File changed: remove previous file locs, collect new file tags and update
       tables and file hashes

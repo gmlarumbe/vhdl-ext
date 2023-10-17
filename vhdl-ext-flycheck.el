@@ -20,7 +20,10 @@
 
 ;;; Commentary:
 
-;; Flycheck additional linters
+;; Add support for the following linters in `flycheck':
+;;  - ghdl (overrides default parameters)
+;;  - vhld_lang
+;;  - vhdl-tool
 
 ;;; Code:
 

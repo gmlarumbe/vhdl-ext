@@ -122,13 +122,13 @@ FEATURES can be a single feature or a list of features."
 (require 'vhdl-ext-utils)
 (require 'vhdl-ext-compile)
 (require 'vhdl-ext-nav)
-(require 'vhdl-ext-imenu)
-(require 'vhdl-ext-template)
-(require 'vhdl-ext-ports)
-(require 'vhdl-ext-hierarchy)
-(require 'vhdl-ext-which-func)
-(require 'vhdl-ext-beautify)
 (require 'vhdl-ext-font-lock)
+(require 'vhdl-ext-imenu)
+(require 'vhdl-ext-which-func)
+(require 'vhdl-ext-ports)
+(require 'vhdl-ext-beautify)
+(require 'vhdl-ext-template)
+(require 'vhdl-ext-hierarchy)
 (require 'vhdl-ext-tags)
 (require 'vhdl-ext-capf)
 (require 'vhdl-ext-xref)
@@ -143,7 +143,7 @@ FEATURES can be a single feature or a list of features."
     (vhdl-ext-when-feature 'hierarchy
       (define-key map (kbd "C-c C-v") 'vhdl-ext-hierarchy-current-buffer))
     (vhdl-ext-when-feature 'compilation
-      (define-key map (kbd "C-c <f5>") 'vhdl-ext-compile-ghdl-project))
+      (define-key map (kbd "C-c <f5>") 'vhdl-ext-compile-project-ghdl))
     (vhdl-ext-when-feature 'flycheck
       (define-key map (kbd "C-c C-f") 'vhdl-ext-flycheck-mode))
     (vhdl-ext-when-feature 'beautify
