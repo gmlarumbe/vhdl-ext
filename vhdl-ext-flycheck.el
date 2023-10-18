@@ -37,7 +37,7 @@
   "Vhdl-ext flycheck."
   :group 'vhdl-ext)
 
-(defcustom vhdl-ext-flycheck-use-open-buffers t
+(defcustom vhdl-ext-flycheck-use-open-buffers nil
   "Set to non-nil to use list of open VHDL buffers/dirs for linters."
   :type 'boolean
   :group 'vhdl-ext-flycheck)

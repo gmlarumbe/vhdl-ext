@@ -35,14 +35,16 @@
   "Vhdl-ext hierarchy."
   :group 'vhdl-ext)
 
-(defcustom vhdl-ext-hierarchy-backend nil
+(defcustom vhdl-ext-hierarchy-backend (if (and (treesit-available-p) (treesit-language-available-p 'vhdl))
+                                          'tree-sitter
+                                        'builtin)
   "Vhdl-ext hierarchy extraction backend."
   :type '(choice (const :tag "GHDL"        ghdl)
                  (const :tag "Tree-sitter" tree-sitter)
                  (const :tag "Built-in"    builtin))
   :group 'vhdl-ext-hierarchy)
 
-(defcustom vhdl-ext-hierarchy-frontend nil
+(defcustom vhdl-ext-hierarchy-frontend 'hierarchy
   "Vhdl-ext hierarchy display and navigation frontend."
   :type '(choice (const :tag "Hierarchy" hierarchy)
                  (const :tag "Outshine"  outshine))
@@ -652,23 +654,10 @@ Expects HIERARCHY to be a indented string."
   (setq vhdl-ext-hierarchy-entity-alist (vhdl-ext-unserialize vhdl-ext-hierarchy-entity-cache-file)))
 
 (defun vhdl-ext-hierarchy-setup ()
-  "Setup hierarchy backend/frontend depending on available binaries/packages.
-If these have been set before, keep their values."
-  (let ((backend (or vhdl-ext-hierarchy-backend
-                     (cond ((executable-find "ghdl")
-                            'ghdl)
-                           ((and (treesit-available-p)
-                                 (treesit-language-available-p 'vhdl))
-                            'tree-sitter)
-                           (t
-                            'builtin))))
-        (frontend (or vhdl-ext-hierarchy-frontend
-                      'hierarchy)))
-    (setq vhdl-ext-hierarchy-backend backend)
-    (setq vhdl-ext-hierarchy-frontend frontend)
-    ;; Cache
-    (when vhdl-ext-cache-enable
-      (vhdl-ext-hierarchy-unserialize))))
+  "Setup hierarchy feature.
+Read hierarchy cache if enabled."
+  (when vhdl-ext-cache-enable
+    (vhdl-ext-hierarchy-unserialize)))
 
 (defun vhdl-ext-hierarchy-clear-cache (&optional all)
   "Clear hierarchy cache files for current project.

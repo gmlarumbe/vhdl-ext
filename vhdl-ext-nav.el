@@ -33,12 +33,16 @@
 
 
 ;;;; Custom
+(defgroup vhdl-ext-nav nil
+  "Vhdl-ext navigation."
+  :group 'vhdl-ext)
+
 (defcustom vhdl-ext-jump-to-parent-entity-engine "ag"
   "Default program to find parent entity instantiations.
 Either `rg' or `ag' are implemented."
   :type '(choice (const :tag "silver searcher" "ag")
                  (const :tag "ripgrep"         "rg"))
-  :group 'vhdl-ext)
+  :group 'vhdl-ext-nav)
 
 
 ;;;; Defuns
@@ -129,7 +133,7 @@ If REF is non-nil show references instead."
   (vhdl-ext-jump-to-entity-at-point :ref))
 
 
-;;;; Jump to parent module
+;;;; Jump to parent entity
 (defvar vhdl-ext-jump-to-parent-entity-point-marker nil
   "Point marker to save the state of the buffer where the search was started.
 Used in ag/rg end of search hooks to conditionally set the xref marker stack.")

@@ -49,12 +49,16 @@
 (require 'vhdl-ext-utils)
 
 
+(defgroup vhdl-ext-tags nil
+  "Vhdl-ext tags."
+  :group 'vhdl-ext)
+
 (defcustom vhdl-ext-tags-fontify-matches t
   "Set to non-nil to fontify matches for xref.
 
 This setting slightly increases processing time of `vhdl-ext-tags-get'."
   :type 'boolean
-  :group 'vhdl-ext)
+  :group 'vhdl-ext-tags)
 
 
 (defvar vhdl-ext-tags-file-hashes nil)
@@ -98,6 +102,10 @@ This setting slightly increases processing time of `vhdl-ext-tags-get'."
                   "vhdl-ext-feature-list"
                   "vhdl-ext-project-alist")
                 'symbols)))
+
+(defvar vhdl-ext-tags-have-been-updated nil
+  "Determines whether or not tags have been updated.
+Used to conditionally serialize tags cache.")
 
 
 ;;;; Common
@@ -386,51 +394,6 @@ Optional arg VERBOSE to display extra messages for debugging."
           (vhdl-ext-tags-add-file-locs file proj-inst-file-tables proj-inst-table)
           (vhdl-ext-tags-add-file-locs file proj-refs-file-tables proj-refs-table))))))
 
-(defun vhdl-ext-tags-get (&optional verbose)
-  "Get tags of current project.
-With current-prefix or VERBOSE, dump output log."
-  (interactive "P")
-  (let* ((proj (vhdl-ext-buffer-proj))
-         (files (vhdl-ext-proj-files proj))
-         (files-removed (seq-difference (map-keys (vhdl-aget vhdl-ext-tags-file-hashes proj)) files))
-         (num-files (+ (length files-removed) (length files)))
-         (num-files-processed 0)
-         (log-file vhdl-ext-tags-cache-log-file)
-         (tags-progress-reporter (make-progress-reporter "[Tags collection]: " 0 num-files)))
-    (vhdl-ext-tags-proj-init proj)
-    (when verbose
-      (delete-file log-file))
-    (dolist (file files-removed)
-      (progress-reporter-update tags-progress-reporter num-files-processed (format "[%s]" file))
-      (vhdl-ext-tags-get--process-file file proj :file-was-removed verbose)
-      (setq num-files-processed (1+ num-files-processed)))
-    (dolist (file files)
-      (when verbose
-        (append-to-file (format "(%0d%%) [Tags collection] Processing %s\n" (/ (* num-files-processed 100) num-files) file) nil log-file))
-      (progress-reporter-update tags-progress-reporter num-files-processed (format "[%s]" file))
-      (vhdl-ext-tags-get--process-file file proj nil verbose)
-      (setq num-files-processed (1+ num-files-processed)))
-    (message "Finished collection of tags!")))
-
-(defun vhdl-ext-tags-get-async (&optional verbose)
-  "Create tags table asynchronously.
-With current-prefix or VERBOSE, dump output log."
-  (interactive "P")
-  (let ((proj-root (vhdl-ext-buffer-proj-root)))
-    (unless proj-root
-      (user-error "Not in a VHDL project buffer"))
-    (message "Starting tag collection for %s" proj-root)
-    (async-start
-     `(lambda ()
-        ,(async-inject-variables vhdl-ext-tags-async-inject-variables-re)
-        (require 'vhdl-ext)
-        (vhdl-ext-tags-unserialize)   ; Read environment in child process
-        (vhdl-ext-tags-get ,@verbose) ; Update variables in child process
-        (vhdl-ext-tags-serialize))    ; Update cache file in childe process
-     (lambda (_result)
-       (vhdl-ext-tags-unserialize)
-       (message "Finished collection of tags!"))))) ; Update parent process from cache file
-
 (defun vhdl-ext-tags-serialize ()
   "Write variables to their cache files."
   (message "Serializing `vhdl-ext' tags cache...")
@@ -446,6 +409,7 @@ With current-prefix or VERBOSE, dump output log."
 
 (defun vhdl-ext-tags-unserialize ()
   "Read cache files into their corresponding variables."
+  (message "Unserializing `vhdl-ext' tags cache...")
   (dolist (var `((vhdl-ext-tags-defs-file-tables . ,vhdl-ext-tags-defs-file-tables-cache-file)
                  (vhdl-ext-tags-refs-file-tables . ,vhdl-ext-tags-refs-file-tables-cache-file)
                  (vhdl-ext-tags-inst-file-tables . ,vhdl-ext-tags-inst-file-tables-cache-file)
@@ -453,13 +417,14 @@ With current-prefix or VERBOSE, dump output log."
                  (vhdl-ext-tags-inst-table       . ,vhdl-ext-tags-inst-table-cache-file)
                  (vhdl-ext-tags-refs-table       . ,vhdl-ext-tags-refs-table-cache-file)
                  (vhdl-ext-tags-file-hashes      . ,vhdl-ext-tags-file-hashes-cache-file)))
-    (set (car var) (vhdl-ext-unserialize (cdr var)))))
+    (set (car var) (vhdl-ext-unserialize (cdr var))))
+  (message "Unserializing `vhdl-ext' tags cache... Done"))
 
-(defun vhdl-ext-tags-setup ()
-  "Setup tags feature: cache read at startup and write before exit."
-  (when vhdl-ext-cache-enable
-    (vhdl-ext-tags-unserialize)
-    (add-hook 'kill-emacs-hook #'vhdl-ext-tags-serialize)))
+(defun vhdl-ext-tags-save-cache ()
+  "Save tags cache only if tables have been updated.
+Removes serializing and compression processing overhead if no change was made."
+  (when vhdl-ext-tags-have-been-updated
+    (vhdl-ext-tags-serialize)))
 
 (defun vhdl-ext-tags-clear-cache (&optional all)
   "Clear tags cache files for current project.
@@ -488,6 +453,59 @@ With prefix arg, clear cache for ALL projects."
     (setq vhdl-ext-tags-file-hashes nil)
     (vhdl-ext-tags-serialize)
     (message "Cleared all projects tags cache!")))
+
+(defun vhdl-ext-tags-setup ()
+  "Setup tags feature: cache read at startup and write before exit."
+  (when vhdl-ext-cache-enable
+    (vhdl-ext-tags-unserialize)
+    (add-hook 'kill-emacs-hook #'vhdl-ext-tags-save-cache)))
+
+(defun vhdl-ext-tags-get (&optional verbose)
+  "Get tags of current project.
+With current-prefix or VERBOSE, dump output log."
+  (interactive "P")
+  (let* ((proj (vhdl-ext-buffer-proj))
+         (files (vhdl-ext-proj-files proj))
+         (files-removed (seq-difference (map-keys (vhdl-aget vhdl-ext-tags-file-hashes proj)) files))
+         (num-files (+ (length files-removed) (length files)))
+         (num-files-processed 0)
+         (log-file vhdl-ext-tags-cache-log-file)
+         (tags-progress-reporter (make-progress-reporter "[Tags collection]: " 0 num-files)))
+    (vhdl-ext-tags-proj-init proj)
+    (when verbose
+      (delete-file log-file))
+    (dolist (file files-removed)
+      (progress-reporter-update tags-progress-reporter num-files-processed (format "[%s]" file))
+      (vhdl-ext-tags-get--process-file file proj :file-was-removed verbose)
+      (setq num-files-processed (1+ num-files-processed)))
+    (dolist (file files)
+      (when verbose
+        (append-to-file (format "(%0d%%) [Tags collection] Processing %s\n" (/ (* num-files-processed 100) num-files) file) nil log-file))
+      (progress-reporter-update tags-progress-reporter num-files-processed (format "[%s]" file))
+      (vhdl-ext-tags-get--process-file file proj nil verbose)
+      (setq num-files-processed (1+ num-files-processed)))
+    (setq vhdl-ext-tags-have-been-updated t)
+    (message "Finished collection of tags!")))
+
+(defun vhdl-ext-tags-get-async (&optional verbose)
+  "Create tags table asynchronously.
+With current-prefix or VERBOSE, dump output log."
+  (interactive "P")
+  (let ((proj-root (vhdl-ext-buffer-proj-root)))
+    (unless proj-root
+      (user-error "Not in a VHDL project buffer"))
+    (message "Starting tag collection for %s" proj-root)
+    (async-start
+     `(lambda ()
+        ,(async-inject-variables vhdl-ext-tags-async-inject-variables-re)
+        (require 'vhdl-ext)
+        (vhdl-ext-tags-unserialize)   ; Read environment in child process
+        (vhdl-ext-tags-get ,@verbose) ; Update variables in child process
+        (vhdl-ext-tags-serialize))    ; Update cache file in child process
+     (lambda (_result)
+       (vhdl-ext-tags-unserialize)
+       (setq vhdl-ext-tags-have-been-updated t)
+       (message "Finished collection of tags!"))))) ; Update parent process from cache file
 
 
 (provide 'vhdl-ext-tags)

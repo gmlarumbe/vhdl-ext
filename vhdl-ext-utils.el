@@ -43,10 +43,13 @@ Defaults to .vhd and .vhdl."
   :type 'boolean
   :group 'vhdl-ext)
 
-(defcustom vhdl-ext-cache-do-compression t
+(defcustom vhdl-ext-cache-do-compression nil
   "If set to non-nil compress cache files.
 
-Requires having \"gzip\" and \"gunzip\" in the $PATH."
+Requires having \"gzip\" and \"gunzip\" in the $PATH.
+
+If set to non-nil increases loading time of `vhdl-ext' package but cache
+files take up much less disk space."
   :type 'boolean
   :group 'vhdl-ext)
 
@@ -583,7 +586,6 @@ These depend on the value of property list of `vhdl-ext-project-alist'.
 
 Compress cache files if gzip is available."
   (let ((dir (file-name-directory filename))
-        (gzip-proc-name "vhdl-ext-serialize-compress")
         (gzip-buf "*vhdl-ext-serialize-compress*"))
     (unless (file-exists-p dir)
       (make-directory dir :parents))
@@ -593,8 +595,9 @@ Compress cache files if gzip is available."
         (insert (let (print-length) (prin1-to-string data))))
       (when (and vhdl-ext-cache-do-compression
                  (executable-find "gzip"))
-        ;; Async compressing
-        (start-process-shell-command gzip-proc-name gzip-buf (format "gzip -9f %s" filename))))))
+        ;; Synchronous processing, as it might be run just before exiting Emacs
+        (unless (eq 0 (call-process-shell-command (format "gzip -9f %s" filename) nil gzip-buf t))
+          (error "Error compressing %s" filename))))))
 
 (defun vhdl-ext-unserialize (filename)
   "Read data serialized by `vhdl-ext-serialize' from FILENAME."
@@ -612,16 +615,19 @@ Compress cache files if gzip is available."
       (if (and vhdl-ext-cache-do-compression
                (executable-find "gunzip")
                (file-exists-p compressed-filename))
-          ;; External gunzip program: This doesn't need to be asynchronous as it will only be done during initial setup
-          (unless (eq 0 (call-process-shell-command decompress-cmd nil gzip-buf t))
-            (error "Error uncompressing %s" compressed-filename))
-        (setq temp-filename filename))
-      (when (file-exists-p temp-filename)
-        (with-temp-buffer
-          (insert-file-contents temp-filename)
-          (delete-file temp-filename)
-          ;; this will blow up if the contents of the file aren't lisp data structures
-          (read (buffer-string)))))))
+          (progn
+            ;; External gunzip program: This doesn't need to be asynchronous as it will only be done during initial setup
+            (unless (eq 0 (call-process-shell-command decompress-cmd nil gzip-buf t))
+              (error "Error decompressing %s" compressed-filename))
+            (with-temp-buffer
+              (insert-file-contents temp-filename)
+              (delete-file temp-filename)
+              (read (buffer-string))))
+        ;; Do not decompress
+        (when (file-exists-p filename)
+          (with-temp-buffer
+            (insert-file-contents filename)
+            (read (buffer-string))))))))
 
 ;;;; GHDL
 (defun vhdl-ext-ghdl-proj-args ()
