@@ -201,8 +201,8 @@ after the search has been done."
   "Jump to the first result and push xref marker if there were any matches.
 Kill the buffer or delete window if there is only one match."
   (when vhdl-ext-jump-to-parent-entity-trigger
-    (let ((entity-name (propertize vhdl-ext-jump-to-parent-entity-name 'face '(:foreground "green")))
-          (dir (propertize vhdl-ext-jump-to-parent-entity-dir 'face '(:foreground "light blue")))
+    (let ((entity-name (propertize vhdl-ext-jump-to-parent-entity-name 'face 'vhdl-ext-font-lock-entity-face))
+          (dir vhdl-ext-jump-to-parent-entity-dir)
           (num-matches))
       (save-excursion
         (goto-char (point-min))

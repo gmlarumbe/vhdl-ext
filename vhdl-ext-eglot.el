@@ -23,8 +23,8 @@
 ;; Support for various VHDL language servers:
 ;;     - rust_hdl: https://github.com/VHDL-LS/rust_hdl.git
 ;;     - ghdl_language_server: https://github.com/ghdl/ghdl-language-server.git
-;;     - vhdl-tool: http://vhdltool.com
 ;;     - hdl_checker: https://github.com/suoto/hdl_checker
+;;     - vhdl-tool: http://vhdltool.com (INFO: Untested since LSP seems a premium feature)
 
 ;;; Code:
 

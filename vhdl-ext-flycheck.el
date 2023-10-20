@@ -22,7 +22,7 @@
 
 ;; Add support for the following linters in `flycheck':
 ;;  - ghdl (overrides default parameters)
-;;  - vhld_lang
+;;  - vhdl_lang
 ;;  - vhdl-tool
 
 ;;; Code:
@@ -98,7 +98,7 @@ See URL `https://github.com/ghdl/ghdl'."
 
 
 ;;;; vhdl_lang
-(flycheck-def-config-file-var flycheck-vhdl-lang-config-file vhdl-lang "vhdl_lang.toml")
+(flycheck-def-config-file-var flycheck-vhdl-lang-config-file vhdl-lang "vhdl_ls.toml")
 
 (flycheck-define-checker vhdl-lang
   "Rust_hdl VHDL Language Frontend.
@@ -140,11 +140,13 @@ See URL `http://vhdltool.com'."
   (pcase linter
     ('vhdl-lang
      (unless (locate-dominating-file buffer-file-name flycheck-vhdl-lang-config-file)
-       (error "Could not find \"vhdl_lang.toml\" in project root!")))
+       (error "Could not find \"vhdl_ls.toml\" in project root!")))
     ('vhdl-tool
+     ;; Start "vhdl-tool server" process, creating vhdltool.sock pipe file in project root
+     ;;  - It might be necessary to reload the vhdl-tool linter to wait until previous process has been set up
      (let ((buf (concat " *vhdl-tool-server@" (vhdl-ext-buffer-proj-root) "*")))
        (unless (get-buffer-process buf)
-         (start-process-shell-command buf buf (concat "cd " (vhdl-ext-buffer-proj-root) " && vhdl-tool server"))
+         (start-process-shell-command buf buf (mapconcat #'identity `("cd" ,(vhdl-ext-buffer-proj-root) "&&" "vhdl-tool" "server") " "))
          (message "Started process @ %s" buf))))))
 
 (defun vhdl-ext-flycheck-set-linter (&optional linter)
@@ -160,7 +162,9 @@ See URL `http://vhdltool.com'."
   (vhdl-ext-flycheck-setup-linter linter)
   (setq vhdl-ext-flycheck-linter linter) ; Save state for reporting
   ;; Refresh linter if in a vhdl buffer
-  (when (eq major-mode 'vhdl-mode)
+  (when (member major-mode '(vhdl-mode vhdl-ts-mode))
+    (when (eq linter 'vhdl-tool)
+      (sit-for 0.5)) ; Wait until "vhdl-tool server" process has been properly set up
     (flycheck-select-checker linter))
   (message "Linter set to: %s " linter))
 

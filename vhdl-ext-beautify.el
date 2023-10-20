@@ -71,6 +71,7 @@ FILES is a list of strings containing the filepaths."
       (error "File %s does not exist! Aborting!" file)))
   (save-window-excursion
     (dolist (file files)
+      (message "Processing %s..." file)
       (with-temp-file file
         (insert-file-contents file)
         (vhdl-ext-with-no-hooks
@@ -78,9 +79,11 @@ FILES is a list of strings containing the filepaths."
         (vhdl-beautify-buffer)))))
 
 (defun vhdl-ext-beautify-dir-files (dir)
-  "Beautify VHDL files on DIR."
+  "Beautify VHDL files on DIR.
+
+Include subdirectory files recursively."
   (interactive "DDirectory: ")
-  (let ((files (vhdl-ext-dir-files dir)))
+  (let ((files (vhdl-ext-dir-files dir :recursive)))
     (vhdl-ext-beautify-files files)))
 
 

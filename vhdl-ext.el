@@ -26,20 +26,21 @@
 ;; Extensions for VHDL Mode:
 ;;
 ;;  - Tree-sitter `vhdl-ts-mode' support
-;;  - Improve syntax highlighting
-;;  - Builtin xref backend
-;;  - Auto-completion
-;;  - Hierarchy extraction and navigation: builtin and GHDL based
+;;  - Improved syntax highlighting for `vhdl-mode'
+;;  - Find definitions and references with builtin `xref' backend
+;;  - Auto-completion with semantic completion
+;;  - Hierarchy extraction and navigation
 ;;  - LSP configuration for `lsp-mode' and `eglot'
 ;;  - Support for many linters via `flycheck'
 ;;  - Beautify blocks and instances
-;;  - Navigate through instances in a module
+;;  - Code navigation functions
 ;;  - Templates insertion via `hydra'
 ;;  - Compilation-based utilities
 ;;  - Improve `imenu': detect instances
-;;  - Enhanced support for `which-func'
+;;  - Add support for `which-func'
 ;;  - Improve code folding via `hideshow'
-;;  - Auto-configure `time-stamp'
+;;  - Project tags and caching
+;;  - `time-stamp' auto-configuration
 ;;  - Port connections utilities
 
 ;;; Code:
@@ -66,7 +67,7 @@
                                    hideshow
                                    time-stamp
                                    ports)
-  "Which Vhdl-ext features to enable."
+  "Which `vhdl-ext' features to enable."
   :type '(set (const :tag "Improved syntax highlighting via `font-lock'."
                 font-lock)
               (const :tag "Xref backend to navigate definitions/references in current project."
@@ -85,13 +86,13 @@
                 beautify)
               (const :tag "Code Navigation functions."
                 navigation)
-              (const :tag "`yasnippet' and custom templates."
+              (const :tag "Custom templates via `hydra'."
                 template)
               (const :tag "Compilation functions."
                 compilation)
               (const :tag "Improved `imenu'."
                 imenu)
-              (const :tag "Improved `which-function-mode'."
+              (const :tag "Support for `which-function-mode'."
                 which-func)
               (const :tag "`hideshow' configuration."
                 hideshow)
@@ -140,51 +141,53 @@ FEATURES can be a single feature or a list of features."
 ;;; Major-mode
 (defvar vhdl-ext-mode-map
   (let ((map (make-sparse-keymap)))
+    (vhdl-ext-when-feature '(capf xref)
+      (define-key map (kbd "C-c C-u") 'vhdl-ext-tags-get))
     (vhdl-ext-when-feature 'hierarchy
       (define-key map (kbd "C-c C-v") 'vhdl-ext-hierarchy-current-buffer))
-    (vhdl-ext-when-feature 'compilation
-      (define-key map (kbd "C-c <f5>") 'vhdl-ext-compile-project-ghdl))
     (vhdl-ext-when-feature 'flycheck
       (define-key map (kbd "C-c C-f") 'vhdl-ext-flycheck-mode))
+    (vhdl-ext-when-feature 'template
+      (define-key map (kbd "C-c C-t") 'vhdl-ext-hydra/body))
     (vhdl-ext-when-feature 'beautify
       (define-key map (kbd "C-M-i") 'vhdl-ext-beautify-block-at-point)
       (define-key map (kbd "C-c M-i") 'vhdl-ext-beautify-instance-at-point))
     (vhdl-ext-when-feature 'navigation
+      (define-key map (kbd "C-M-.") 'vhdl-ext-jump-to-parent-entity)
+      (define-key map (kbd "C-c M-.") 'vhdl-ext-jump-to-entity-at-point-def)
+      (define-key map (kbd "C-c M-?") 'vhdl-ext-jump-to-entity-at-point-ref)
       (define-key map (kbd "C-M-f") 'vhdl-ext-forward-sexp)
       (define-key map (kbd "C-M-d") 'vhdl-ext-backward-sexp)
       (define-key map (kbd "C-M-u") 'vhdl-ext-find-entity-instance-bwd)
-      (define-key map (kbd "C-M-d") 'vhdl-ext-find-entity-instance-fwd)
-      (define-key map (kbd "C-M-.") 'vhdl-ext-jump-to-parent-entity)
-      (define-key map (kbd "C-c M-.") 'vhdl-ext-jump-to-entity-at-point-def)
-      (define-key map (kbd "C-c M-?") 'vhdl-ext-jump-to-entity-at-point-ref))
-    (vhdl-ext-when-feature 'template
-      (define-key map (kbd "C-c C-t") 'vhdl-ext-hydra/body))
+      (define-key map (kbd "C-M-d") 'vhdl-ext-find-entity-instance-fwd))
+    (vhdl-ext-when-feature 'compilation
+      (define-key map (kbd "C-c <f5>") 'vhdl-ext-compile-project-ghdl))
     (vhdl-ext-when-feature 'ports
       (define-key map (kbd "C-c C-c t") 'vhdl-ext-ports-toggle-connect)
       (define-key map (kbd "C-c C-c r") 'vhdl-ext-ports-connect-recursively))
-    (vhdl-ext-when-feature '(capf xref)
-      (define-key map (kbd "C-c C-u") 'vhdl-ext-tags-get))
     map)
-  "Key map for the `vhdl-ext'.")
+  "Keymap for `vhdl-ext'.")
 
 ;;;###autoload
 (defun vhdl-ext-mode-setup ()
   "Setup `vhdl-ext-mode' depending on enabled features."
   (interactive)
   ;; Features
-  (vhdl-ext-when-feature 'hierarchy
-    (vhdl-ext-hierarchy-setup))
-  (vhdl-ext-when-feature 'hideshow
-    (vhdl-ext-hs-setup))
   (vhdl-ext-when-feature 'font-lock
     (vhdl-ext-font-lock-setup))
+  (vhdl-ext-when-feature '(capf xref)
+    (vhdl-ext-tags-setup))
+  (vhdl-ext-when-feature 'hierarchy
+    (vhdl-ext-hierarchy-setup))
   (vhdl-ext-when-feature 'eglot
     (vhdl-ext-eglot-set-server vhdl-ext-eglot-default-server))
   (vhdl-ext-when-feature 'lsp
     (vhdl-ext-lsp-setup)
     (vhdl-ext-lsp-set-server vhdl-ext-lsp-mode-default-server))
-  (vhdl-ext-when-feature '(capf xref)
-    (vhdl-ext-tags-setup))
+  (vhdl-ext-when-feature 'flycheck
+    (vhdl-ext-flycheck-setup))
+  (vhdl-ext-when-feature 'hideshow
+    (vhdl-ext-hs-setup))
   ;; Jump to parent module ag/ripgrep hooks
   (add-hook 'ag-search-finished-hook #'vhdl-ext-navigation-ag-rg-hook)
   (add-hook 'ripgrep-search-finished-hook #'vhdl-ext-navigation-ag-rg-hook))
@@ -198,12 +201,14 @@ FEATURES can be a single feature or a list of features."
   :global nil
   (if vhdl-ext-mode
       (progn
+        ;; Common
         (vhdl-ext-update-buffer-file-and-dir-list)
         (add-hook 'kill-buffer-hook #'vhdl-ext-kill-buffer-hook nil :local)
-        (vhdl-ext-when-feature 'which-func
-          (vhdl-ext-which-func))
-        (vhdl-ext-when-feature 'time-stamp
-          (vhdl-ext-time-stamp-mode))
+        ;; Features
+        (vhdl-ext-when-feature 'xref
+          (vhdl-ext-xref-set))
+        (vhdl-ext-when-feature 'capf
+          (vhdl-ext-capf-set))
         (vhdl-ext-when-feature 'flycheck
           (if vhdl-ext-flycheck-use-open-buffers
               (progn (setq vhdl-ext-flycheck-dirs vhdl-ext-dir-list)
@@ -213,15 +218,12 @@ FEATURES can be a single feature or a list of features."
           (setq flycheck-ghdl-language-standard (vhdl-ext-get-standard)) ; Global for all projects
           (setq flycheck-ghdl-workdir (vhdl-ext-proj-workdir))           ; Project dependant
           (setq flycheck-ghdl-work-lib (vhdl-ext-proj-worklib)))         ; Project dependant
-        (vhdl-ext-when-feature 'capf
-          (vhdl-ext-capf-set))
-        (vhdl-ext-when-feature 'xref
-          (vhdl-ext-xref-set))
+        (vhdl-ext-when-feature 'which-func
+          (vhdl-ext-which-func))
+        (vhdl-ext-when-feature 'time-stamp
+          (vhdl-ext-time-stamp-mode))
         ;; `vhdl-mode'-only customization (exclude `vhdl-ts-mode')
         (when (eq major-mode 'vhdl-mode)
-          ;; Imenu
-          (vhdl-ext-when-feature 'imenu
-            (advice-add 'vhdl-index-menu-init :override #'vhdl-ext-index-menu-init))
           ;; Font-lock
           ;;   It's not possible to add font-lock keywords to minor-modes.
           ;;   The workaround consists in add/remove keywords to the major mode when
@@ -229,13 +231,20 @@ FEATURES can be a single feature or a list of features."
           ;;   https://emacs.stackexchange.com/questions/60198/font-lock-add-keywords-is-not-working
           (vhdl-ext-when-feature 'font-lock
             (font-lock-flush)
-            (setq-local font-lock-multiline nil))))
+            (setq-local font-lock-multiline nil))
+          ;; Imenu
+          (vhdl-ext-when-feature 'imenu
+            (advice-add 'vhdl-index-menu-init :override #'vhdl-ext-index-menu-init))))
     ;; Cleanup
     (remove-hook 'kill-buffer-hook #'vhdl-ext-kill-buffer-hook :local)
-    (vhdl-ext-when-feature 'time-stamp
-      (vhdl-ext-time-stamp-mode -1))
+    (vhdl-ext-when-feature 'xref
+      (vhdl-ext-xref-set :disable))
+    (vhdl-ext-when-feature 'capf
+      (vhdl-ext-capf-set :disable))
     (vhdl-ext-when-feature 'imenu
-      (advice-remove 'vhdl-index-menu-init #'vhdl-ext-index-menu-init))))
+      (advice-remove 'vhdl-index-menu-init #'vhdl-ext-index-menu-init))
+    (vhdl-ext-when-feature 'time-stamp
+      (vhdl-ext-time-stamp-mode -1))))
 
 
 ;;; Provide

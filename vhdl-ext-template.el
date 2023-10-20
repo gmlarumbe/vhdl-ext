@@ -25,35 +25,42 @@
 ;;; Code:
 
 (require 'hydra)
-(require 'vhdl-ext-utils)
+(require 'vhdl-ext-beautify)
 
-(defun vhdl-ext-entity-from-file (file &optional port-copy)
-  "Find first entity declaration in FILE.
-If optional arg PORT-COPY is non-nil, get generic and port information from an
-entity or component declaration via `vhdl-port-copy'."
-  (with-temp-buffer
-    (insert-file-contents file)
-    (when (re-search-forward vhdl-ext-entity-re nil t)
-      (when port-copy
-        (save-match-data
-          (vhdl-port-copy)))
-      (match-string-no-properties 2))))
+(defun vhdl-ext-template-copy-entity-from-file (file)
+  "Select entity from FILE and copy its ports for template instantiation.
+
+Get generic and port information from an entity or component declaration via
+`vhdl-port-copy'."
+  (let ((entity (vhdl-ext-select-file-entity file)))
+    (with-temp-buffer
+      (insert-file-contents file)
+      (or (catch 'entity-name
+            (while (re-search-forward vhdl-ext-entity-re nil t)
+              (when (string= (match-string-no-properties 2) entity)
+                (save-match-data
+                  (vhdl-port-copy))
+                (throw 'entity-name entity))))
+          (error "File %s has no entities" file)))))
 
 (defun vhdl-ext-insert-instance-from-file (file)
   "Insert entity instance from FILE."
   (interactive "FSelect entity from file:")
-  (let* ((entity-name (vhdl-ext-entity-from-file file :port-copy))
+  (let* ((entity-name (vhdl-ext-template-copy-entity-from-file file))
          (instance-name (read-string "Instance-name: " (concat "I_" (upcase entity-name)))))
-    (vhdl-port-paste-instance instance-name)))
+    (save-excursion
+      (vhdl-port-paste-instance instance-name))
+    (vhdl-ext-beautify-instance-at-point)))
 
 (defun vhdl-ext-insert-testbench-from-file (file outfile)
   "Create testbench from entity of selected FILE in OUTFILE."
   (interactive "FSelect entity from file:\nFOutput file: ")
   (when (file-exists-p outfile)
     (error "File %s exists" outfile))
-  (vhdl-ext-entity-from-file file :port-copy)
+  (vhdl-ext-template-copy-entity-from-file file)
   (find-file outfile)
-  (vhdl-port-paste-testbench))
+  (vhdl-port-paste-testbench)
+  (vhdl-beautify-buffer))
 
 
 ;;;; Hydra
