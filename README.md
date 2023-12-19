@@ -11,6 +11,7 @@ This package provides useful extensions on top of [`vhdl-mode`](https://iis-peop
 and [`vhdl-ts-mode`](https://github.com/gmlarumbe/vhdl-ts-mode).
 
 * [Tree-sitter `vhdl-ts-mode` support](#tree-sitter)
+* [Project management](#project-management)
 * [Improve syntax highlighting](#syntax-highlighting)
 * [Find definitions and references](#find-definitions-and-references)
 * [Auto-completion](#auto-completion)
@@ -123,7 +124,7 @@ Enabling of `vhdl-ext-mode` minor-mode creates the following keybindings:
   * <kbd>C-c C-t</kbd> `vhdl-ext-hydra/body`
   * <kbd>C-c C-f</kbd> `vhdl-ext-flycheck-mode`
   * <kbd>C-c C-u></kbd> `vhdl-ext-tags-get`
-  * <kbd>C-c \<f5\></kbd> `vhdl-ext-compile-ghdl-project`
+  * <kbd>C-c \<f5\></kbd> `vhdl-ext-compile-project-ghdl`
 
 * Navigation
   * <kbd>C-M-f</kbd> `vhdl-ext-forward-sexp`
@@ -153,6 +154,29 @@ builtin `vhdl-mode` Emacs lisp parsing or on tree-sitter
 
 For information about installation of `vhdl-ts-mode` check its
 [repo](https://github.com/gmlarumbe/vhdl-ts-mode).
+
+
+## Project management ##
+
+The package provides the variable `vhdl-ext-project-alist` to
+select which files belong to a specific project:
+
+  ```elisp
+  (setq vhdl-ext-project-alist
+        `(("axi_if_converter" ; Project name
+           :root "/home/gonz/Repos/larumbe/axi_if_converter"
+           :dirs ("-r src" ; -r to add directories recursively
+                  "-r tb")
+           :ignore-dirs ("src/ignored_ip")
+           :ignore-files ("src/some_ip/ignored_sim_netlist.vhd")
+           ;; The ones below are used for GHDL-related features
+           :worklib "xil_defaultlib"                     ; Defaults to `work' if not set
+           :workdir "library/xil_defaultlib"             ; Output compilation directory for worklib
+           :lib-search-path ("/opt/ghdl_Xilinx_lib/")))) ; Extra directories to look for compiled libraries
+  ```
+
+The different properties for each project entry determine which files will be used
+for some features of the package, such as completion, xref navigation, hierarchy extraction and compilation.
 
 
 ## Syntax highlighting ##
@@ -255,7 +279,7 @@ and jump to error:
 
 <img src="https://github.com/gmlarumbe/vhdl-ext/assets/51021955/845980ab-c54b-4e89-b53f-056140be87a7" width=80%>
 
-* `vhdl-ext-compile-ghdl-project`: <kbd>C-c \<f5\></kbd>
+* `vhdl-ext-compile-project-ghdl`: <kbd>C-c \<f5\></kbd>
 
 See more info in the [wiki](https://github.com/gmlarumbe/vhdl-ext/wiki/Compilation).
 
