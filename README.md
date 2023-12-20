@@ -1,8 +1,8 @@
 [![MELPA](https://melpa.org/packages/vhdl-ext-badge.svg)](https://melpa.org/#/vhdl-ext)
 [![MELPA Stable](https://stable.melpa.org/packages/vhdl-ext-badge.svg)](https://stable.melpa.org/#/vhdl-ext)
-[![Build Status](https://github.com/gmlarumbe/vhdl-ext/workflows/ERT-straight/badge.svg)](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/build_straight.yml)
-[![Build Status](https://github.com/gmlarumbe/vhdl-ext/workflows/package-el-basic/badge.svg)](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/build_package_melpa_basic.yml)
-[![Build Status](https://github.com/gmlarumbe/vhdl-ext/workflows/ERT-MELPA-Stable/badge.svg)](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/build_package_melpa_stable.yml)
+[![Build Status](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/build_straight.yml/badge.svg)](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/build_straight.yml)
+[![Build Status](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/build_package_melpa_basic.yml/badge.svg)](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/build_package_melpa_basic.yml)
+[![Build Status](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/build_package_melpa_stable.yml/badge.svg)](https://github.com/gmlarumbe/vhdl-ext/actions/workflows/build_package_melpa_stable.yml)
 
 
 # vhdl-ext.el - VHDL Extensions for Emacs #
