@@ -93,9 +93,8 @@ Find references of SYMBOL."
   nil)
 
 (defun vhdl-ext-xref-backend-enable ()
-  "Enable `vhdl-ext' backend on current buffer.
-Still experimental.  Removes the rest of xref backends."
-  (setq-local xref-backend-functions '(vhdl-ext-xref-backend t)))
+  "Enable `vhdl-ext' backend on current buffer."
+  (setq-local xref-backend-functions `(vhdl-ext-xref-backend ,@xref-backend-functions)))
 
 (defun vhdl-ext-xref-set (&optional disable)
   "Setup `vhdl-ext' to use builtin `xref' backend.
