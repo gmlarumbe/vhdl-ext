@@ -219,8 +219,6 @@ FEATURES can be a single feature or a list of features."
           (setq flycheck-ghdl-language-standard (vhdl-ext-get-standard)) ; Global for all projects
           (setq flycheck-ghdl-workdir (vhdl-ext-proj-workdir))           ; Project dependant
           (setq flycheck-ghdl-work-lib (vhdl-ext-proj-worklib)))         ; Project dependant
-        (vhdl-ext-when-feature 'which-func
-          (vhdl-ext-which-func))
         (vhdl-ext-when-feature 'time-stamp
           (vhdl-ext-time-stamp-mode))
         ;; `vhdl-mode'-only customization (exclude `vhdl-ts-mode')
@@ -235,7 +233,10 @@ FEATURES can be a single feature or a list of features."
             (setq-local font-lock-multiline nil))
           ;; Imenu
           (vhdl-ext-when-feature 'imenu
-            (advice-add 'vhdl-index-menu-init :override #'vhdl-ext-index-menu-init))))
+            (advice-add 'vhdl-index-menu-init :override #'vhdl-ext-index-menu-init))
+          ;; Which-func
+          (vhdl-ext-when-feature 'which-func
+            (vhdl-ext-which-func))))
     ;; Cleanup
     (remove-hook 'kill-buffer-hook #'vhdl-ext-kill-buffer-hook :local)
     (vhdl-ext-when-feature 'xref
