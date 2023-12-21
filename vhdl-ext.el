@@ -151,8 +151,7 @@ FEATURES can be a single feature or a list of features."
     (vhdl-ext-when-feature 'template
       (define-key map (kbd "C-c C-t") 'vhdl-ext-hydra/body))
     (vhdl-ext-when-feature 'beautify
-      (define-key map (kbd "C-M-i") 'vhdl-ext-beautify-block-at-point)
-      (define-key map (kbd "C-c M-i") 'vhdl-ext-beautify-instance-at-point))
+      (define-key map (kbd "C-M-i") 'vhdl-ext-beautify-block-at-point))
     (vhdl-ext-when-feature 'navigation
       (define-key map (kbd "C-M-.") 'vhdl-ext-jump-to-parent-entity)
       (define-key map (kbd "C-c M-.") 'vhdl-ext-jump-to-entity-at-point-def)

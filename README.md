@@ -119,7 +119,6 @@ Enabling of `vhdl-ext-mode` minor-mode creates the following keybindings:
 
 * Features
   * <kbd>C-M-i</kbd> `vhdl-ext-beautify-block-at-point`
-  * <kbd>C-c M-i</kbd> `vhdl-ext-beautify-instance-at-point`
   * <kbd>C-c C-v</kbd> `vhdl-ext-hierarchy-current-buffer`
   * <kbd>C-c C-t</kbd> `vhdl-ext-hydra/body`
   * <kbd>C-c C-f</kbd> `vhdl-ext-flycheck-mode`
@@ -245,12 +244,12 @@ Beautify block and instances at point:
 Interactive functions:
 
 * `vhdl-ext-beautify-block-at-point`: <kbd>C-M-i</kbd>
-* `vhdl-ext-beautify-instance-at-point`: <kbd>C-c M-i</kbd>
+* `vhdl-ext-beautify-instance-at-point`
 
 Batch-mode functions:
 
 * `vhdl-ext-beautify-files`
-* `vhdl-ext-beautify-dir-files`
+* `vhdl-ext-beautify-dir-files`: uses tree-sitter if run with prefix arg <kbd>C-u</kbd>
 
 
 ## Navigation ##
