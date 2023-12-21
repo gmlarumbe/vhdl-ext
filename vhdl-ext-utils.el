@@ -348,14 +348,21 @@ Expand with respect to REL-DIR if non-nil."
 (defun vhdl-ext-scan-buffer-entities-and-lines ()
   "Find entities and their definition files in current buffer.
 Return list with found entities and their line number or nil if not found."
-  (let (entities-and-files)
-    (save-excursion
-      (goto-char (point-min))
-      (while (vhdl-re-search-forward vhdl-ext-entity-re nil t)
-        (push `(,(match-string-no-properties 2)
-                ,(line-number-at-pos))
-              entities-and-files)))
-    (nreverse (delete-dups entities-and-files))))
+  (if (eq major-mode 'vhdl-ts-mode)
+      ;; `vhdl-ts-mode'
+      (mapcar (lambda (node)
+                `(,(vhdl-ts--node-identifier-name node)             ; Entity name
+                  ,(line-number-at-pos (treesit-node-start node)))) ; Line number
+              (vhdl-ts-entity-declarations-nodes-current-buffer))
+    ;; `vhdl-mode'
+    (let (entities-and-files)
+      (save-excursion
+        (goto-char (point-min))
+        (while (vhdl-re-search-forward vhdl-ext-entity-re nil t)
+          (push `(,(match-string-no-properties 2)
+                  ,(line-number-at-pos))
+                entities-and-files)))
+      (nreverse (delete-dups entities-and-files)))))
 
 (defun vhdl-ext-scan-buffer-entities ()
   "Find entities in current buffer.

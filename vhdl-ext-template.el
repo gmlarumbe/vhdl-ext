@@ -50,17 +50,19 @@ Get generic and port information from an entity or component declaration via
          (instance-name (read-string "Instance-name: " (concat "I_" (upcase entity-name)))))
     (save-excursion
       (vhdl-port-paste-instance instance-name))
-    (vhdl-ext-beautify-instance-at-point)))
+    (save-excursion
+      (search-forward instance-name)
+      (vhdl-ext-beautify-block-at-point))))
 
-(defun vhdl-ext-insert-testbench-from-file (file outfile)
+(defun vhdl-ext-insert-testbench-from-file (file outdir)
   "Create testbench from entity of selected FILE in OUTFILE."
-  (interactive "FSelect entity from file:\nFOutput file: ")
-  (when (file-exists-p outfile)
-    (error "File %s exists" outfile))
+  (interactive "FSelect entity from file:\nDOutput dir: ")
   (vhdl-ext-template-copy-entity-from-file file)
-  (find-file outfile)
-  (vhdl-port-paste-testbench)
-  (vhdl-beautify-buffer))
+  (find-file (file-name-concat outdir "temp.vhdl"))
+  (vhdl-port-paste-testbench) ; Renames temp file to <entity>_tb.vhdl
+  (if (eq major-mode 'vhdl-ts-mode)
+      (vhdl-ts-beautify-buffer)
+    (vhdl-beautify-buffer)))
 
 
 ;;;; Hydra
