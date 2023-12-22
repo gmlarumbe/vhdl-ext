@@ -157,7 +157,7 @@ FEATURES can be a single feature or a list of features."
       (define-key map (kbd "C-c M-.") 'vhdl-ext-jump-to-entity-at-point-def)
       (define-key map (kbd "C-c M-?") 'vhdl-ext-jump-to-entity-at-point-ref)
       (define-key map (kbd "C-M-f") 'vhdl-ext-forward-sexp)
-      (define-key map (kbd "C-M-d") 'vhdl-ext-backward-sexp)
+      (define-key map (kbd "C-M-b") 'vhdl-ext-backward-sexp)
       (define-key map (kbd "C-M-u") 'vhdl-ext-find-entity-instance-bwd)
       (define-key map (kbd "C-M-d") 'vhdl-ext-find-entity-instance-fwd))
     (vhdl-ext-when-feature 'compilation

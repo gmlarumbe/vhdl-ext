@@ -155,50 +155,54 @@ ALIST keys are strings that define projects in `vhdl-ext-project-alist'."
   "Move forward one SEXP.
 With prefix arg, move COUNT sexps."
   (interactive "P")
-  (let* ((symbol-raw (thing-at-point 'symbol :no-props))
-         (symbol (when symbol-raw
-                   (downcase symbol-raw)))
-         (bounds (bounds-of-thing-at-point 'symbol)))
-    (cond (;; entity, architecture, package, configuration, context
-           (member symbol '("entity" "architecture" "configuration" "context"))
-           (vhdl-re-search-forward "\\_<is\\_>" nil t)
-           (goto-char (match-beginning 0))
-           (vhdl-forward-sexp count)
-           (when (looking-at (concat "\\s-+\\_<" symbol "\\_>"))
-             (forward-word)))
-          ;; function, procedure
-          ((member symbol '("function" "procedure"))
-           (let ((pos (point)))
-             (if (save-excursion (setq pos (vhdl-end-of-statement))
-                                 (eq (preceding-char) ?\;)) ; Function declaration in package declaration (not body)
-                 (goto-char pos)
-               (vhdl-re-search-forward "\\_<is\\_>" nil t)
-               (goto-char (match-beginning 0))
-               (vhdl-forward-sexp count)
-               (when (looking-at (concat "\\s-+\\_<" symbol "\\_>"))
-                 (forward-word)))))
-          ;; component, process
-          ((member symbol '("component" "process" "generate" "loop"))
-           (goto-char (car bounds))
-           (vhdl-forward-sexp count)
-           (when (looking-at (concat "\\s-+\\_<" symbol "\\_>"))
-             (forward-word)))
-          ;; if then/else/elsif
-          ((member symbol '("then" "else" "elsif"))
-           (goto-char (car bounds))
-           (vhdl-forward-sexp count)
-           (when (looking-at (concat "\\s-+\\_<if\\_>"))
-             (forward-word)))
-          ;; Package/package body
-          ((member symbol '("package"))
-           (vhdl-re-search-forward "\\_<is\\_>" nil t)
-           (goto-char (match-beginning 0))
-           (vhdl-forward-sexp count)
-           (when (looking-at (concat "\\s-+\\_<" symbol "\\_>\\(\\s-+body\\)?"))
-             (goto-char (match-end 0))))
-          ;; Fallback
-          (t
-           (vhdl-forward-sexp count)))))
+  (if (eq major-mode 'vhdl-ts-mode)
+      ;; `vhdl-ts-mode'
+      (vhdl-ts-forward-sexp count)
+    ;; `vhdl-mode'
+    (let* ((symbol-raw (thing-at-point 'symbol :no-props))
+           (symbol (when symbol-raw
+                     (downcase symbol-raw)))
+           (bounds (bounds-of-thing-at-point 'symbol)))
+      (cond (;; entity, architecture, package, configuration, context
+             (member symbol '("entity" "architecture" "configuration" "context"))
+             (vhdl-re-search-forward "\\_<is\\_>" nil t)
+             (goto-char (match-beginning 0))
+             (vhdl-forward-sexp count)
+             (when (looking-at (concat "\\s-+\\_<" symbol "\\_>"))
+               (forward-word)))
+            ;; function, procedure
+            ((member symbol '("function" "procedure"))
+             (let ((pos (point)))
+               (if (save-excursion (setq pos (vhdl-end-of-statement))
+                                   (eq (preceding-char) ?\;)) ; Function declaration in package declaration (not body)
+                   (goto-char pos)
+                 (vhdl-re-search-forward "\\_<is\\_>" nil t)
+                 (goto-char (match-beginning 0))
+                 (vhdl-forward-sexp count)
+                 (when (looking-at (concat "\\s-+\\_<" symbol "\\_>"))
+                   (forward-word)))))
+            ;; component, process
+            ((member symbol '("component" "process" "generate" "loop"))
+             (goto-char (car bounds))
+             (vhdl-forward-sexp count)
+             (when (looking-at (concat "\\s-+\\_<" symbol "\\_>"))
+               (forward-word)))
+            ;; if then/else/elsif
+            ((member symbol '("then" "else" "elsif"))
+             (goto-char (car bounds))
+             (vhdl-forward-sexp count)
+             (when (looking-at (concat "\\s-+\\_<if\\_>"))
+               (forward-word)))
+            ;; Package/package body
+            ((member symbol '("package"))
+             (vhdl-re-search-forward "\\_<is\\_>" nil t)
+             (goto-char (match-beginning 0))
+             (vhdl-forward-sexp count)
+             (when (looking-at (concat "\\s-+\\_<" symbol "\\_>\\(\\s-+body\\)?"))
+               (goto-char (match-end 0))))
+            ;; Fallback
+            (t
+             (vhdl-forward-sexp count))))))
 
 (defun vhdl-ext-backward-sexp (&optional count)
   "Move backward one SEXP.
@@ -207,47 +211,51 @@ With prefix arg, move COUNT sexps.
 Algorithm takes into account that keywords component, generate and process
 cannot be ommitted after an end."
   (interactive "P")
-  (let* ((symbol-raw (thing-at-point 'symbol :no-props))
-         (symbol (when symbol-raw
-                   (downcase symbol-raw)))
-         (bounds (bounds-of-thing-at-point 'symbol)))
-    (cond (;; end
-           (member symbol '("end"))
-           (goto-char (cdr bounds))
-           (vhdl-backward-sexp count)
-           (cond ((looking-at "\\_<is\\_>")
-                  (vhdl-re-search-backward "\\_<\\(entity\\|function\\|procedure\\|component\\|package\\|context\\|configuration\\)\\_>" nil t))
-                 ((looking-at "\\_<begin\\_>")
-                  (vhdl-re-search-backward "\\_<\\(?1:end\\|architecture\\|function\\|procedure\\|process\\)\\_>" nil t)
-                  (while (or (string= "end" (match-string-no-properties 1))
-                             (looking-back "\\_<\\(?1:end\\)\\_>\\s-+" (line-beginning-position)))
-                    (goto-char (match-end 1))
-                    (vhdl-ext-backward-sexp count)
-                    (vhdl-re-search-backward "\\_<\\(end\\|architecture\\|function\\|procedure\\|process\\)\\_>" nil t)))))
-          ;; entity, architecture, ,function, procedure, package, process, if, context, configuration
-          ((member symbol '("entity" "architecture" "function" "procedure" "package" "process" "if" "context" "configuration"))
-           (vhdl-re-search-backward "\\_<end\\_>" nil t)
-           (goto-char (match-end 0))
-           (vhdl-backward-sexp count)
-           (vhdl-re-search-backward (concat "\\_<" symbol "\\_>") nil t))
-          ;; component, generate, loop
-          ((member symbol '("component" "generate" "loop"))
-           (vhdl-re-search-backward "\\_<end\\_>" nil t)
-           (goto-char (match-end 0))
-           (vhdl-backward-sexp count))
-          ;; if then/else/elsif
-          ((member symbol '("else" "elsif"))
-           (goto-char (car bounds))
-           (vhdl-backward-sexp count))
-          ;; package body
-          ((member symbol '("body"))
-           (vhdl-re-search-backward "\\(?1:end\\)\\s-+package" nil t)
-           (goto-char (match-end 1))
-           (vhdl-backward-sexp count)
-           (vhdl-re-search-backward (concat "package\\s-+body") nil t))
-          ;; Fallback
-          (t
-           (vhdl-backward-sexp count)))))
+  (if (eq major-mode 'vhdl-ts-mode)
+      ;; `vhdl-ts-mode'
+      (vhdl-ts-backward-sexp count)
+    ;; `vhdl-mode'
+    (let* ((symbol-raw (thing-at-point 'symbol :no-props))
+           (symbol (when symbol-raw
+                     (downcase symbol-raw)))
+           (bounds (bounds-of-thing-at-point 'symbol)))
+      (cond (;; end
+             (member symbol '("end"))
+             (goto-char (cdr bounds))
+             (vhdl-backward-sexp count)
+             (cond ((looking-at "\\_<is\\_>")
+                    (vhdl-re-search-backward "\\_<\\(entity\\|function\\|procedure\\|component\\|package\\|context\\|configuration\\)\\_>" nil t))
+                   ((looking-at "\\_<begin\\_>")
+                    (vhdl-re-search-backward "\\_<\\(?1:end\\|architecture\\|function\\|procedure\\|process\\)\\_>" nil t)
+                    (while (or (string= "end" (match-string-no-properties 1))
+                               (looking-back "\\_<\\(?1:end\\)\\_>\\s-+" (line-beginning-position)))
+                      (goto-char (match-end 1))
+                      (vhdl-ext-backward-sexp count)
+                      (vhdl-re-search-backward "\\_<\\(end\\|architecture\\|function\\|procedure\\|process\\)\\_>" nil t)))))
+            ;; entity, architecture, ,function, procedure, package, process, if, context, configuration
+            ((member symbol '("entity" "architecture" "function" "procedure" "package" "process" "if" "context" "configuration"))
+             (vhdl-re-search-backward "\\_<end\\_>" nil t)
+             (goto-char (match-end 0))
+             (vhdl-backward-sexp count)
+             (vhdl-re-search-backward (concat "\\_<" symbol "\\_>") nil t))
+            ;; component, generate, loop
+            ((member symbol '("component" "generate" "loop"))
+             (vhdl-re-search-backward "\\_<end\\_>" nil t)
+             (goto-char (match-end 0))
+             (vhdl-backward-sexp count))
+            ;; if then/else/elsif
+            ((member symbol '("else" "elsif"))
+             (goto-char (car bounds))
+             (vhdl-backward-sexp count))
+            ;; package body
+            ((member symbol '("body"))
+             (vhdl-re-search-backward "\\(?1:end\\)\\s-+package" nil t)
+             (goto-char (match-end 1))
+             (vhdl-backward-sexp count)
+             (vhdl-re-search-backward (concat "package\\s-+body") nil t))
+            ;; Fallback
+            (t
+             (vhdl-backward-sexp count))))))
 
 (defun vhdl-ext-get-standard ()
   "Get current standard as a string from `vhdl-standard'."
@@ -407,41 +415,45 @@ Return nil if no entity was found."
 
 (defun vhdl-ext-block-at-point ()
   "Return current block at point type and name."
-  (let ((pos (point))
-        beg-pos end-pos found block name)
-    (save-excursion
-      (while (and (not found)
-                  (vhdl-re-search-backward vhdl-ext-block-at-point-re nil t))
-        (when (looking-back "\\_<end\\_>\\s-+" (line-beginning-position))
-          (vhdl-ext-backward-sexp)
-          (vhdl-re-search-backward vhdl-ext-block-at-point-re nil t))
-        (setq block (thing-at-point 'symbol :no-props))
-        (setq beg-pos (point))
-        (cond ((string= block "process")
-               (when (looking-back "^\\s-*\\(?1:[a-zA-Z0-9_-]+\\)\\s-*:\\s-*" (line-beginning-position))
-                 (setq name (match-string-no-properties 1))))
-              ((string= block "generate")
-               (when (save-excursion (vhdl-re-search-backward "^\\s-*\\(?1:[a-zA-Z0-9_-]+\\)\\s-*:\\s-*" (line-beginning-position) :noerror))
-                 (setq name (match-string-no-properties 1))))
-              ((string= block "package")
-               (when (save-excursion (vhdl-re-search-forward "package\\s-+\\(?1:body\\s-+\\)?\\(?2:[a-zA-Z0-9_-]+\\)" (line-end-position) :noerror))
-                 (setq name (match-string-no-properties 2))))
-              (t
-               (save-excursion
-                 (forward-word)
-                 (vhdl-forward-syntactic-ws)
-                 (setq name (thing-at-point 'symbol :no-props)))))
-        (save-excursion
-          (vhdl-ext-forward-sexp)
-          (setq end-pos (point)))
-        (when (and (>= pos beg-pos)
-                   (<= pos end-pos))
-          (setq found t))))
-    (when found
-      `((type      . ,block)
-        (name      . ,name)
-        (beg-point . ,beg-pos)
-        (end-point . ,end-pos)))))
+  (if (eq major-mode 'vhdl-ts-mode)
+      ;; `vhdl-ts-mode'
+      (vhdl-ts-block-at-point)
+    ;; `vhdl-mode'
+    (let ((pos (point))
+          beg-pos end-pos found block name)
+      (save-excursion
+        (while (and (not found)
+                    (vhdl-re-search-backward vhdl-ext-block-at-point-re nil t))
+          (when (looking-back "\\_<end\\_>\\s-+" (line-beginning-position))
+            (vhdl-ext-backward-sexp)
+            (vhdl-re-search-backward vhdl-ext-block-at-point-re nil t))
+          (setq block (thing-at-point 'symbol :no-props))
+          (setq beg-pos (point))
+          (cond ((string= block "process")
+                 (when (looking-back "^\\s-*\\(?1:[a-zA-Z0-9_-]+\\)\\s-*:\\s-*" (line-beginning-position))
+                   (setq name (match-string-no-properties 1))))
+                ((string= block "generate")
+                 (when (save-excursion (vhdl-re-search-backward "^\\s-*\\(?1:[a-zA-Z0-9_-]+\\)\\s-*:\\s-*" (line-beginning-position) :noerror))
+                   (setq name (match-string-no-properties 1))))
+                ((string= block "package")
+                 (when (save-excursion (vhdl-re-search-forward "package\\s-+\\(?1:body\\s-+\\)?\\(?2:[a-zA-Z0-9_-]+\\)" (line-end-position) :noerror))
+                   (setq name (match-string-no-properties 2))))
+                (t
+                 (save-excursion
+                   (forward-word)
+                   (vhdl-forward-syntactic-ws)
+                   (setq name (thing-at-point 'symbol :no-props)))))
+          (save-excursion
+            (vhdl-ext-forward-sexp)
+            (setq end-pos (point)))
+          (when (and (>= pos beg-pos)
+                     (<= pos end-pos))
+            (setq found t))))
+      (when found
+        `((type      . ,block)
+          (name      . ,name)
+          (beg-point . ,beg-pos)
+          (end-point . ,end-pos))))))
 
 (defun vhdl-ext-point-inside-block (block)
   "Return block name if cursor is inside specified BLOCK type."

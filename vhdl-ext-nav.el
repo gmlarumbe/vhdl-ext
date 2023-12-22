@@ -30,6 +30,7 @@
 (require 'ripgrep)
 (require 'xref)
 (require 'vhdl-ext-utils)
+(require 'vhdl-ts-mode)
 
 
 ;;;; Custom
@@ -56,26 +57,38 @@ If optional argument BWD is non-nil search backwards instead.
 Third arg INTERACTIVE-P specifies whether function call should be treated as if
 it was interactive.  This changes the position where point will be at the end of
 the function call."
-  (let ((found nil)
-        (pos))
-    (save-excursion
-      (when interactive-p
-        (if bwd
-            (backward-char)
-          (forward-char)))
-      (if bwd
-          (setq found (vhdl-re-search-backward vhdl-ext-instance-re limit t))
-        (setq found (vhdl-re-search-forward vhdl-ext-instance-re limit t)))
-      (if interactive-p
-          (setq pos (match-beginning 6))
-        (setq pos (point))))
-    (if (not found)
+  (if (eq major-mode 'vhdl-ts-mode)
+      ;; `vhdl-ts-mode'
+      (let ((node (vhdl-ts-find-entity-instance bwd)))
+        (if interactive-p
+            (if node
+                (message "%s : %s" (vhdl-ts--node-identifier-name node) (vhdl-ts--node-instance-name node))
+              (if bwd
+                  (message "Could not find any instance backwards")
+                (message "Could not find any instance forward")))
+          ;; For non-interactive calls return node with its positions
+          node))
+    ;; `vhdl-mode'
+    (let ((found nil)
+          (pos))
+      (save-excursion
         (when interactive-p
-          (message "Cound not find instance %s" (if bwd "backward" "forward")))
-      ;; When found
-      (when interactive-p
-        (message (concat (match-string-no-properties 1) " : " (match-string-no-properties 6))))
-      (goto-char pos))))
+          (if bwd
+              (backward-char)
+            (forward-char)))
+        (if bwd
+            (setq found (vhdl-re-search-backward vhdl-ext-instance-re limit t))
+          (setq found (vhdl-re-search-forward vhdl-ext-instance-re limit t)))
+        (if interactive-p
+            (setq pos (match-beginning 6))
+          (setq pos (point))))
+      (if (not found)
+          (when interactive-p
+            (message "Cound not find instance %s" (if bwd "backward" "forward")))
+        ;; When found
+        (when interactive-p
+          (message (concat (match-string-no-properties 1) " : " (match-string-no-properties 6))))
+        (goto-char pos)))))
 
 (defun vhdl-ext-find-entity-instance-fwd (&optional limit)
   "Search forward for a VHDL entity/instance.
