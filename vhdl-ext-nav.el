@@ -106,21 +106,27 @@ Optional LIMIT argument bounds the search."
 
 (defun vhdl-ext-instance-at-point ()
   "Return list with entity and instance names if point is at an instance."
-  (let ((point-cur (point))
-        point-instance-begin point-instance-end instance-type instance-name)
-    (save-excursion
-      (when (and (vhdl-re-search-forward ";" nil t)
-                 (vhdl-ext-find-entity-instance-bwd) ; Sets match data
-                 (setq instance-name (match-string-no-properties 1))
-                 (setq instance-type (match-string-no-properties 6))
-                 (setq point-instance-begin (match-beginning 1))
-                 (vhdl-re-search-forward ";" nil t) ; Needed to avoid issues with last instance on a file
-                 (setq point-instance-end (1- (point))))
-        (when (and (>= point-cur point-instance-begin)
-                   (<= point-cur point-instance-end))
-          (set-match-data (list point-instance-begin
-                                point-instance-end))
-          (list instance-type instance-name))))))
+  (if (eq major-mode 'vhdl-ts-mode)
+      ;; `vhdl-ts-mode'
+      (let ((node (vhdl-ts-instance-at-point)))
+        (when node
+          `(,(vhdl-ts--node-identifier-name node) ,(vhdl-ts--node-instance-name node))))
+    ;; `vhdl-mode'
+    (let ((point-cur (point))
+          point-instance-begin point-instance-end instance-type instance-name)
+      (save-excursion
+        (when (and (vhdl-re-search-forward ";" nil t)
+                   (vhdl-ext-find-entity-instance-bwd) ; Sets match data
+                   (setq instance-name (match-string-no-properties 1))
+                   (setq instance-type (match-string-no-properties 6))
+                   (setq point-instance-begin (match-beginning 1))
+                   (vhdl-re-search-forward ";" nil t) ; Needed to avoid issues with last instance on a file
+                   (setq point-instance-end (1- (point))))
+          (when (and (>= point-cur point-instance-begin)
+                     (<= point-cur point-instance-end))
+            (set-match-data (list point-instance-begin
+                                  point-instance-end))
+            `(,instance-type ,instance-name)))))))
 
 (defun vhdl-ext-jump-to-entity-at-point (&optional ref)
   "Jump to definition of instance at point.
