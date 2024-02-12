@@ -60,7 +60,13 @@ Move forward COUNT s-expressions."
                                            ,vhdl-ext-hs-start-regexp
                                            nil
                                            "--\\( \\|$\\)"
-                                           ,(cdr mode)))))
+                                           ,(cdr mode))))
+  (dolist (hook '(vhdl-mode-hook vhdl-ts-mode-hook))
+    (add-hook hook #'hs-minor-mode))
+  ;; Workaround to enable `hideshow' on first file visit with lazy loading using
+  ;; :config section with `use-package'
+  (when (member major-mode '(vhdl-mode vhdl-ts-mode))
+    (hs-minor-mode 1)))
 
 
 (provide 'vhdl-ext-hs)
