@@ -71,8 +71,14 @@
 
 (defun vhdl-ext-xref-backend ()
   "Vhdl-ext backend for Xref."
-  (when (vhdl-ext-buffer-proj-root)
-    'vhdl-ext))
+  (let (proj symbol proj-table)
+    (and (setq proj (vhdl-ext-buffer-proj))
+         (setq symbol (thing-at-point 'symbol :no-props))
+         (or (and (setq proj-table (vhdl-aget vhdl-ext-tags-defs-table proj))
+                  (gethash symbol proj-table))
+             (and (setq proj-table (vhdl-aget vhdl-ext-tags-refs-table proj))
+                  (gethash symbol proj-table)))
+         'vhdl-ext)))
 
 (cl-defmethod xref-backend-identifier-at-point ((_backend (eql vhdl-ext)))
   "Implementation of `xref-backend-identifier-at-point' for vhdl-ext-xref."
