@@ -1,6 +1,6 @@
 ;;; vhdl-ext-tags.el --- Vhdl-ext Tags  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2022-2023 Gonzalo Larumbe
+;; Copyright (C) 2022-2024 Gonzalo Larumbe
 
 ;; Author: Gonzalo Larumbe <gonzalomlarumbe@gmail.com>
 ;; URL: https://github.com/gmlarumbe/vhdl-ext
