@@ -163,13 +163,13 @@ select which files belong to a specific project:
   ```elisp
   (setq vhdl-ext-project-alist
         `(("axi_if_converter" ; Project name
-           :root "/home/gonz/Repos/larumbe/axi_if_converter"
+           :root "/home/gonz/Repos/larumbe/axi_if_converter" ; supports remote dirs via Tramp
            :files ("src/my_block.vhd"
                    "src/*.vhd") ; Multiple files can be specified through the glob pattern
            :dirs ("src/tb"
                   "-r src/rtl" ; -r to add directories recursively
                   "src/syn/*_block"
-                  "src/**/netlists") ; globstar supported to add all directories that begin with "src" and end with "netlists"
+                  "src/**/netlists") ; add all dirs that begin with "src" and end with "netlists"
            :ignore-dirs ("src/ignored_ip")
            :ignore-files ("src/some_ip/ignored_sim_netlist.vhd")
            ;; The ones below are used for GHDL-related features
