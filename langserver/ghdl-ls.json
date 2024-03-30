@@ -1,0 +1,8 @@
+{
+  "name": "ghdl-ls",
+  "languageId": "vhdl",
+  "command": [
+    "ghdl-ls"
+  ],
+  "settings": {}
+}

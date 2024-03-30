@@ -1,0 +1,9 @@
+{
+  "name": "hdl-checker",
+  "languageId": "vhdl",
+  "command": [
+    "hdl_checker",
+    "--lsp"
+  ],
+  "settings": {}
+}

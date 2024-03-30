@@ -1,0 +1,8 @@
+{
+  "name": "rust-hdl",
+  "languageId": "vhdl",
+  "command": [
+    "vhdl_ls"
+  ],
+  "settings": {}
+}
