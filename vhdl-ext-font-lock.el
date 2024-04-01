@@ -50,7 +50,7 @@
 (defface vhdl-ext-font-lock-then-face
   '((t (:inherit font-lock-keyword-face)))
   "Face for if-else grouping keyword: then."
-  :group 'verilog-ext-font-lock)
+  :group 'vhdl-ext-font-lock)
 
 (defvar vhdl-ext-font-lock-punctuation-face 'vhdl-ext-font-lock-punctuation-face)
 (defface vhdl-ext-font-lock-punctuation-face
