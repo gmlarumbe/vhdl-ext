@@ -1,4 +1,4 @@
-;;; vhdl-ext-eglot.el --- VHDL eglot -*- lexical-binding: t -*-
+;;; vhdl-ext-lsp-bridge.el --- vhdl-ext lsp-bridge setup -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2022-2024 Gonzalo Larumbe
 
@@ -28,16 +28,23 @@
 
 ;;; Code:
 
-(require 'eglot)
+(require 'lsp-bridge nil :noerror) ; Set to :noerror since `lsp-bridge' is not available in MELPA
 (require 'vhdl-ext-utils)
 
-(defvar vhdl-ext-eglot-default-server 've-rust-hdl)
+(defconst vhdl-ext-lsp-bridge-langserver-dir
+  (expand-file-name "langserver" (file-name-directory (or load-file-name (buffer-file-name)))))
 
-(defun vhdl-ext-eglot-set-server (server-id)
-  "Configure VHDL for `eglot' for selected SERVER-ID.
+(defvar vhdl-ext-lsp-bridge-default-server 've-rust-hdl)
+
+(defun vhdl-ext-lsp-bridge-set-server (server-id)
+  "Configure VHDL for `lsp-bridge' with SERVER-ID server.
 Override any previous configuration for `vhdl-mode' and `vhdl-ts-mode'."
   (interactive (list (intern (completing-read "Server-id: " vhdl-ext-lsp-server-ids nil t))))
-  (let ((cmd (car (alist-get server-id vhdl-ext-lsp-available-servers))))
+  (let ((cmd (car (alist-get server-id vhdl-ext-lsp-available-servers)))
+        (cfg-file (cadr (alist-get server-id vhdl-ext-lsp-available-servers)))
+        (cfg-dir vhdl-ext-lsp-bridge-langserver-dir))
+    (unless (featurep 'lsp-bridge)
+      (user-error "lsp-bridge not available: check Installation section on https://github.com/manateelazycat/lsp-bridge"))
     (unless cmd
       (error "%s not recognized as a supported server" server-id))
     (if (not (executable-find (if (listp cmd)
@@ -46,13 +53,19 @@ Override any previous configuration for `vhdl-mode' and `vhdl-ts-mode'."
         (message "%s not in $PATH, skipping config..." server-id)
       ;; Else configure available server
       (dolist (mode '(vhdl-mode vhdl-ts-mode))
-        (setq eglot-server-programs (assq-delete-all mode eglot-server-programs))
-        (if (listp cmd)
-            (push `(,mode ,@cmd) eglot-server-programs)
-          (push `(,mode ,cmd) eglot-server-programs)))
-      (message "[vhdl-ext eglot]: %s" server-id))))
+        (setq lsp-bridge-single-lang-server-mode-list (assq-delete-all mode lsp-bridge-single-lang-server-mode-list))
+        (push (cons mode (file-name-concat cfg-dir cfg-file)) lsp-bridge-single-lang-server-mode-list))
+      ;; Some reporting
+      (message "[vhdl-ext lsp-bridge]: %s" server-id))))
 
 
-(provide 'vhdl-ext-eglot)
 
-;;; vhdl-ext-eglot.el ends here
+(provide 'vhdl-ext-lsp-bridge)
+
+;;; vhdl-ext-lsp-bridge.el ends here
+
+;; Silence all the lsp-bridge byte-compiler warnings:
+;;
+;; Local Variables:
+;; byte-compile-warnings: (not free-vars)
+;; End:
