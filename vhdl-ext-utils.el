@@ -110,10 +110,10 @@ GHDL related:
 
 ;;;;; LSP
 (defconst vhdl-ext-lsp-available-servers
-  '((ve-hdl-checker . ("hdl_checker" "--lsp"))
-    (ve-rust-hdl    . "vhdl_ls")
-    (ve-ghdl-ls     . "ghdl-ls")
-    (ve-vhdl-tool   . ("vhdl-tool" "lsp")))
+  '((ve-hdl-checker ("hdl_checker" "--lsp") "hdl-checker.json")
+    (ve-rust-hdl    "vhdl_ls"               "rust-hdl.json")
+    (ve-ghdl-ls     "ghdl-ls"               "ghdl-ls.json")
+    (ve-vhdl-tool   ("vhdl-tool" "lsp")     "vhdl-tool.json"))
   "Vhdl-ext available LSP servers.")
 (defconst vhdl-ext-lsp-server-ids (mapcar #'car vhdl-ext-lsp-available-servers))
 

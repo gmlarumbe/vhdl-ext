@@ -45,7 +45,7 @@ Register clients."
     ;; Register clients
     (dolist (server vhdl-ext-lsp-available-servers)
       (setq server-id (car server))
-      (setq server-bin (cdr server))
+      (setq server-bin (cadr server))
       (setq lsp-vhdl-server server-id)
       (lsp-register-client
        (make-lsp-client :new-connection (lsp-stdio-connection server-bin)
@@ -58,7 +58,7 @@ Register clients."
 Disable the rest to avoid handling priorities.
 Override any previous configuration for `vhdl-mode' and `vhdl-ts-mode'."
   (interactive (list (intern (completing-read "Server-id: " vhdl-ext-lsp-server-ids nil t))))
-  (let ((cmd (cdr (assoc server-id vhdl-ext-lsp-available-servers))))
+  (let ((cmd (cadr (assoc server-id vhdl-ext-lsp-available-servers))))
     (if (not (executable-find (if (listp cmd)
                                   (car cmd)
                                 cmd)))
@@ -67,7 +67,7 @@ Override any previous configuration for `vhdl-mode' and `vhdl-ts-mode'."
       (dolist (mode '(vhdl-mode vhdl-ts-mode))
         (setq lsp-disabled-clients (assq-delete-all mode lsp-disabled-clients))
         (push (cons mode (remove server-id vhdl-ext-lsp-server-ids)) lsp-disabled-clients))
-      (message "[VHDL LSP]: %s" server-id))))
+      (message "[vhdl-ext lsp]: %s" server-id))))
 
 
 
