@@ -31,7 +31,7 @@
 ;;  - Find definitions and references with builtin `xref' backend
 ;;  - Auto-completion with semantic completion
 ;;  - Hierarchy extraction and navigation
-;;  - LSP configuration for `lsp-bridge', `lsp-mode' and `eglot'
+;;  - LSP configuration for `lsp-bridge', `lsp-mode', `eglot' and `lspce'
 ;;  - Support for many linters via `flycheck'
 ;;  - Beautify blocks and instances
 ;;  - Code navigation functions
@@ -59,6 +59,7 @@
                                    eglot
                                    lsp
                                    lsp-bridge
+                                   lspce
                                    flycheck
                                    beautify
                                    navigation
@@ -84,6 +85,8 @@
                 lsp)
               (const :tag "Setup LSP servers for `lsp-bridge'."
                 lsp-bridge)
+              (const :tag "Setup LSP servers for `lspce'."
+                lspce)
               (const :tag "Setup linters for `flycheck'."
                 flycheck)
               (const :tag "Code beautifying functions."
@@ -141,6 +144,7 @@ FEATURES can be a single feature or a list of features."
 (require 'vhdl-ext-eglot)
 (require 'vhdl-ext-lsp)
 (require 'vhdl-ext-lsp-bridge)
+(require 'vhdl-ext-lspce)
 
 
 ;;; Major-mode
@@ -190,6 +194,8 @@ FEATURES can be a single feature or a list of features."
     (vhdl-ext-lsp-set-server vhdl-ext-lsp-mode-default-server))
   (vhdl-ext-when-feature 'lsp-bridge
     (vhdl-ext-lsp-bridge-set-server vhdl-ext-lsp-bridge-default-server))
+  (vhdl-ext-when-feature 'lspce
+    (vhdl-ext-lspce-set-server vhdl-ext-lspce-default-server))
   (vhdl-ext-when-feature 'flycheck
     (vhdl-ext-flycheck-setup))
   (vhdl-ext-when-feature 'hideshow

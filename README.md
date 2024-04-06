@@ -16,7 +16,7 @@ and [`vhdl-ts-mode`](https://github.com/gmlarumbe/vhdl-ts-mode).
 * [Find definitions and references](#find-definitions-and-references)
 * [Auto-completion](#auto-completion)
 * [Hierarchy extraction and navigation](#hierarchy-extraction)
-* [LSP configuration for `lsp-bridge`, `lsp-mode` and `eglot`](#language-server-protocol)
+* [LSP configuration for `lsp-bridge`, `lsp-mode`,`eglot` and `lspce`](#language-server-protocol)
 * [Support for many linters via `flycheck`](#linting)
 * [Beautify blocks and instances](#beautify-blocks-and-instances)
 * [Navigate through instances in a entity](#navigation)
@@ -70,6 +70,7 @@ By default all features are enabled:
         eglot
         lsp
         lsp-bridge
+        lspce
         flycheck
         beautify
         navigation
@@ -101,6 +102,7 @@ If installed and loaded via `use-package`:
           eglot
           lsp
           lsp-bridge
+          lspce
           flycheck
           beautify
           navigation
@@ -220,7 +222,7 @@ For configuration information, see the [wiki](https://github.com/gmlarumbe/vhdl-
 
 ## Language Server Protocol ##
 
-Auto-configure various VHDL language servers for `lsp-bridge`, `lsp-mode` and `eglot`:
+Auto-configure various VHDL language servers for `lsp-bridge`, `lsp-mode`, `eglot` and `lspce`:
 
 - [rust_hdl](https://github.com/VHDL-LS/rust_hdl.git)
 - [ghdl_language_server](https://github.com/ghdl/ghdl-language-server.git)
