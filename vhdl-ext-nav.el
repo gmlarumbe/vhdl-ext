@@ -30,7 +30,6 @@
 (require 'ripgrep)
 (require 'xref)
 (require 'vhdl-ext-utils)
-(require 'vhdl-ts-mode)
 
 
 ;;;; Custom

@@ -25,6 +25,7 @@
 ;;; Code:
 
 (require 'vhdl-mode)
+(require 'vhdl-ts-mode)
 
 ;;;; Custom
 (defcustom vhdl-ext-file-extension-re "\\.vhdl?\\'"
@@ -512,30 +513,50 @@ Return nil if no entity was found."
 
 (defun vhdl-ext-point-inside-block (block)
   "Return block name if cursor is inside specified BLOCK type."
-  (let ((pos (point))
-        (re (cond ((eq block 'entity)        "\\<\\(entity\\)\\>")
-                  ((eq block 'architecture)  "\\<\\(architecture\\)\\>")
-                  ((eq block 'package)       "\\<\\(package\\)\\>")
-                  ((eq block 'configuration) "\\<\\(configuration\\)\\>")
-                  ((eq block 'context)       "\\<\\(context\\)\\>")
-                  ((eq block 'function)      "\\<\\(function\\)\\>")
-                  ((eq block 'procedure)     "\\<\\(procedure\\)\\>")
-                  ((eq block 'component)     "\\<\\(component\\)\\>")
-                  ((eq block 'process)       "\\<\\(process\\)\\>")
-                  ((eq block 'generate)      "\\<\\(generate\\)\\>")
-                  (t (error "Incorrect block argument"))))
-        block-beg-point block-end-point)
-    (save-match-data
-      (save-excursion
-        (when (and (vhdl-re-search-backward re nil t)
-                   (setq block-beg-point (point))
-                   (vhdl-ext-forward-sexp)
-                   (setq block-end-point (point))
-                   (>= pos block-beg-point)
-                   (< pos block-end-point))
-          `((type      . ,(symbol-name block))
-            (beg-point . ,block-beg-point)
-            (end-point . ,block-end-point)))))))
+  (if (eq major-mode 'vhdl-ts-mode)
+      ;; `vhdl-ts-mode' based search
+      (let* ((re (cond ((eq block 'entity)        "\\<\\(entity_declaration\\)\\>")
+                       ((eq block 'architecture)  "\\<\\(architecture_body\\)\\>")
+                       ((eq block 'package)       "\\<\\(package_declaration\\)\\>")
+                       ((eq block 'configuration) "\\<\\(configuration_declaration\\)\\>")
+                       ((eq block 'context)       "\\<\\(context_declaration\\)\\>")
+                       ((eq block 'function)      "\\<\\(function_declaration\\)\\>")
+                       ((eq block 'procedure)     "\\<\\(procedure_declaration\\)\\>")
+                       ((eq block 'component)     "\\<\\(component_declaration\\)\\>")
+                       ((eq block 'process)       "\\<\\(process_statement\\)\\>")
+                       ((eq block 'generate)      "\\<\\(\\(for\\|if\\|case\\)_generate_statement\\)\\>")
+                       (t (error "Incorrect block argument"))))
+             (node (vhdl-ts--node-has-parent-recursive (vhdl-ts--node-at-point) re)))
+        (when node
+          `((type      . ,(treesit-node-type node))
+            (name      . ,(vhdl-ts--node-identifier-name node))
+            (beg-point . ,(treesit-node-start node))
+            (end-point . ,(treesit-node-end node)))))
+    ;; `vhdl-mode' based search
+    (let ((pos (point))
+          (re (cond ((eq block 'entity)        "\\<\\(entity\\)\\>")
+                    ((eq block 'architecture)  "\\<\\(architecture\\)\\>")
+                    ((eq block 'package)       "\\<\\(package\\)\\>")
+                    ((eq block 'configuration) "\\<\\(configuration\\)\\>")
+                    ((eq block 'context)       "\\<\\(context\\)\\>")
+                    ((eq block 'function)      "\\<\\(function\\)\\>")
+                    ((eq block 'procedure)     "\\<\\(procedure\\)\\>")
+                    ((eq block 'component)     "\\<\\(component\\)\\>")
+                    ((eq block 'process)       "\\<\\(process\\)\\>")
+                    ((eq block 'generate)      "\\<\\(generate\\)\\>")
+                    (t (error "Incorrect block argument"))))
+          block-beg-point block-end-point)
+      (save-match-data
+        (save-excursion
+          (when (and (vhdl-re-search-backward re nil t)
+                     (setq block-beg-point (point))
+                     (vhdl-ext-forward-sexp)
+                     (setq block-end-point (point))
+                     (>= pos block-beg-point)
+                     (< pos block-end-point))
+            `((type      . ,(symbol-name block))
+              (beg-point . ,block-beg-point)
+              (end-point . ,block-end-point))))))))
 
 (defun vhdl-ext-inside-if-else ()
   "Return non-nil if point is inside an if-else block."

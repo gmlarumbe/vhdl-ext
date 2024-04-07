@@ -29,7 +29,6 @@
 (require 'tree-widget)
 (require 'async)
 (require 'vhdl-ext-nav)
-(require 'vhdl-ts-mode)
 
 (defgroup vhdl-ext-hierarchy nil
   "Vhdl-ext hierarchy."

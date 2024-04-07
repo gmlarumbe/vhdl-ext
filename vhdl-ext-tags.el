@@ -45,7 +45,6 @@
 
 (require 'async)
 (require 'map)
-(require 'vhdl-ts-mode)
 (require 'vhdl-ext-utils)
 
 
