@@ -90,8 +90,9 @@ ARGS is a property list."
          (if (y-or-n-p (format "Buffer %s is in use, kill its process and start new compilation?" ,buf))
              (kill-buffer ,buf)
            (user-error "Aborted")))
-       (compile command)
-       (,comp-mode))))
+       (pop-to-buffer (compile command))
+       (,comp-mode)
+       (setq-local compile-command command))))
 
 ;;; Compilation-re
 (defconst vhdl-ext-compile-filename-re "[a-zA-Z0-9-_\\.\\/]+")
@@ -110,6 +111,7 @@ ARGS is a property list."
   :compile-re vhdl-ext-compile-ghdl-re
   :buf-name vhdl-ext-compile-ghdl-buf)
 
+;;;###autoload (autoload 'vhdl-ext-compile-ghdl "vhdl-ext.el")
 (vhdl-ext-compile-define-fn vhdl-ext-compile-ghdl
   :docstring "Compile GHDL COMMAND with error regexp highlighting."
   :buf vhdl-ext-compile-ghdl-buf
