@@ -8,9 +8,8 @@
 ######################################################
 
 # Variables
-TEST_HDL_PATH = test-hdl
+TEST_HDL_PATH = test/test-hdl
 ERT_TESTS = $(TEST_HDL_PATH)/ert-tests.sh
-LANGUAGE = vhdl
 PACKAGE = vhdl-ext
 
 include $(TEST_HDL_PATH)/Makefile.mk

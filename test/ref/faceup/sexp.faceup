@@ -1,0 +1,202 @@
+«m:-------------------------------------------------------------------------------»«x:
+»«m:-- »«x:Title      : Sexp Tests
+»«m:-- »«x:Project    : vhdl-ext
+»«m:-------------------------------------------------------------------------------»«x:
+»«m:-- »«x:File       : sexp.vhd
+»«m:-- »«x:Author     : Gonzalo Larumbe  <gonzalomlarumbe@gmail.com>
+»«m:-- »«x:Company    : gmlarumbe
+»«m:-- »«x:Created    : 2023-06-10
+»«m:-- »«x:Last update: 2023-06-16
+»«m:-- »«x:Platform   : Arch
+»«m:-- »«x:Standard   : VHDL'08
+»«m:-------------------------------------------------------------------------------»«x:
+»«m:-- »«x:Description:
+»«m:-------------------------------------------------------------------------------»«x:
+»«m:-- »«x:Copyright (c) 2023 gmlarumbe
+»«m:-------------------------------------------------------------------------------»«x:
+»«m:-- »«x:Revisions  :
+»«m:-- »«x:Date        Version  Author  Description
+»«m:-- »«x:2023-06-10  1.0      gonz    Created
+»«m:-------------------------------------------------------------------------------»«x:
+»
+«k:library» «b:ieee»«:vhdl-ext-font-lock-punctuation-face:;»
+«k:use» «b:ieee»«:vhdl-ext-font-lock-operator-face:.»«b:std_logic_1164»«:vhdl-ext-font-lock-operator-face:.»«k:all»«:vhdl-ext-font-lock-punctuation-face:;»
+
+«m:-- »«x:Entities
+»«k:entity» «f:foo» «k:is»
+    «k:port» «:vhdl-ext-font-lock-parenthesis-face:(»
+        clk    «:vhdl-ext-font-lock-punctuation-face::» «k:in» «t:std_logic»«:vhdl-ext-font-lock-punctuation-face:;»
+        resetn «:vhdl-ext-font-lock-punctuation-face::» «k:in» «t:std_logic»
+        «:vhdl-ext-font-lock-parenthesis-face:)»«:vhdl-ext-font-lock-punctuation-face:;»
+
+«k:end» «k:entity» «f:foo»«:vhdl-ext-font-lock-punctuation-face:;»
+
+«k:entity» «f:foo2» «k:is»
+    «k:port» «:vhdl-ext-font-lock-parenthesis-face:(»
+        clk    «:vhdl-ext-font-lock-punctuation-face::» «k:in» «t:std_logic»«:vhdl-ext-font-lock-punctuation-face:;»
+        resetn «:vhdl-ext-font-lock-punctuation-face::» «k:in» «t:std_logic»
+        «:vhdl-ext-font-lock-parenthesis-face:)»«:vhdl-ext-font-lock-punctuation-face:;»
+
+«k:end» «f:foo2»«:vhdl-ext-font-lock-punctuation-face:;»
+
+
+«m:-- »«x:Architectures/functions/components/processes/procedures/generates
+»«k:architecture» «f:RTL» «k:of» «f:foo» «k:is»
+
+    «k:signal» soft_reset «:vhdl-ext-font-lock-punctuation-face::» «t:std_logic»«:vhdl-ext-font-lock-punctuation-face:;»
+
+    «k:component» «f:blk_mem_gen_0»
+        «k:port» «:vhdl-ext-font-lock-parenthesis-face:(»
+            clka  «:vhdl-ext-font-lock-punctuation-face::» «k:in»  «t:std_logic»«:vhdl-ext-font-lock-punctuation-face:;»
+            doutb «:vhdl-ext-font-lock-punctuation-face::» «k:out» «t:std_logic_vector»«:vhdl-ext-font-lock-parenthesis-face:(»«:vhdl-ext-font-lock-brackets-content-face:63» «:vhdl-ext-font-lock-instance-lib-face:downto» «:vhdl-ext-font-lock-brackets-content-face:0»«:vhdl-ext-font-lock-parenthesis-face:)»
+            «:vhdl-ext-font-lock-parenthesis-face:)»«:vhdl-ext-font-lock-punctuation-face:;»
+    «k:end» «k:component»«:vhdl-ext-font-lock-punctuation-face:;»
+
+    «k:function» «f:clogb2» «:vhdl-ext-font-lock-parenthesis-face:(»bit_depth «:vhdl-ext-font-lock-punctuation-face::» «t:integer»«:vhdl-ext-font-lock-parenthesis-face:)» «k:return» «t:integer» «k:is»
+        «k:variable» depth «:vhdl-ext-font-lock-punctuation-face::» «t:integer» «:vhdl-ext-font-lock-punctuation-face::=» bit_depth«:vhdl-ext-font-lock-punctuation-face:;»
+        «k:variable» count «:vhdl-ext-font-lock-punctuation-face::» «t:integer» «:vhdl-ext-font-lock-punctuation-face::=» 1«:vhdl-ext-font-lock-punctuation-face:;»
+    «k:begin»
+        «k:for» «v:clogb2» «k:in» 1 «k:to» bit_depth «k:loop»
+            «k:if» «:vhdl-ext-font-lock-parenthesis-face:(»bit_depth «:vhdl-ext-font-lock-punctuation-face:<=» 2«:vhdl-ext-font-lock-parenthesis-face:)» «:vhdl-ext-font-lock-then-face:then»
+                count «:vhdl-ext-font-lock-punctuation-face::=» 1«:vhdl-ext-font-lock-punctuation-face:;»
+            «k:else»
+                «k:if» «:vhdl-ext-font-lock-parenthesis-face:(»depth «:vhdl-ext-font-lock-punctuation-face:<=» 1«:vhdl-ext-font-lock-parenthesis-face:)» «:vhdl-ext-font-lock-then-face:then»
+                    count «:vhdl-ext-font-lock-punctuation-face::=» count«:vhdl-ext-font-lock-punctuation-face:;»
+                «k:else»
+                    depth «:vhdl-ext-font-lock-punctuation-face::=» depth «:vhdl-ext-font-lock-operator-face:/» 2«:vhdl-ext-font-lock-punctuation-face:;»
+                    count «:vhdl-ext-font-lock-punctuation-face::=» count «:vhdl-ext-font-lock-operator-face:+» 1«:vhdl-ext-font-lock-punctuation-face:;»
+                «k:end» «k:if»«:vhdl-ext-font-lock-punctuation-face:;»
+            «k:end» «k:if»«:vhdl-ext-font-lock-punctuation-face:;»
+        «k:end» «k:loop»«:vhdl-ext-font-lock-punctuation-face:;»
+        «k:return» «:vhdl-ext-font-lock-parenthesis-face:(»count«:vhdl-ext-font-lock-parenthesis-face:)»«:vhdl-ext-font-lock-punctuation-face:;»
+    «k:end» «k:function» «f:clogb2»«:vhdl-ext-font-lock-punctuation-face:;»
+
+«k:begin»
+
+    main «:vhdl-ext-font-lock-punctuation-face::» «k:process»
+
+        «k:procedure» «f:init_values» «k:is»
+        «k:begin»
+            resetn     «:vhdl-ext-font-lock-punctuation-face:<=» «s:'0'»«:vhdl-ext-font-lock-punctuation-face:;»
+            soft_reset «:vhdl-ext-font-lock-punctuation-face:<=» «s:'0'»«:vhdl-ext-font-lock-punctuation-face:;»
+        «k:end» «k:procedure» «f:init_values»«:vhdl-ext-font-lock-punctuation-face:;»
+
+    «k:begin»
+    «k:end» «k:process» «f:main»«:vhdl-ext-font-lock-punctuation-face:;»
+
+    gen_mem_sel «:vhdl-ext-font-lock-punctuation-face::» «k:if» «:vhdl-ext-font-lock-parenthesis-face:(»USER_NUM_MEM «:vhdl-ext-font-lock-punctuation-face:>=» 1«:vhdl-ext-font-lock-parenthesis-face:)» «k:generate»
+    «k:begin»
+        mem_select  «:vhdl-ext-font-lock-punctuation-face:<=» «s:"1"»«:vhdl-ext-font-lock-punctuation-face:;»
+    «k:end» «k:generate» «f:gen_mem_sel»«:vhdl-ext-font-lock-punctuation-face:;»
+
+«k:end» «k:architecture» «f:RTL»«:vhdl-ext-font-lock-punctuation-face:;»
+
+
+
+«k:architecture» «f:RTL» «k:of» «f:foo» «k:is»
+
+    «k:signal» soft_reset «:vhdl-ext-font-lock-punctuation-face::» «t:std_logic»«:vhdl-ext-font-lock-punctuation-face:;»
+
+    «k:function» «f:clogb2» «:vhdl-ext-font-lock-parenthesis-face:(»bit_depth «:vhdl-ext-font-lock-punctuation-face::» «t:integer»«:vhdl-ext-font-lock-parenthesis-face:)» «k:return» «t:integer» «k:is»
+        «k:variable» depth «:vhdl-ext-font-lock-punctuation-face::» «t:integer» «:vhdl-ext-font-lock-punctuation-face::=» bit_depth«:vhdl-ext-font-lock-punctuation-face:;»
+        «k:variable» count «:vhdl-ext-font-lock-punctuation-face::» «t:integer» «:vhdl-ext-font-lock-punctuation-face::=» 1«:vhdl-ext-font-lock-punctuation-face:;»
+    «k:begin»
+        «k:for» «v:clogb2» «k:in» 1 «k:to» bit_depth «k:loop»
+            «k:if» «:vhdl-ext-font-lock-parenthesis-face:(»bit_depth «:vhdl-ext-font-lock-punctuation-face:<=» 2«:vhdl-ext-font-lock-parenthesis-face:)» «:vhdl-ext-font-lock-then-face:then»
+                count «:vhdl-ext-font-lock-punctuation-face::=» 1«:vhdl-ext-font-lock-punctuation-face:;»
+            «k:else»
+                «k:if» «:vhdl-ext-font-lock-parenthesis-face:(»depth «:vhdl-ext-font-lock-punctuation-face:<=» 1«:vhdl-ext-font-lock-parenthesis-face:)» «:vhdl-ext-font-lock-then-face:then»
+                    «k:for» «v:j» «k:in» 1 «k:to» 10 «k:loop»
+                        count «:vhdl-ext-font-lock-punctuation-face::=» count«:vhdl-ext-font-lock-punctuation-face:;»
+                    «k:end» «k:loop»«:vhdl-ext-font-lock-punctuation-face:;»
+                «k:else»
+                    depth «:vhdl-ext-font-lock-punctuation-face::=» depth «:vhdl-ext-font-lock-operator-face:/» 2«:vhdl-ext-font-lock-punctuation-face:;»
+                    count «:vhdl-ext-font-lock-punctuation-face::=» count «:vhdl-ext-font-lock-operator-face:+» 1«:vhdl-ext-font-lock-punctuation-face:;»
+                «k:end» «k:if»«:vhdl-ext-font-lock-punctuation-face:;»
+            «k:end» «k:if»«:vhdl-ext-font-lock-punctuation-face:;»
+        «k:end» «k:loop»«:vhdl-ext-font-lock-punctuation-face:;»
+        «k:return» «:vhdl-ext-font-lock-parenthesis-face:(»count«:vhdl-ext-font-lock-parenthesis-face:)»«:vhdl-ext-font-lock-punctuation-face:;»
+    «k:end»«:vhdl-ext-font-lock-punctuation-face:;»
+
+«k:begin»
+
+    main «:vhdl-ext-font-lock-punctuation-face::» «k:process»
+
+        «k:procedure» «f:init_values» «k:is»
+        «k:begin»
+            resetn     «:vhdl-ext-font-lock-punctuation-face:<=» «s:'0'»«:vhdl-ext-font-lock-punctuation-face:;»
+            soft_reset «:vhdl-ext-font-lock-punctuation-face:<=» «s:'0'»«:vhdl-ext-font-lock-punctuation-face:;»
+        «k:end» «f:init_values»«:vhdl-ext-font-lock-punctuation-face:;»
+
+    «k:begin»
+    «k:end» «k:process» «f:main»«:vhdl-ext-font-lock-punctuation-face:;»
+
+    gen_mem_sel «:vhdl-ext-font-lock-punctuation-face::» «k:if» «:vhdl-ext-font-lock-parenthesis-face:(»USER_NUM_MEM «:vhdl-ext-font-lock-punctuation-face:>=» 1«:vhdl-ext-font-lock-parenthesis-face:)» «k:generate»
+    «k:begin»
+        mem_select  «:vhdl-ext-font-lock-punctuation-face:<=» «s:"1"»«:vhdl-ext-font-lock-punctuation-face:;»
+    «k:end» «k:generate»«:vhdl-ext-font-lock-punctuation-face:;»
+
+«k:end» «f:RTL»«:vhdl-ext-font-lock-punctuation-face:;»
+
+
+
+«m:-- »«x:Packages
+»«k:package» «f:foo» «k:is»
+
+    «k:procedure» «f:foo2»«:vhdl-ext-font-lock-parenthesis-face:(»
+        «k:signal» common_in   «:vhdl-ext-font-lock-punctuation-face::» «k:in»  mf_common_response_r_type_in
+        «:vhdl-ext-font-lock-parenthesis-face:)»«:vhdl-ext-font-lock-punctuation-face:;»
+
+«k:end» «k:package» «f:foo»«:vhdl-ext-font-lock-punctuation-face:;»
+
+«k:package» «f:foo» «k:is»
+
+    «k:procedure» «f:foo2»«:vhdl-ext-font-lock-parenthesis-face:(»
+        «k:signal» common_in   «:vhdl-ext-font-lock-punctuation-face::» «k:in»  mf_common_response_r_type_in
+        «:vhdl-ext-font-lock-parenthesis-face:)»«:vhdl-ext-font-lock-punctuation-face:;»
+
+«k:end»«:vhdl-ext-font-lock-punctuation-face:;»
+
+
+«k:package» «k:body» «f:foo» «k:is»
+
+    «k:procedure» «f:foo» «:vhdl-ext-font-lock-parenthesis-face:(»
+        «k:signal» common_in   «:vhdl-ext-font-lock-punctuation-face::» «k:in»  mf_common_response_r_type_in
+        «:vhdl-ext-font-lock-parenthesis-face:)» «k:is»
+    «k:begin»
+        common_out«:vhdl-ext-font-lock-operator-face:.»m_axi_arready «:vhdl-ext-font-lock-punctuation-face:<=» «s:'1'»«:vhdl-ext-font-lock-punctuation-face:;»
+    «k:end» «k:procedure» «f:foo»«:vhdl-ext-font-lock-punctuation-face:;»
+
+«k:end» «k:package» «k:body» «f:foo»«:vhdl-ext-font-lock-punctuation-face:;»
+
+
+«k:package» «k:body» «f:foo» «k:is»
+
+    «k:procedure» «f:foo» «:vhdl-ext-font-lock-parenthesis-face:(»
+        «k:signal» common_in   «:vhdl-ext-font-lock-punctuation-face::» «k:in»  mf_common_response_r_type_in
+        «:vhdl-ext-font-lock-parenthesis-face:)» «k:is»
+    «k:begin»
+        common_out«:vhdl-ext-font-lock-operator-face:.»m_axi_arready «:vhdl-ext-font-lock-punctuation-face:<=» «s:'1'»«:vhdl-ext-font-lock-punctuation-face:;»
+    «k:end»  «f:foo»«:vhdl-ext-font-lock-punctuation-face:;»
+
+«k:end»«:vhdl-ext-font-lock-punctuation-face:;»
+
+
+«m:-- »«x:Configuration
+»«k:configuration» «f:foo» «k:of» «f:foo2» «k:is»
+
+«k:end» «k:configuration» «f:foo»«:vhdl-ext-font-lock-punctuation-face:;»
+
+«k:configuration» «f:foo» «k:of» «f:foo2» «k:is»
+
+«k:end»«:vhdl-ext-font-lock-punctuation-face:;»
+
+
+«m:-- »«x:Contexts
+»context «f:foo» «k:is»
+
+«k:end» context «f:foo»«:vhdl-ext-font-lock-punctuation-face:;»
+
+context «f:foo» «k:is»
+
+«k:end»«:vhdl-ext-font-lock-punctuation-face:;»

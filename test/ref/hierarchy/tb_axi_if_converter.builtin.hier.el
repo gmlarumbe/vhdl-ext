@@ -1,0 +1,22 @@
+tb_axi_if_converter
+  tb_axi_if_converter.axi_if_converter:DUT
+    tb_axi_if_converter.axi_if_converter:DUT.axi_lite_regs:I_AXI_LITE_REGS
+    tb_axi_if_converter.axi_if_converter:DUT.input_buffer:I_INPUT_BUFFER
+      tb_axi_if_converter.axi_if_converter:DUT.input_buffer:I_INPUT_BUFFER.blk_mem_gen_0:input_buffer_l
+        tb_axi_if_converter.axi_if_converter:DUT.input_buffer:I_INPUT_BUFFER.blk_mem_gen_0:input_buffer_l.blk_mem_gen_v8_4_2:U0
+          tb_axi_if_converter.axi_if_converter:DUT.input_buffer:I_INPUT_BUFFER.blk_mem_gen_0:input_buffer_l.blk_mem_gen_v8_4_2:U0.blk_mem_gen_v8_4_2_synth:inst_blk_mem_gen
+      tb_axi_if_converter.axi_if_converter:DUT.input_buffer:I_INPUT_BUFFER.blk_mem_gen_0:input_buffer_r
+        tb_axi_if_converter.axi_if_converter:DUT.input_buffer:I_INPUT_BUFFER.blk_mem_gen_0:input_buffer_r.blk_mem_gen_v8_4_2:U0
+          tb_axi_if_converter.axi_if_converter:DUT.input_buffer:I_INPUT_BUFFER.blk_mem_gen_0:input_buffer_r.blk_mem_gen_v8_4_2:U0.blk_mem_gen_v8_4_2_synth:inst_blk_mem_gen
+    tb_axi_if_converter.axi_if_converter:DUT.core_converter:I_CORE_CONVERTER_L
+    tb_axi_if_converter.axi_if_converter:DUT.core_converter:I_CORE_CONVERTER_R
+    tb_axi_if_converter.axi_if_converter:DUT.axi_lite_master:I_AXI_LITE_MASTER
+    tb_axi_if_converter.axi_if_converter:DUT.clk_div:I_CLK_DIV
+      tb_axi_if_converter.axi_if_converter:DUT.clk_div:I_CLK_DIV.BUFG:BUFG_inst
+    tb_axi_if_converter.axi_if_converter:DUT.clk_sync:I_CLK_FS_SYNC
+    tb_axi_if_converter.axi_if_converter:DUT.pattern_counter:I_PATTERN_COUNTER_L
+    tb_axi_if_converter.axi_if_converter:DUT.pattern_counter:I_PATTERN_COUNTER_R
+    tb_axi_if_converter.axi_if_converter:DUT.core_fsm:I_CORE_FSM_L
+    tb_axi_if_converter.axi_if_converter:DUT.core_fsm:I_CORE_FSM_R
+  tb_axi_if_converter.s_axi_model:I_SLAVEMODEL_L
+  tb_axi_if_converter.s_axi_model:I_SLAVEMODEL_R

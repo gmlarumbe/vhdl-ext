@@ -1,0 +1,36 @@
+tb_axi_if_converter
+  tb_axi_if_converter.axi_if_converter:dut
+    tb_axi_if_converter.axi_if_converter:dut.axi_lite_regs:i_axi_lite_regs
+    tb_axi_if_converter.axi_if_converter:dut.input_buffer:i_input_buffer
+    tb_axi_if_converter.axi_if_converter:dut.core_converter:i_core_converter_l
+    tb_axi_if_converter.axi_if_converter:dut.core_converter:i_core_converter_r
+    tb_axi_if_converter.axi_if_converter:dut.axi_lite_master:i_axi_lite_master
+    tb_axi_if_converter.axi_if_converter:dut.clk_div:i_clk_div
+      tb_axi_if_converter.axi_if_converter:dut.clk_div:i_clk_div.bufg:bufg_inst
+    tb_axi_if_converter.axi_if_converter:dut.clk_sync:i_clk_fs_sync
+    tb_axi_if_converter.axi_if_converter:dut.pattern_counter:i_pattern_counter_l
+    tb_axi_if_converter.axi_if_converter:dut.pattern_counter:i_pattern_counter_r
+    tb_axi_if_converter.axi_if_converter:dut.core_fsm:i_core_fsm_l
+    tb_axi_if_converter.axi_if_converter:dut.core_fsm:i_core_fsm_r
+  tb_axi_if_converter.s_axi_model:i_slavemodel_l
+    tb_axi_if_converter.s_axi_model:i_slavemodel_l.gen_mem_sel:if-generate true
+    tb_axi_if_converter.s_axi_model:i_slavemodel_l.bram_gen(0):for-generate
+      tb_axi_if_converter.s_axi_model:i_slavemodel_l.bram_gen(0):for-generate.byte_bram_gen(0):for-generate
+      tb_axi_if_converter.s_axi_model:i_slavemodel_l.bram_gen(0):for-generate.byte_bram_gen(1):for-generate
+      tb_axi_if_converter.s_axi_model:i_slavemodel_l.bram_gen(0):for-generate.byte_bram_gen(2):for-generate
+      tb_axi_if_converter.s_axi_model:i_slavemodel_l.bram_gen(0):for-generate.byte_bram_gen(3):for-generate
+      tb_axi_if_converter.s_axi_model:i_slavemodel_l.bram_gen(0):for-generate.byte_bram_gen(4):for-generate
+      tb_axi_if_converter.s_axi_model:i_slavemodel_l.bram_gen(0):for-generate.byte_bram_gen(5):for-generate
+      tb_axi_if_converter.s_axi_model:i_slavemodel_l.bram_gen(0):for-generate.byte_bram_gen(6):for-generate
+      tb_axi_if_converter.s_axi_model:i_slavemodel_l.bram_gen(0):for-generate.byte_bram_gen(7):for-generate
+  tb_axi_if_converter.s_axi_model:i_slavemodel_r
+    tb_axi_if_converter.s_axi_model:i_slavemodel_r.gen_mem_sel:if-generate true
+    tb_axi_if_converter.s_axi_model:i_slavemodel_r.bram_gen(0):for-generate
+      tb_axi_if_converter.s_axi_model:i_slavemodel_r.bram_gen(0):for-generate.byte_bram_gen(0):for-generate
+      tb_axi_if_converter.s_axi_model:i_slavemodel_r.bram_gen(0):for-generate.byte_bram_gen(1):for-generate
+      tb_axi_if_converter.s_axi_model:i_slavemodel_r.bram_gen(0):for-generate.byte_bram_gen(2):for-generate
+      tb_axi_if_converter.s_axi_model:i_slavemodel_r.bram_gen(0):for-generate.byte_bram_gen(3):for-generate
+      tb_axi_if_converter.s_axi_model:i_slavemodel_r.bram_gen(0):for-generate.byte_bram_gen(4):for-generate
+      tb_axi_if_converter.s_axi_model:i_slavemodel_r.bram_gen(0):for-generate.byte_bram_gen(5):for-generate
+      tb_axi_if_converter.s_axi_model:i_slavemodel_r.bram_gen(0):for-generate.byte_bram_gen(6):for-generate
+      tb_axi_if_converter.s_axi_model:i_slavemodel_r.bram_gen(0):for-generate.byte_bram_gen(7):for-generate

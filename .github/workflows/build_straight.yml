@@ -34,8 +34,8 @@ jobs:
 
       - name: Install binaries
         run: |
-          test-hdl/vhdl/scripts/setup-env.sh
-          test-hdl/vhdl/scripts/install-ts-grammar.sh
+          test/test-hdl/scripts/vhdl/setup-env.sh
+          test/test-hdl/scripts/vhdl/install-ts-grammar.sh
 
       - name: Run ERT tests
         run: |

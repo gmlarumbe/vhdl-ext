@@ -1,0 +1,19 @@
+axi_if_converter
+  axi_if_converter.axi_lite_regs:I_AXI_LITE_REGS
+  axi_if_converter.input_buffer:I_INPUT_BUFFER
+    axi_if_converter.input_buffer:I_INPUT_BUFFER.blk_mem_gen_0:input_buffer_l
+      axi_if_converter.input_buffer:I_INPUT_BUFFER.blk_mem_gen_0:input_buffer_l.blk_mem_gen_v8_4_2:U0
+        axi_if_converter.input_buffer:I_INPUT_BUFFER.blk_mem_gen_0:input_buffer_l.blk_mem_gen_v8_4_2:U0.blk_mem_gen_v8_4_2_synth:inst_blk_mem_gen
+    axi_if_converter.input_buffer:I_INPUT_BUFFER.blk_mem_gen_0:input_buffer_r
+      axi_if_converter.input_buffer:I_INPUT_BUFFER.blk_mem_gen_0:input_buffer_r.blk_mem_gen_v8_4_2:U0
+        axi_if_converter.input_buffer:I_INPUT_BUFFER.blk_mem_gen_0:input_buffer_r.blk_mem_gen_v8_4_2:U0.blk_mem_gen_v8_4_2_synth:inst_blk_mem_gen
+  axi_if_converter.core_converter:I_CORE_CONVERTER_L
+  axi_if_converter.core_converter:I_CORE_CONVERTER_R
+  axi_if_converter.axi_lite_master:I_AXI_LITE_MASTER
+  axi_if_converter.clk_div:I_CLK_DIV
+    axi_if_converter.clk_div:I_CLK_DIV.BUFG:BUFG_inst
+  axi_if_converter.clk_sync:I_CLK_FS_SYNC
+  axi_if_converter.pattern_counter:I_PATTERN_COUNTER_L
+  axi_if_converter.pattern_counter:I_PATTERN_COUNTER_R
+  axi_if_converter.core_fsm:I_CORE_FSM_L
+  axi_if_converter.core_fsm:I_CORE_FSM_R

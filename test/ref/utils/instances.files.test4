@@ -1,0 +1,14 @@
+axi_if_converter/rtl/BUFG.vhd
+axi_if_converter/rtl/axi_if_converter.vhd
+axi_if_converter/rtl/axi_lite_master.vhd
+axi_if_converter/rtl/axi_lite_regs.vhd
+axi_if_converter/rtl/clk_div.vhd
+axi_if_converter/rtl/clk_sync.vhd
+axi_if_converter/rtl/core_converter.vhd
+axi_if_converter/rtl/core_fsm.vhd
+axi_if_converter/rtl/global_pkg.vhd
+axi_if_converter/rtl/input_buffer.vhd
+axi_if_converter/rtl/input_buffer_pkg.vhd
+axi_if_converter/rtl/pattern_counter.vhd
+axi_if_converter/tb/tb_axi_if_converter.vhd
+axi_if_converter/tb/tb_core_fsm.vhd
