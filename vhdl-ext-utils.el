@@ -754,7 +754,7 @@ Compress cache files if gzip is available."
 
 
 ;;;; Overrides
-;; TODO: To be fixed @ emacs/main
+;; TODO: To be fixed @ emacs/main (still not fixed @ Emacs 29.4)
 (defun vhdl-ext-corresponding-begin (&optional lim)
   "If the word at the current position corresponds to an \"end\"
 keyword, then return a vector containing enough information to find
