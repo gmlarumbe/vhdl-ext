@@ -4,7 +4,7 @@
 
 ;; Author: Gonzalo Larumbe <gonzalomlarumbe@gmail.com>
 ;; URL: https://github.com/gmlarumbe/vhdl-ext
-;; Version: 0.5.2
+;; Version: 0.5.3
 ;; Keywords: VHDL, IDE, Tools
 ;; Package-Requires: ((emacs "29.1") (vhdl-ts-mode "0.1.4") (lsp-mode "8.0.0") (ag "0.48") (ripgrep "0.4.0") (hydra "0.15.0") (flycheck "32") (outshine "3.0.1") (async "1.9.7"))
 
