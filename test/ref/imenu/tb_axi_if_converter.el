@@ -1,13 +1,13 @@
 (("Entity"
-  ("tb_axi_if_converter" . #<marker at 402 in tb_axi_if_converter.vhd>))
+  ("tb_axi_if_converter" . 402))
  ("Architecture"
-  ("TB of tb_axi_if_converter" . #<marker at 587 in tb_axi_if_converter.vhd>))
+  ("TB of tb_axi_if_converter" . 587))
  ("Process"
-  ("main" . #<marker at 25066 in tb_axi_if_converter.vhd>))
+  ("main" . 25066))
  ("Procedure"
-  ("init_values" . #<marker at 25085 in tb_axi_if_converter.vhd>)
-  ("rx_data" . #<marker at 25285 in tb_axi_if_converter.vhd>))
+  ("init_values" . 25085)
+  ("rx_data" . 25285))
  ("Instance"
-  ("axi_if_converter" . #<marker at 10493 in tb_axi_if_converter.vhd>)
-  ("s_axi_model" . #<marker at 18789 in tb_axi_if_converter.vhd>)
-  ("s_axi_model" . #<marker at 21092 in tb_axi_if_converter.vhd>)))
+  ("axi_if_converter" . 10493)
+  ("s_axi_model" . 18789)
+  ("s_axi_model" . 21092)))

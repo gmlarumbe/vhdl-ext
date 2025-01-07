@@ -1,22 +1,22 @@
 (("Entity"
-  ("foo" . #<marker at 434 in indent_misc.vhd>)
-  ("X_GATE" . #<marker at 1523 in indent_misc.vhd>)
-  ("block_test" . #<marker at 2612 in indent_misc.vhd>)
-  ("traffic_light_fsm" . #<marker at 3502 in indent_misc.vhd>))
+  ("foo" . 434)
+  ("X_GATE" . 1523)
+  ("block_test" . 2612)
+  ("traffic_light_fsm" . 3502))
  ("Architecture"
-  ("indent of indent_test" . #<marker at 525 in indent_misc.vhd>)
-  ("STRUCTURE of X_GATE" . #<marker at 1628 in indent_misc.vhd>)
-  ("arch of block_test" . #<marker at 2649 in indent_misc.vhd>)
-  ("rtl of traffic_light_fsm" . #<marker at 3697 in indent_misc.vhd>))
+  ("indent of indent_test" . 525)
+  ("STRUCTURE of X_GATE" . 1628)
+  ("arch of block_test" . 2649)
+  ("rtl of traffic_light_fsm" . 3697))
  ("Package"
-  ("foo" . #<marker at 779 in indent_misc.vhd>)
-  ("foo" . #<marker at 950 in indent_misc.vhd>))
+  ("foo" . 779)
+  ("foo" . 950))
  ("Block"
-  ("LEVEL1" . #<marker at 1328 in indent_misc.vhd>)
-  ("LEVEL1" . #<marker at 1723 in indent_misc.vhd>)
-  ("level1" . #<marker at 2332 in indent_misc.vhd>)
-  ("LEVEL1" . #<marker at 2836 in indent_misc.vhd>))
+  ("LEVEL1" . 1328)
+  ("LEVEL1" . 1723)
+  ("level1" . 2332)
+  ("LEVEL1" . 2836))
  ("Process"
-  ("REG" . #<marker at 3866 in indent_misc.vhd>))
+  ("REG" . 3866))
  ("Procedure"
-  ("test_multiline_expression" . #<marker at 970 in indent_misc.vhd>)))
+  ("test_multiline_expression" . 970)))
