@@ -53,6 +53,14 @@ To install it via [straight](https://github.com/radian-software/straight.el) wit
 (use-package vhdl-ext)
 ```
 
+### GUIX ###
+
+To install via [Guix](https://guix.gnu.org) use:
+
+``` shell
+$ guix install emacs-vhdl-ext
+```
+
 ## Basic config ##
 
 The most basic configuration just requires choosing which features you
