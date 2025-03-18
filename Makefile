@@ -2,7 +2,7 @@
 #
 #  Makefile for test-hdl with vhdl-ext
 #
-#  Copyright (c) 2022-2024 Gonzalo Larumbe
+#  Copyright (c) 2022-2025 Gonzalo Larumbe
 #  All rights reserved.
 # 
 ######################################################
