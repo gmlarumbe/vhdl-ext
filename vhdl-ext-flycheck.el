@@ -93,7 +93,7 @@ See URL `https://github.com/ghdl/ghdl'."
   :error-patterns
   ((info    line-start (file-name) ":" line ":" column ":note: "    (message) line-end)
    (warning line-start (file-name) ":" line ":" column ":warning: " (message) line-end)
-   (error   line-start (file-name) ":" line ":" column ": "         (message) line-end))
+   (error   line-start (file-name) ":" line ":" column ":"         (message) line-end))
   :modes (vhdl-mode vhdl-ts-mode))
 
 
