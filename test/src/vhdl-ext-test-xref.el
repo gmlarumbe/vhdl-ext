@@ -56,7 +56,8 @@
 (defun vhdl-ext-test-xref-gen-expected-files ()
   (let ((vhdl-ext-tags-defs-table nil)
         (vhdl-ext-tags-refs-table nil)
-        (vhdl-ext-tags-inst-table nil))
+        (vhdl-ext-tags-inst-table nil)
+        (vhdl-ext-tags-fontify-matches nil))
     (vhdl-ext-test-with-test-project vhdl-ext-test-tags-proj-name
       ;; Generate/update tags for test project
       (vhdl-ext-test-tags-get :root vhdl-ext-test-files-common-dir
@@ -86,7 +87,8 @@
 (ert-deftest xref::defs ()
   (let ((vhdl-ext-tags-defs-table nil)
         (vhdl-ext-tags-refs-table nil)
-        (vhdl-ext-tags-inst-table nil))
+        (vhdl-ext-tags-inst-table nil)
+        (vhdl-ext-tags-fontify-matches nil))
     (vhdl-ext-test-with-test-project vhdl-ext-test-tags-proj-name
       ;; Generate/update tags for test project
       (vhdl-ext-test-tags-get :root vhdl-ext-test-files-common-dir
@@ -108,7 +110,8 @@
 (ert-deftest xref::refs ()
   (let ((vhdl-ext-tags-defs-table nil)
         (vhdl-ext-tags-refs-table nil)
-        (vhdl-ext-tags-inst-table nil))
+        (vhdl-ext-tags-inst-table nil)
+        (vhdl-ext-tags-fontify-matches nil))
     (vhdl-ext-test-with-test-project vhdl-ext-test-tags-proj-name
       ;; Generate/update tags for test project
       (vhdl-ext-test-tags-get :root vhdl-ext-test-files-common-dir
