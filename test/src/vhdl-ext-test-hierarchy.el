@@ -84,7 +84,7 @@
       (hierarchy-print hier (lambda (node) node))
       (buffer-substring-no-properties (point-min) (point-max)))))
 
-(defun vhdl-ext-test-hierarchy--outshine-fn ()
+(defun vhdl-ext-test-hierarchy--outline-fn ()
   (vhdl-ext-hierarchy-current-buffer)
   (buffer-substring-no-properties (point-min) (point-max)))
 
@@ -117,11 +117,11 @@
         ;; INFO: This one seems important to have a clear state on each file parsed.
         (vhdl-ext-hierarchy-clear-cache)
         (funcall mode)
-        (cond (;; ghdl-outshine
+        (cond (;; ghdl-outline
                ;;  - ghdl cannot use temp-buffer since executes a command that requires a filename as an argument
                (and (eq backend 'ghdl)
-                    (eq frontend 'outshine))
-               (vhdl-ext-test-hierarchy--outshine-fn))
+                    (eq frontend 'outline))
+               (vhdl-ext-test-hierarchy--outline-fn))
               ;; ghdl-hierarchy
               ;;  - ghdl cannot use temp-buffer since executes a command that requires a filename as an argument
               ((and (eq backend 'ghdl)
@@ -132,21 +132,21 @@
                     (eq frontend 'hierarchy))
                (vhdl-ext-hierarchy-parse)
                (vhdl-ext-test-hierarchy--hierarchy-fn))
-              ;; builtin-outshine
+              ;; builtin-outline
               ((and (eq backend 'builtin)
-                    (eq frontend 'outshine))
+                    (eq frontend 'outline))
                (vhdl-ext-hierarchy-parse)
-               (vhdl-ext-test-hierarchy--outshine-fn))
+               (vhdl-ext-test-hierarchy--outline-fn))
               ;; tree-sitter-hierarchy
               ((and (eq backend 'tree-sitter)
                     (eq frontend 'hierarchy))
                (vhdl-ext-hierarchy-parse)
                (vhdl-ext-test-hierarchy--hierarchy-fn))
-              ;; tree-sitter-outshine
+              ;; tree-sitter-outline
               ((and (eq backend 'tree-sitter)
-                    (eq frontend 'outshine))
+                    (eq frontend 'outline))
                (vhdl-ext-hierarchy-parse)
-               (vhdl-ext-test-hierarchy--outshine-fn))
+               (vhdl-ext-test-hierarchy--outline-fn))
               ;; Fallback
               (t
                (error "Not a proper backend-frontend combination!")))))))
@@ -169,20 +169,20 @@
                                          :workdir ,workdir
                                          :files ,vhdl-ext-test-hierarchy-ghdl-instances-sources-list)
                                  :clean-fn (lambda () (delete-directory (file-name-concat root workdir) t))))
-  ;; ghdl-outshine simple: "instances.vhd"
+  ;; ghdl-outline simple: "instances.vhd"
   (let* ((root vhdl-ext-test-files-common-dir)
          (file (file-name-concat root "instances.vhd"))
          (workdir "lib/"))
     (test-hdl-gen-expected-files :file-list `(,file)
                                  :dest-dir vhdl-ext-test-ref-dir-hierarchy
-                                 :out-file-ext "ghdl.outshine.vhd"
+                                 :out-file-ext "ghdl.outline.vhd"
                                  :process-fn 'eval-ff
                                  :fn #'vhdl-ext-test-hierarchy-buffer
                                  :args `(:mode vhdl-mode
                                          :backend ghdl
                                          :root ,root
                                          :workdir ,workdir
-                                         :frontend outshine
+                                         :frontend outline
                                          :files ,vhdl-ext-test-hierarchy-ghdl-instances-sources-list)
                                  :clean-fn (lambda () (delete-directory (file-name-concat root workdir) t))))
   ;; ghdl-hierarchy complex: "tb_axi_if_converter.vhd"
@@ -202,18 +202,18 @@
                                          :worklib "xil_defaultlib"
                                          :files ,vhdl-ext-test-hierarchy-ghdl-axi-converter-sources-list)
                                  :clean-fn (lambda () (delete-directory (file-name-concat root workdir) t))))
-  ;; ghdl-outshine complex: "tb_axi_if_converter.vhd"
+  ;; ghdl-outline complex: "tb_axi_if_converter.vhd"
   (let* ((root vhdl-ext-test-axi-converter-dir)
          (file (file-name-concat root "tb/tb_axi_if_converter.vhd"))
          (workdir "lib/"))
     (test-hdl-gen-expected-files :file-list `(,file)
                                  :dest-dir vhdl-ext-test-ref-dir-hierarchy
-                                 :out-file-ext "ghdl.outshine.vhd"
+                                 :out-file-ext "ghdl.outline.vhd"
                                  :process-fn 'eval-ff
                                  :fn #'vhdl-ext-test-hierarchy-buffer
                                  :args `(:mode vhdl-mode
                                          :backend ghdl
-                                         :frontend outshine
+                                         :frontend outline
                                          :root ,root
                                          :workdir ,workdir
                                          :worklib "xil_defaultlib"
@@ -229,15 +229,15 @@
                                        :backend builtin
                                        :frontend hierarchy
                                        :files ,vhdl-ext-test-hierarchy-sources-list))
-  ;; builtin-outshine
+  ;; builtin-outline
   (test-hdl-gen-expected-files :file-list vhdl-ext-test-hierarchy-file-list
                                :dest-dir vhdl-ext-test-ref-dir-hierarchy
-                               :out-file-ext "builtin.outshine.vhd"
+                               :out-file-ext "builtin.outline.vhd"
                                :process-fn 'eval-ff
                                :fn #'vhdl-ext-test-hierarchy-buffer
                                :args `(:mode vhdl-mode
                                        :backend builtin
-                                       :frontend outshine
+                                       :frontend outline
                                        :files ,vhdl-ext-test-hierarchy-sources-list))
   ;; tree-sitter-hierarchy
   (test-hdl-gen-expected-files :file-list vhdl-ext-test-hierarchy-file-list
@@ -249,15 +249,15 @@
                                        :backend tree-sitter
                                        :frontend hierarchy
                                        :files ,vhdl-ext-test-hierarchy-sources-list))
-  ;; tree-sitter-outshine
+  ;; tree-sitter-outline
   (test-hdl-gen-expected-files :file-list vhdl-ext-test-hierarchy-file-list
                                :dest-dir vhdl-ext-test-ref-dir-hierarchy
-                               :out-file-ext "ts.outshine.vhd"
+                               :out-file-ext "ts.outline.vhd"
                                :process-fn 'eval-ff
                                :fn #'vhdl-ext-test-hierarchy-buffer
                                :args `(:mode vhdl-ts-mode
                                        :backend tree-sitter
-                                       :frontend outshine
+                                       :frontend outline
                                        :files ,vhdl-ext-test-hierarchy-sources-list))
   ;; More custom ones (e.g. need to explicit entity to be parsed from a file with multiple entities declared)
   ;; - hierarchy.vhd / builtin-hierarchy
@@ -271,15 +271,15 @@
                                        :frontend hierarchy
                                        :files ,vhdl-ext-test-hierarchy-sources-list
                                        :entity "tb_axi_if_converter"))
-  ;; - hierarchy.vhd / builtin-outshine
+  ;; - hierarchy.vhd / builtin-outline
   (test-hdl-gen-expected-files :file-list `(,(file-name-concat vhdl-ext-test-files-common-dir "hierarchy.vhd"))
                                :dest-dir vhdl-ext-test-ref-dir-hierarchy
-                               :out-file-ext "me.builtin.outshine.vhd"
+                               :out-file-ext "me.builtin.outline.vhd"
                                :process-fn 'eval-ff
                                :fn #'vhdl-ext-test-hierarchy-buffer
                                :args `(:mode vhdl-mode
                                        :backend builtin
-                                       :frontend outshine
+                                       :frontend outline
                                        :files ,vhdl-ext-test-hierarchy-sources-list
                                        :entity "tb_axi_if_converter"))
   ;; - hierarchy.vhd / tree-sitter-hierarchy
@@ -293,15 +293,15 @@
                                        :frontend hierarchy
                                        :files ,vhdl-ext-test-hierarchy-sources-list
                                        :entity "tb_axi_if_converter"))
-  ;; - hierarchy.vhd / tree-sitter-outshine
+  ;; - hierarchy.vhd / tree-sitter-outline
   (test-hdl-gen-expected-files :file-list `(,(file-name-concat vhdl-ext-test-files-common-dir "hierarchy.vhd"))
                                :dest-dir vhdl-ext-test-ref-dir-hierarchy
-                               :out-file-ext "me.ts.outshine.vhd"
+                               :out-file-ext "me.ts.outline.vhd"
                                :process-fn 'eval-ff
                                :fn #'vhdl-ext-test-hierarchy-buffer
                                :args `(:mode vhdl-ts-mode
                                        :backend tree-sitter
-                                       :frontend outshine
+                                       :frontend outline
                                        :files ,vhdl-ext-test-hierarchy-sources-list
                                        :entity "tb_axi_if_converter")))
 
@@ -325,21 +325,21 @@
                                   (lambda () (delete-directory (file-name-concat root workdir) t))))))
 
 
-(ert-deftest hierarchy::ghdl-outshine::simple ()
+(ert-deftest hierarchy::ghdl-outline::simple ()
   (let* ((root vhdl-ext-test-files-common-dir)
          (file (file-name-concat root "instances.vhd"))
          (workdir "lib/"))
     (should (test-hdl-files-equal (test-hdl-process-file :test-file file
-                                                         :dump-file (file-name-concat vhdl-ext-test-dump-dir-hierarchy (test-hdl-basename file "ghdl.outshine.vhd"))
+                                                         :dump-file (file-name-concat vhdl-ext-test-dump-dir-hierarchy (test-hdl-basename file "ghdl.outline.vhd"))
                                                          :process-fn 'eval-ff
                                                          :fn #'vhdl-ext-test-hierarchy-buffer
                                                          :args `(:mode vhdl-mode
                                                                  :backend ghdl
                                                                  :root ,root
                                                                  :workdir ,workdir
-                                                                 :frontend outshine
+                                                                 :frontend outline
                                                                  :files ,vhdl-ext-test-hierarchy-ghdl-instances-sources-list))
-                                  (file-name-concat vhdl-ext-test-ref-dir-hierarchy (test-hdl-basename file "ghdl.outshine.vhd"))
+                                  (file-name-concat vhdl-ext-test-ref-dir-hierarchy (test-hdl-basename file "ghdl.outline.vhd"))
                                   ;; Cleanup function (remove lib/ compilation directory)
                                   (lambda () (delete-directory (file-name-concat root workdir) t))))))
 
@@ -364,22 +364,22 @@
                                   (lambda () (delete-directory (file-name-concat root workdir) t))))))
 
 
-(ert-deftest hierarchy::ghdl-outshine::complex ()
+(ert-deftest hierarchy::ghdl-outline::complex ()
   (let* ((root vhdl-ext-test-axi-converter-dir)
          (file (file-name-concat root "tb/tb_axi_if_converter.vhd"))
          (workdir "lib/"))
     (should (test-hdl-files-equal (test-hdl-process-file :test-file file
-                                                         :dump-file (file-name-concat vhdl-ext-test-dump-dir-hierarchy (test-hdl-basename file "ghdl.outshine.vhd"))
+                                                         :dump-file (file-name-concat vhdl-ext-test-dump-dir-hierarchy (test-hdl-basename file "ghdl.outline.vhd"))
                                                          :process-fn 'eval-ff
                                                          :fn #'vhdl-ext-test-hierarchy-buffer
                                                          :args `(:mode vhdl-mode
                                                                  :backend ghdl
-                                                                 :frontend outshine
+                                                                 :frontend outline
                                                                  :root ,root
                                                                  :workdir ,workdir
                                                                  :worklib "xil_defaultlib"
                                                                  :files ,vhdl-ext-test-hierarchy-ghdl-axi-converter-sources-list))
-                                  (file-name-concat vhdl-ext-test-ref-dir-hierarchy (test-hdl-basename file "ghdl.outshine.vhd"))
+                                  (file-name-concat vhdl-ext-test-ref-dir-hierarchy (test-hdl-basename file "ghdl.outline.vhd"))
                                   ;; Cleanup function (remove lib/ compilation directory)
                                   (lambda () (delete-directory (file-name-concat root workdir) t))))))
 
@@ -397,17 +397,17 @@
                                   (file-name-concat vhdl-ext-test-ref-dir-hierarchy (test-hdl-basename file "builtin.hier.el"))))))
 
 
-(ert-deftest hierarchy::builtin-outshine ()
+(ert-deftest hierarchy::builtin-outline ()
   (dolist (file vhdl-ext-test-hierarchy-file-list)
     (should (test-hdl-files-equal (test-hdl-process-file :test-file file
-                                                         :dump-file (file-name-concat vhdl-ext-test-dump-dir-hierarchy (test-hdl-basename file "builtin.outshine.vhd"))
+                                                         :dump-file (file-name-concat vhdl-ext-test-dump-dir-hierarchy (test-hdl-basename file "builtin.outline.vhd"))
                                                          :process-fn 'eval-ff
                                                          :fn #'vhdl-ext-test-hierarchy-buffer
                                                          :args `(:mode vhdl-mode
                                                                  :backend builtin
-                                                                 :frontend outshine
+                                                                 :frontend outline
                                                                  :files ,vhdl-ext-test-hierarchy-sources-list))
-                                  (file-name-concat vhdl-ext-test-ref-dir-hierarchy (test-hdl-basename file "builtin.outshine.vhd"))))))
+                                  (file-name-concat vhdl-ext-test-ref-dir-hierarchy (test-hdl-basename file "builtin.outline.vhd"))))))
 
 
 (ert-deftest hierarchy::tree-sitter-hierarchy ()
@@ -423,17 +423,17 @@
                                   (file-name-concat vhdl-ext-test-ref-dir-hierarchy (test-hdl-basename file "ts.hier.el"))))))
 
 
-(ert-deftest hierarchy::tree-sitter-outshine ()
+(ert-deftest hierarchy::tree-sitter-outline ()
   (dolist (file vhdl-ext-test-hierarchy-file-list)
     (should (test-hdl-files-equal (test-hdl-process-file :test-file file
-                                                         :dump-file (file-name-concat vhdl-ext-test-dump-dir-hierarchy (test-hdl-basename file "ts.outshine.vhd"))
+                                                         :dump-file (file-name-concat vhdl-ext-test-dump-dir-hierarchy (test-hdl-basename file "ts.outline.vhd"))
                                                          :process-fn 'eval-ff
                                                          :fn #'vhdl-ext-test-hierarchy-buffer
                                                          :args `(:mode vhdl-ts-mode
                                                                  :backend tree-sitter
-                                                                 :frontend outshine
+                                                                 :frontend outline
                                                                  :files ,vhdl-ext-test-hierarchy-sources-list))
-                                  (file-name-concat vhdl-ext-test-ref-dir-hierarchy (test-hdl-basename file "ts.outshine.vhd"))))))
+                                  (file-name-concat vhdl-ext-test-ref-dir-hierarchy (test-hdl-basename file "ts.outline.vhd"))))))
 
 
 (ert-deftest hierarchy::builtin-hierarchy::multiple-entities ()
@@ -450,18 +450,18 @@
                                   (file-name-concat vhdl-ext-test-ref-dir-hierarchy (test-hdl-basename file "me.builtin.hier.el"))))))
 
 
-(ert-deftest hierarchy::builtin-outshine::multiple-entities ()
+(ert-deftest hierarchy::builtin-outline::multiple-entities ()
   (let ((file (file-name-concat vhdl-ext-test-files-common-dir "hierarchy.vhd")))
     (should (test-hdl-files-equal (test-hdl-process-file :test-file file
-                                                         :dump-file (file-name-concat vhdl-ext-test-dump-dir-hierarchy (test-hdl-basename file "me.builtin.outshine.vhd"))
+                                                         :dump-file (file-name-concat vhdl-ext-test-dump-dir-hierarchy (test-hdl-basename file "me.builtin.outline.vhd"))
                                                          :process-fn 'eval-ff
                                                          :fn #'vhdl-ext-test-hierarchy-buffer
                                                          :args `(:mode vhdl-mode
                                                                  :backend builtin
-                                                                 :frontend outshine
+                                                                 :frontend outline
                                                                  :files ,vhdl-ext-test-hierarchy-sources-list
                                                                  :entity "tb_axi_if_converter"))
-                                  (file-name-concat vhdl-ext-test-ref-dir-hierarchy (test-hdl-basename file "me.builtin.outshine.vhd"))))))
+                                  (file-name-concat vhdl-ext-test-ref-dir-hierarchy (test-hdl-basename file "me.builtin.outline.vhd"))))))
 
 
 (ert-deftest hierarchy::tree-sitter-hierarchy::multiple-entities ()
@@ -478,18 +478,18 @@
                                   (file-name-concat vhdl-ext-test-ref-dir-hierarchy (test-hdl-basename file "me.ts.hier.el"))))))
 
 
-(ert-deftest hierarchy::tree-sitter-outshine::multiple-entities ()
+(ert-deftest hierarchy::tree-sitter-outline::multiple-entities ()
   (let ((file (file-name-concat vhdl-ext-test-files-common-dir "hierarchy.vhd")))
     (should (test-hdl-files-equal (test-hdl-process-file :test-file file
-                                                         :dump-file (file-name-concat vhdl-ext-test-dump-dir-hierarchy (test-hdl-basename file "me.ts.outshine.vhd"))
+                                                         :dump-file (file-name-concat vhdl-ext-test-dump-dir-hierarchy (test-hdl-basename file "me.ts.outline.vhd"))
                                                          :process-fn 'eval-ff
                                                          :fn #'vhdl-ext-test-hierarchy-buffer
                                                          :args `(:mode vhdl-ts-mode
                                                                  :backend tree-sitter
-                                                                 :frontend outshine
+                                                                 :frontend outline
                                                                  :files ,vhdl-ext-test-hierarchy-sources-list
                                                                  :entity "tb_axi_if_converter"))
-                                  (file-name-concat vhdl-ext-test-ref-dir-hierarchy (test-hdl-basename file "me.ts.outshine.vhd"))))))
+                                  (file-name-concat vhdl-ext-test-ref-dir-hierarchy (test-hdl-basename file "me.ts.outline.vhd"))))))
 
 
 (provide 'vhdl-ext-test-hierarchy)

@@ -24,7 +24,7 @@
 
 ;;; Code:
 
-(require 'outshine)
+(require 'outline)
 (require 'hierarchy)
 (require 'tree-widget)
 (require 'async)
@@ -46,7 +46,7 @@
 (defcustom vhdl-ext-hierarchy-frontend 'hierarchy
   "Vhdl-ext hierarchy display and navigation frontend."
   :type '(choice (const :tag "Hierarchy" hierarchy)
-                 (const :tag "Outshine"  outshine))
+                 (const :tag "Outline"   outline))
   :group 'vhdl-ext-hierarchy)
 
 (defcustom vhdl-ext-hierarchy-twidget-init-expand nil
@@ -159,7 +159,7 @@ Return populated `hierarchy' struct."
 (defun vhdl-ext-hierarchy--convert-struct-to-string (hierarchy-struct)
   "Convert HIERARCHY-STRUCT to a string.
 Used to convert hierarchy formats for displaying on different frontends."
-  (let ((offset-blank-spaces 2) ; Intended to be used by outshine, which assumes an input ...
+  (let ((offset-blank-spaces 2) ; Intended to be used by outline, which assumes an input ...
         (unicode-spc 32)        ; ... with an offset of two indent spaces
         (debug nil))
     (unless (hierarchy-p hierarchy-struct)
@@ -541,26 +541,8 @@ Show only module name, discard instance name after colon (mod:INST)."
   (when vhdl-ext-hierarchy-twidget-init-expand
     (vhdl-ext-hierarchy-twidget-nav-init-expand)))
 
-;;;;; outshine
-(defmacro vhdl-ext-hierarchy-outshine-nav (vhdl-ext-func outshine-func)
-  "Define function VHDL-EXT-FUNC to call OUTSHINE-FUNC.
-Called in a buffer with `vhdl-ext-hierarchy-outshine-nav-mode' enabled.
-Move through headings and point at the beginning of the tag."
-  (declare (indent 0) (debug t))
-  `(defun ,vhdl-ext-func ()
-     (interactive)
-     (beginning-of-line) ; Required for `outline-hide-sublevels'
-     (call-interactively ,outshine-func)
-     (skip-chars-forward (car (car outshine-promotion-headings)))))
-
-(vhdl-ext-hierarchy-outshine-nav vhdl-ext-hierarchy-outshine-nav-previous-visible-heading #'outline-previous-visible-heading)
-(vhdl-ext-hierarchy-outshine-nav vhdl-ext-hierarchy-outshine-nav-next-visible-heading     #'outline-next-visible-heading)
-(vhdl-ext-hierarchy-outshine-nav vhdl-ext-hierarchy-outshine-nav-up-heading               #'outline-up-heading)
-(vhdl-ext-hierarchy-outshine-nav vhdl-ext-hierarchy-outshine-nav-forward-same-level       #'outline-forward-same-level)
-(vhdl-ext-hierarchy-outshine-nav vhdl-ext-hierarchy-outshine-nav-backward-same-level      #'outline-backward-same-level)
-(vhdl-ext-hierarchy-outshine-nav vhdl-ext-hierarchy-outshine-nav-hide-sublevels           #'outline-hide-sublevels)
-
-(defun vhdl-ext-hierarchy-outshine-jump-to-file (&optional other-window)
+;;;;; outline
+(defun vhdl-ext-hierarchy-outline-jump-to-file (&optional other-window)
   "Jump to module definition at point on navigation hierarchy file.
 If OTHER-WINDOW is non-nil, open definition in other window."
   (interactive)
@@ -568,46 +550,57 @@ If OTHER-WINDOW is non-nil, open definition in other window."
       (xref-find-definitions-other-window (thing-at-point 'symbol t))
     (xref-find-definitions (thing-at-point 'symbol t))))
 
-(defun vhdl-ext-hierarchy-outshine-jump-to-file-other-window ()
+(defun vhdl-ext-hierarchy-outline-jump-to-file-other-window ()
   "Jump to module definition at point on navigation hierarchy file."
   (interactive)
-  (vhdl-ext-hierarchy-outshine-jump-to-file :other-window))
+  (vhdl-ext-hierarchy-outline-jump-to-file :other-window))
 
-(define-minor-mode vhdl-ext-hierarchy-outshine-nav-mode
-  "Instance navigation frontend with `outshine'.
-Makes use of processed output under `outline-minor-mode' and `outshine'."
+(define-minor-mode vhdl-ext-hierarchy-outline-nav-mode
+  "Instance navigation frontend with `outline'.
+Makes use of processed output under `outline-minor-mode' and `outline'."
   :lighter " vH"
   :keymap
   '(;; Hide/Show
     ("a"       . outline-show-all)
     ("i"       . outline-show-children)
     ("h"       . outline-show-children)
-    ("l"       . vhdl-ext-hierarchy-outshine-nav-hide-sublevels)
+    ("l"       . outline-hide-sublevels)
     ("I"       . outline-show-branches)
     (";"       . outline-hide-other)
     ;; Movement
-    ("u"       . vhdl-ext-hierarchy-outshine-nav-up-heading)
-    ("C-c C-u" . vhdl-ext-hierarchy-outshine-nav-up-heading)
-    ("n"       . vhdl-ext-hierarchy-outshine-nav-next-visible-heading)
-    ("j"       . vhdl-ext-hierarchy-outshine-nav-next-visible-heading)
-    ("p"       . vhdl-ext-hierarchy-outshine-nav-previous-visible-heading)
-    ("k"       . vhdl-ext-hierarchy-outshine-nav-previous-visible-heading)
-    ("C-c C-n" . vhdl-ext-hierarchy-outshine-nav-forward-same-level)
-    ("C-c C-p" . vhdl-ext-hierarchy-outshine-nav-backward-same-level)
+    ("u"       . outline-up-heading)
+    ("C-c C-u" . outline-up-heading)
+    ("n"       . outline-next-visible-heading)
+    ("j"       . outline-next-visible-heading)
+    ("p"       . outline-previous-visible-heading)
+    ("k"       . outline-previous-visible-heading)
+    ("C-c C-n" . outline-forward-same-level)
+    ("C-c C-p" . outline-backward-same-level)
     ;; Jump
-    ("o"       . vhdl-ext-hierarchy-outshine-jump-to-file-other-window)
-    ("C-o"     . vhdl-ext-hierarchy-outshine-jump-to-file-other-window)
-    ("RET"     . vhdl-ext-hierarchy-outshine-jump-to-file)
-    ("C-j"     . vhdl-ext-hierarchy-outshine-jump-to-file))
+    ("o"       . vhdl-ext-hierarchy-outline-jump-to-file-other-window)
+    ("C-o"     . vhdl-ext-hierarchy-outline-jump-to-file-other-window)
+    ("RET"     . vhdl-ext-hierarchy-outline-jump-to-file)
+    ("C-j"     . vhdl-ext-hierarchy-outline-jump-to-file))
   ;; Minor-mode code
-  (outshine-mode 1)
-  (setq buffer-read-only t)
-  (view-mode -1))
+  (setq-local outline-regexp "-- [\\*]+ ")
+  (setq-local outline-regexp "-- [\\*]+ ")
+  (setq-local outline-heading-alist
+        '(("-- * " . 1)
+          ("-- ** " . 2)
+          ("-- *** " . 3)
+          ("-- **** " . 4)
+          ("-- ***** " . 5)
+          ("-- ****** " . 6)
+          ("-- ******* " . 7)
+          ("-- ******** " . 8)))
+  (setq-local outline-minor-mode-highlight 'override)
+  (outline-minor-mode 1)
+  (setq buffer-read-only t))
 
-(defun vhdl-ext-hierarchy-outshine-display (hierarchy)
-  "Display HIERARCHY using `outshine'.
+(defun vhdl-ext-hierarchy-outline-display (hierarchy)
+  "Display HIERARCHY using `outline'.
 Expects HIERARCHY to be a indented string."
-  (let ((buf "*Vhdl-outshine*"))
+  (let ((buf "*Vhdl-outline*"))
     (with-current-buffer (get-buffer-create buf)
       (setq buffer-read-only nil)
       (erase-buffer)
@@ -629,14 +622,14 @@ Expects HIERARCHY to be a indented string."
       ;; Insert local variables at the end of the file
       (goto-char (point-max))
       (newline 1)
-      (insert "\n-- * Buffer local variables\n-- Local Variables:\n-- eval: (vhdl-mode 1)\n-- eval: (vhdl-ext-hierarchy-outshine-nav-mode 1)\n-- End:\n")
+      (insert "\n-- * Buffer local variables\n-- Local Variables:\n-- eval: (vhdl-mode 1)\n-- eval: (vhdl-ext-hierarchy-outline-nav-mode 1)\n-- End:\n")
       ;; Insert header to get some info of the file
       (goto-char (point-min))
       (open-line 1)
       (insert "-- Hierarchy generated by `vhdl-ext'\n")
       (vhdl-ext-with-no-hooks
         (vhdl-mode))
-      (vhdl-ext-hierarchy-outshine-nav-mode))
+      (vhdl-ext-hierarchy-outline-nav-mode))
     (pop-to-buffer buf)))
 
 ;;;; Core
@@ -698,14 +691,14 @@ With prefix arg, clear cache for ALL projects."
 Handle conversion (if needed) of input extracted data depending on output
 frontend.
 
-E.g.: If displayed with outshine it is needed to convert between a hierarchy
+E.g.: If displayed with outline it is needed to convert between a hierarchy
 struct and an indented string."
   (let ((display-hierarchy hierarchy))
-    (cond (;; Outshine (conversion needed)
-           (eq vhdl-ext-hierarchy-frontend 'outshine)
+    (cond (;; Outline (conversion needed)
+           (eq vhdl-ext-hierarchy-frontend 'outline)
            (when (hierarchy-p hierarchy)
              (setq display-hierarchy (vhdl-ext-hierarchy--convert-struct-to-string hierarchy)))
-           (vhdl-ext-hierarchy-outshine-display display-hierarchy))
+           (vhdl-ext-hierarchy-outline-display display-hierarchy))
           ;; Hierarchy (no conversion needed)
           ((eq vhdl-ext-hierarchy-frontend 'hierarchy)
            (setq display-hierarchy hierarchy)
