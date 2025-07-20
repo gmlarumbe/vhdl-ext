@@ -343,5 +343,5 @@
 -- * Buffer local variables
 -- Local Variables:
 -- eval: (vhdl-mode 1)
--- eval: (vhdl-ext-hierarchy-outshine-nav-mode 1)
+-- eval: (vhdl-ext-hierarchy-outline-nav-mode 1)
 -- End:
