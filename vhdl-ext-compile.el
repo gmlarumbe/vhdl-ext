@@ -103,7 +103,7 @@ COMP-MODE is the name of the compilation derived mode created by macro
 (defconst vhdl-ext-compile-ghdl-re
   `((ghdl-info    ,(concat "\\(?1:" vhdl-ext-compile-filename-re "\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):note: ")    1 2 3 0 nil)
     (ghdl-warning ,(concat "\\(?1:" vhdl-ext-compile-filename-re "\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):warning: ") 1 2 3 1 nil)
-    (ghdl-error   ,(concat "\\(?1:" vhdl-ext-compile-filename-re "\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\): ")         1 2 3 2 nil)))
+    (ghdl-error   ,(concat "\\(?1:" vhdl-ext-compile-filename-re "\\):\\(?2:[0-9]+\\):\\(?3:[0-9]+\\):error: ")   1 2 3 2 nil)))
 
 (defvar vhdl-ext-compile-ghdl-buf "*ghdl*")
 
