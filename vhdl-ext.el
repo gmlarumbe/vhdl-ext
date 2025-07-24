@@ -125,26 +125,65 @@ FEATURES can be a single feature or a list of features."
        ,@body)))
 
 ;;; Features
-(require 'vhdl-ext-hs)
-(require 'vhdl-ext-time-stamp)
 (require 'vhdl-ext-utils)
-(require 'vhdl-ext-compile)
-(require 'vhdl-ext-nav)
-(require 'vhdl-ext-font-lock)
-(require 'vhdl-ext-imenu)
-(require 'vhdl-ext-which-func)
-(require 'vhdl-ext-ports)
-(require 'vhdl-ext-beautify)
-(require 'vhdl-ext-template)
-(require 'vhdl-ext-hierarchy)
-(require 'vhdl-ext-tags)
-(require 'vhdl-ext-capf)
-(require 'vhdl-ext-xref)
-(require 'vhdl-ext-flycheck)
-(require 'vhdl-ext-eglot)
-(require 'vhdl-ext-lsp)
-(require 'vhdl-ext-lsp-bridge)
-(require 'vhdl-ext-lspce)
+
+(vhdl-ext-when-feature 'hideshow
+  (require 'vhdl-ext-hs))
+
+(vhdl-ext-when-feature 'time-stamp
+  (require 'vhdl-ext-time-stamp))
+
+(eval-and-compile
+  (vhdl-ext-when-feature 'compilation
+    (require 'vhdl-ext-compile)))
+
+(vhdl-ext-when-feature 'navigation
+  (require 'vhdl-ext-nav))
+
+(vhdl-ext-when-feature 'font-lock
+  (require 'vhdl-ext-font-lock))
+
+(vhdl-ext-when-feature 'imenu
+  (require 'vhdl-ext-imenu))
+
+(vhdl-ext-when-feature 'which-func
+  (require 'vhdl-ext-which-func))
+
+(vhdl-ext-when-feature 'ports
+  (require 'vhdl-ext-ports))
+
+(vhdl-ext-when-feature 'beautify
+  (require 'vhdl-ext-beautify))
+
+(vhdl-ext-when-feature 'template
+  (require 'vhdl-ext-template))
+
+(vhdl-ext-when-feature 'hierarchy
+  (require 'vhdl-ext-hierarchy))
+
+(vhdl-ext-when-feature '(capf xref)
+  (require 'vhdl-ext-tags))
+
+(vhdl-ext-when-feature 'capf
+  (require 'vhdl-ext-capf))
+
+(vhdl-ext-when-feature 'xref
+  (require 'vhdl-ext-xref))
+
+(vhdl-ext-when-feature 'flycheck
+  (require 'vhdl-ext-flycheck))
+
+(vhdl-ext-when-feature 'eglot
+  (require 'vhdl-ext-eglot))
+
+(vhdl-ext-when-feature 'lsp
+  (require 'vhdl-ext-lsp))
+
+(vhdl-ext-when-feature 'lsp-bridge
+  (require 'vhdl-ext-lsp-bridge))
+
+(vhdl-ext-when-feature 'lspce
+  (require 'vhdl-ext-lspce))
 
 
 ;;; Major-mode
