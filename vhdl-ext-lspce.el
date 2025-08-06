@@ -31,6 +31,10 @@
 (require 'lspce nil :noerror) ; Set to :noerror since `lspce' is not available in MELPA
 (require 'vhdl-ext-utils)
 
+(declare-function lspce--execute-command "ext:lspce")
+(declare-function lspce--add-option "ext:lspce" t 'fileonly)
+(defvar lspce-server-programs nil)
+
 (defvar vhdl-ext-lspce-default-server 've-rust-hdl)
 
 ;;; Set server
@@ -59,10 +63,4 @@ Override any previous configuration for `vhdl-mode' and `vhdl-ts-mode'."
 (provide 'vhdl-ext-lspce)
 
 ;;; vhdl-ext-lspce.el ends here
-
-;; Silence all the lspce byte-compiler warnings:
-;;
-;; Local Variables:
-;; byte-compile-warnings: (not unresolved free-vars)
-;; End:
 
