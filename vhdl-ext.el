@@ -46,6 +46,33 @@
 
 ;;; Code:
 
+(declare-function vhdl-ext-which-func "vhdl-ext-which-func")
+(declare-function vhdl-ext-index-menu-init "vhdl-ext-imenu")
+(declare-function vhdl-ext-time-stamp-mode "vhdl-ext-time-stamp")
+(declare-function vhdl-ext-capf-set "vhdl-ext-capf")
+(declare-function vhdl-ext-xref-set "vhdl-ext-xref")
+(declare-function vhdl-ext-navigation-ag-rg-hook "vhdl-ext-nav")
+(declare-function vhdl-ext-hs-setup "vhdl-ext-hs")
+(declare-function vhdl-ext-flycheck-setup "vhdl-ext-flycheck")
+(declare-function vhdl-ext-lspce-set-server "vhdl-ext-lspce")
+(declare-function vhdl-ext-lsp-bridge-set-server "vhdl-ext-lsp-bridge")
+(declare-function vhdl-ext-lsp-set-server "vhdl-ext-lsp")
+(declare-function vhdl-ext-lsp-setup "vhdl-ext-lsp")
+(declare-function vhdl-ext-eglot-set-server "vhdl-ext-eglot")
+(declare-function vhdl-ext-hierarchy-setup "vhdl-ext-hierarchy")
+(declare-function vhdl-ext-tags-setup "vhdl-ext-tags")
+(declare-function vhdl-ext-font-lock-setup "vhdl-ext-font-lock")
+
+(defvar vhdl-ext-eglot-default-server)
+(defvar vhdl-ext-lsp-mode-default-server)
+(defvar vhdl-ext-lsp-bridge-default-server)
+(defvar vhdl-ext-lspce-default-server)
+(defvar vhdl-ext-flycheck-use-open-buffers)
+(defvar vhdl-ext-flycheck-dirs)
+(defvar vhdl-ext-flycheck-files)
+(defvar flycheck-ghdl-work-lib)
+
+
 ;;; Customization
 (defgroup vhdl-ext nil
   "VHDL Extensions."
@@ -133,9 +160,8 @@ FEATURES can be a single feature or a list of features."
 (vhdl-ext-when-feature 'time-stamp
   (require 'vhdl-ext-time-stamp))
 
-(eval-and-compile
-  (vhdl-ext-when-feature 'compilation
-    (require 'vhdl-ext-compile)))
+(vhdl-ext-when-feature 'compilation
+  (require 'vhdl-ext-compile))
 
 (vhdl-ext-when-feature 'navigation
   (require 'vhdl-ext-nav))
