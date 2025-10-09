@@ -70,6 +70,8 @@
 (defvar vhdl-ext-flycheck-use-open-buffers)
 (defvar vhdl-ext-flycheck-dirs)
 (defvar vhdl-ext-flycheck-files)
+(defvar flycheck-ghdl-language-standard)
+(defvar flycheck-ghdl-workdir)
 (defvar flycheck-ghdl-work-lib)
 
 
