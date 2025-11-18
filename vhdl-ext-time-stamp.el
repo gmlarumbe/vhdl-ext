@@ -71,6 +71,14 @@ specified by `time-stamp-format' between them."
   :group 'vhdl-ext-time-stamp)
 
 
+(defun vhdl-ext-time-stamp-hook ()
+  "Intermediary hook to preserve correct order of local hook value setting.
+
+This is needed when mixing Emacs local hooks in file local variables and using
+`add-hook' with the local argument."
+  (when (derived-mode-p 'vhdl-mode)
+    (add-hook 'before-save-hook #'time-stamp nil :local)))
+
 (define-minor-mode vhdl-ext-time-stamp-mode
   "Setup `time-stamp' format for Vhdl files.
 By default `time-stamp' looks for the pattern in the first 8 lines.
@@ -87,8 +95,8 @@ Use only one method of timestamp update."
     (setq-local time-stamp-start vhdl-ext-time-stamp-start)
     (setq-local time-stamp-end vhdl-ext-time-stamp-end)
     (if vhdl-ext-time-stamp-mode
-        (add-hook 'before-save-hook #'time-stamp nil :local)
-      (remove-hook 'before-save-hook #'time-stamp :local))))
+        (add-hook 'hack-local-variables-hook #'vhdl-ext-time-stamp-hook)
+      (remove-hook 'hack-local-variables-hook #'vhdl-ext-time-stamp-hook))))
 
 
 (provide 'vhdl-ext-time-stamp)
