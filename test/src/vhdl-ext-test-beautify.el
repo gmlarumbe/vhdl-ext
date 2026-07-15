@@ -1,6 +1,6 @@
 ;;; vhdl-ext-test-beautify.el --- vhdl-ext ERT beautify tests  -*- lexical-binding: t -*-
 
-;; Copyright (C) 2022-2025 Gonzalo Larumbe
+;; Copyright (C) 2022-2026 Gonzalo Larumbe
 
 ;; Author: Gonzalo Larumbe <gonzalomlarumbe@gmail.com>
 ;; URL: https://github.com/gmlarumbe/test-hdl
