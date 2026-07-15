@@ -46,29 +46,44 @@
 (defconst vhdl-ext-test-navigation-block-nav-file-list vhdl-ext-test-common-file-list)
 
 
+;; Function mocking done according to the snippet below in rg.el:
+;;
+;; (with-current-buffer (compilation-start command 'rg-mode #'rg-buffer-name)
+;;   (rg-mode-init search)))))
+;;
+(defvar vhdl-ext-test-jump-to-parent-entity-cmd-output)
 
-(cl-defun vhdl-ext-test-jump-to-parent-entity (&key mode engine)
-  (cl-letf (((symbol-function 'compilation-start)
-             (lambda (command &optional mode name-function highlight-regexp)
-               (butlast (split-string (shell-command-to-string command) "\n") 4)))
-            ((symbol-function 'vhdl-ext-buffer-proj-root)
-             (lambda (&optional project)
-               vhdl-ext-test-files-common-dir)))
-    (let* ((vhdl-ext-jump-to-parent-entity-engine engine)
-           ;; INFO: Using let-binding in ripgrep.el arguments for compatibility with release 0.4.0 (Feb 2017) for MELPA Stable tests
-           ;;
-           ;; From man rg(1):
-           ;;
-           ;; --vimgrep
-           ;;     Show results with every match on its own line, including line
-           ;;     numbers and column numbers. With this option, a line with more than
-           ;;     one match will be printed more than once.
-           (ripgrep-highlight-search nil)
-           (ripgrep-arguments '("--vimgrep")))
-      ;; Core after all the function setup, using default args for ag and rg
+(cl-defun vhdl-ext-test-jump-to-parent-entity (&key mode)
+  (let (;; INFO: Using let-binding in rg.el arguments for compatibility with release 0.4.0 (Feb 2017) for MELPA Stable tests
+        ;;
+        ;; From man rg(1):
+        ;;
+        ;; --vimgrep
+        ;;     Show results with every match on its own line, including line
+        ;;     numbers and column numbers. With this option, a line with more than
+        ;;     one match will be printed more than once.
+        ;;
+        ;; --sort path: used to force deterministic ordering, and as a side effect disable parallelism
+        ;;              (so that gen output for comparison will always be the same)
+        (rg-required-command-line-flags '("-n"
+                                          "--vimgrep"
+                                          "--sort"
+                                          "path"))
+        (rg-buffer-name "*rg*"))
+    (cl-letf (((symbol-function 'vhdl-ext-buffer-proj-root)
+               (lambda (&optional project)
+                 vhdl-ext-test-files-common-dir))
+              ((symbol-function 'compilation-start)
+               (lambda (command &optional mode name-function highlight-regexp)
+                 (setq vhdl-ext-test-jump-to-parent-entity-cmd-output (butlast (split-string (shell-command-to-string command) "\n") 4))
+                 (get-buffer-create rg-buffer-name)))
+              ((symbol-function 'rg-mode-init)
+               (lambda (search)
+                 nil)))
       (test-hdl-no-messages
-        (funcall mode))
-      (vhdl-ext-jump-to-parent-entity))))
+       (funcall mode))
+      (vhdl-ext-jump-to-parent-entity)
+      vhdl-ext-test-jump-to-parent-entity-cmd-output)))
 
 
 (defun vhdl-ext-test-navigation-gen-expected-files ()
@@ -106,22 +121,13 @@
                                :args '(:mode vhdl-ts-mode
                                        :fn vhdl-ext-find-entity-instance-bwd
                                        :start-pos-max t))
-  ;; Jump-to-parent ag
-  (test-hdl-gen-expected-files :file-list vhdl-ext-test-navigation-jump-to-parent-file-list
-                               :dest-dir vhdl-ext-test-ref-dir-navigation
-                               :out-file-ext "ag"
-                               :process-fn 'eval
-                               :fn #'vhdl-ext-test-jump-to-parent-entity
-                               :args `(:mode vhdl-mode
-                                       :engine "ag"))
   ;; Jump-to-parent rg
   (test-hdl-gen-expected-files :file-list vhdl-ext-test-navigation-jump-to-parent-file-list
                                :dest-dir vhdl-ext-test-ref-dir-navigation
                                :out-file-ext "rg"
                                :process-fn 'eval
                                :fn #'vhdl-ext-test-jump-to-parent-entity
-                               :args `(:mode vhdl-mode
-                                       :engine "rg")))
+                               :args `(:mode vhdl-mode)))
 
 
 (ert-deftest navigation::instances ()
@@ -165,25 +171,13 @@
                                   (file-name-concat vhdl-ext-test-ref-dir-navigation (test-hdl-basename file "ts.inst.bwd.el"))))))
 
 
-(ert-deftest navigation::jump-to-parent-entity-ag ()
-  (dolist (file vhdl-ext-test-navigation-jump-to-parent-file-list)
-    (should (test-hdl-files-equal (test-hdl-process-file :test-file file
-                                                         :dump-file (file-name-concat vhdl-ext-test-dump-dir-navigation (test-hdl-basename file "ag"))
-                                                         :process-fn 'eval
-                                                         :fn #'vhdl-ext-test-jump-to-parent-entity
-                                                         :args '(:mode vhdl-mode
-                                                                 :engine "ag"))
-                                  (file-name-concat vhdl-ext-test-ref-dir-navigation (test-hdl-basename file "ag"))))))
-
-
 (ert-deftest navigation::jump-to-parent-entity-rg ()
   (dolist (file vhdl-ext-test-navigation-jump-to-parent-file-list)
     (should (test-hdl-files-equal (test-hdl-process-file :test-file file
                                                          :dump-file (file-name-concat vhdl-ext-test-dump-dir-navigation (test-hdl-basename file "rg"))
                                                          :process-fn 'eval
                                                          :fn #'vhdl-ext-test-jump-to-parent-entity
-                                                         :args '(:mode vhdl-mode
-                                                                 :engine "rg"))
+                                                         :args '(:mode vhdl-mode))
                                   (file-name-concat vhdl-ext-test-ref-dir-navigation (test-hdl-basename file "rg"))))))
 
 

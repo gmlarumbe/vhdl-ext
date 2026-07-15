@@ -6,7 +6,7 @@
 ;; URL: https://github.com/gmlarumbe/vhdl-ext
 ;; Version: 0.7.0
 ;; Keywords: VHDL, IDE, Tools
-;; Package-Requires: ((emacs "29.1") (vhdl-ts-mode "0.3.2") (lsp-mode "8.0.0") (ag "0.48") (ripgrep "0.4.0") (hydra "0.15.0") (flycheck "32") (async "1.9.7"))
+;; Package-Requires: ((emacs "29.1") (vhdl-ts-mode "0.3.2") (lsp-mode "8.0.0") (rg "2.3.0") (hydra "0.15.0") (flycheck "32") (async "1.9.7"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@
 (declare-function vhdl-ext-time-stamp-mode "vhdl-ext-time-stamp")
 (declare-function vhdl-ext-capf-set "vhdl-ext-capf")
 (declare-function vhdl-ext-xref-set "vhdl-ext-xref")
-(declare-function vhdl-ext-navigation-ag-rg-hook "vhdl-ext-nav")
+(declare-function vhdl-ext-navigation-rg-hook "vhdl-ext-nav")
 (declare-function vhdl-ext-hs-setup "vhdl-ext-hs")
 (declare-function vhdl-ext-flycheck-setup "vhdl-ext-flycheck")
 (declare-function vhdl-ext-lspce-set-server "vhdl-ext-lspce")
@@ -267,9 +267,8 @@ FEATURES can be a single feature or a list of features."
     (vhdl-ext-flycheck-setup))
   (vhdl-ext-when-feature 'hideshow
     (vhdl-ext-hs-setup))
-  ;; Jump to parent module ag/ripgrep hooks
-  (add-hook 'ag-search-finished-hook #'vhdl-ext-navigation-ag-rg-hook)
-  (add-hook 'ripgrep-search-finished-hook #'vhdl-ext-navigation-ag-rg-hook))
+  ;; Jump to parent module rg.el hook
+  (add-hook 'rg-finish-functions #'vhdl-ext-navigation-rg-hook))
 
 ;;;###autoload
 (define-minor-mode vhdl-ext-mode
