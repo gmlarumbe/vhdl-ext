@@ -49,7 +49,7 @@
   :type 'string
   :group 'vhdl-ext-time-stamp)
 
-(defcustom vhdl-ext-time-stamp-format  "%:y-%02m-%02d"
+(defcustom vhdl-ext-time-stamp-format  "%:Y-%02m-%02d"
   "`time-stamp' format.  See `time-stamp-format'."
   :type 'string
   :group 'vhdl-ext-time-stamp)
