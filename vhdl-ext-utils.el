@@ -72,17 +72,17 @@ GHDL related:
  - :worklib - defaults to \"work\"
  - :workdir - output compilation directory for worklib
  - :lib-search-path - extra directories to look for compiled libraries."
-  :type '(repeat
-          (list (string :tag "Project")
-                (plist :tag "Properties"
-                       :options ((:root string)
-                                 (:dirs (repeat directory))
-                                 (:ignore-dirs (repeat directory))
-                                 (:files (repeat file))
-                                 (:ignore-files (repeat file))
-                                 (:worklib string)
-                                 (:workdir directory)
-                                 (:lib-search-path (repeat directory))))))
+  :type '(alist
+          :key-type (string :tag "Project")
+          :value-type (plist :tag "Properties"
+                             :options ((:root string)
+                                       (:dirs (repeat directory))
+                                       (:ignore-dirs (repeat directory))
+                                       (:files (repeat file))
+                                       (:ignore-files (repeat file))
+                                       (:worklib string)
+                                       (:workdir directory)
+                                       (:lib-search-path (repeat directory)))))
   :group 'vhdl-ext)
 
 
