@@ -372,7 +372,7 @@ declaration."
     (with-temp-buffer
       (insert-file-contents file)
       (treesit-parser-create 'vhdl)
-      (dolist (arch-node (vhdl-ts-nodes "architecture_body") module-instances-alist)
+      (dolist (arch-node (vhdl-ts-nodes "architecture_definition") module-instances-alist)
         (setq arch-entity-name (vhdl-ts-arch-entity-name arch-node))
         (setq instances nil)
         (dolist (inst-node (vhdl-ts-arch-instances-nodes arch-node))
