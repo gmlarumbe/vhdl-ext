@@ -143,7 +143,7 @@ If REF is non-nil show references instead."
 Used in rg end of search hooks to conditionally set the xref marker stack.")
 (defvar vhdl-ext-jump-to-parent-entity-name nil)
 (defvar vhdl-ext-jump-to-parent-entity-dir nil)
-(defvar vhdl-ext-jump-to-parent-entity-trigger nil
+(defvar vhdl-ext-jump-to-parent-trigger nil
   "Variable to run the post rg command hook.
 Run only when the rg search was triggered by `vhdl-ext-jump-to-parent-entity'
 command.")
@@ -180,7 +180,7 @@ after the search has been done."
       (setq vhdl-ext-jump-to-parent-entity-dir proj-dir)
       (setq vhdl-ext-jump-to-parent-entity-starting-windows (length (window-list)))
       (setq vhdl-ext-jump-to-parent-entity-point-marker (point-marker))
-      (setq vhdl-ext-jump-to-parent-entity-trigger t)
+      (setq vhdl-ext-jump-to-parent-trigger t)
       ;; Perform project based search
       (vhdl-ext-rg-pcre entity-instance-pcre))))
 
@@ -194,14 +194,16 @@ after the search has been done."
 (defun vhdl-ext-navigation-rg-hook (_buffer _status)
   "Jump to the first result and push xref marker if there were any matches.
 Kill the buffer or delete window if there is only one match."
-  (when vhdl-ext-jump-to-parent-entity-trigger
+  (when vhdl-ext-jump-to-parent-trigger
     (let ((entity-name (propertize vhdl-ext-jump-to-parent-entity-name 'face 'vhdl-ext-font-lock-entity-face))
           (dir vhdl-ext-jump-to-parent-entity-dir)
-          (num-matches))
+          (num-matches 0)
+          num-matches-str)
       (save-excursion
         (goto-char (point-min))
-        (re-search-forward "^\\([0-9]+\\) matches\\s-*$" nil :noerror)
-        (setq num-matches (string-to-number (match-string-no-properties 1))))
+        (re-search-forward "(\\([0-9]+\\) matches found)" nil :noerror)
+        (when (setq num-matches-str (match-string-no-properties 1))
+          (setq num-matches (string-to-number num-matches-str))))
       (cond ((eq num-matches 1)
              (xref-push-marker-stack vhdl-ext-jump-to-parent-entity-point-marker)
              (next-error)
@@ -214,7 +216,7 @@ Kill the buffer or delete window if there is only one match."
             (t
              (vhdl-ext-navigation-rg-hook-cleanup)
              (message "No matches found")))
-      (setq vhdl-ext-jump-to-parent-entity-trigger nil))))
+      (setq vhdl-ext-jump-to-parent-trigger nil))))
 
 
 (provide 'vhdl-ext-nav)
