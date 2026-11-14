@@ -85,7 +85,7 @@ begin
     end process main;
 
     gen_mem_sel : if (USER_NUM_MEM >= 1) generate
-        begin
+    begin
         mem_select <= "1";
     end generate gen_mem_sel;
 
@@ -132,7 +132,7 @@ begin
     end process main;
 
     gen_mem_sel : if (USER_NUM_MEM >= 1) generate
-        begin
+    begin
         mem_select <= "1";
     end generate;
 
@@ -143,17 +143,17 @@ end RTL;
 -- Packages
 package foo is
 
-procedure foo2(
-signal common_in   : in  mf_common_response_r_type_in
-);
+    procedure foo2(
+        signal common_in : in mf_common_response_r_type_in
+    );
 
 end package foo;
 
 package foo is
 
-procedure foo2(
-signal common_in   : in  mf_common_response_r_type_in
-);
+    procedure foo2(
+        signal common_in : in mf_common_response_r_type_in
+    );
 
 end;
 

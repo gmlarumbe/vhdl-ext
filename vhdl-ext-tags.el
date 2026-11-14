@@ -208,23 +208,23 @@ project."
   (eval-when-compile
     (regexp-opt
      '("entity_declaration"
-       "architecture_body"
+       "architecture_definition"
        "package_declaration"
-       "package_body"
+       "package_definition"
        "component_declaration"
-       "constant_interface_declaration" ; Generics
-       "signal_interface_declaration"   ; Ports
+       "interface_declaration"
+       "interface_constant_declaration"
+       "interface_signal_declaration"
+       "interface_variable_declaration"
        "signal_declaration"
        "constant_declaration"
-       "full_type_declaration"
+       "type_declaration"
        "subtype_declaration"
        "element_declaration"
        "variable_declaration"
        "alias_declaration"
-       "procedure_declaration"
-       "function_declaration"
-       "function_body"
-       "procedure_body"
+       "subprogram_declaration"
+       "subprogram_definition"
        "configuration_declaration"
        "context_declaration"
        "component_instantiation_statement")
@@ -260,7 +260,9 @@ PARENT is passed as an argument to build the :items prop list of
   (let* ((ts-node (car node))
          (children (cdr node))
          (type (treesit-node-type ts-node))
-         (is-instance (and type (string-match vhdl-ts-instance-re type))))
+         (is-instance (and type (string-match vhdl-ts-instance-re type)))
+         (is-port (and type (string-match "\\_<interface_\\(\\(constant\\|variable\\|signal\\)_\\)?declaration\\_>" type)))
+         (is-declaration (and type (string-match "\\_<\\(constant\\|variable\\|signal\\)_declaration\\_>" type))))
     ;; Iterate over all the nodes of the tree
     (mapc (lambda (child-node)
             (vhdl-ext-tags-table-push-defs-ts--recurse :node child-node
@@ -270,22 +272,35 @@ PARENT is passed as an argument to build the :items prop list of
     ;; Push definitions of current node
     (when ts-node ; root ts-node will be nil
       (goto-char (treesit-node-start ts-node))
-      (if is-instance
-          (puthash `(,(vhdl-ts--node-instance-name ts-node) ; Key plist
-                     :file ,file
-                     :line ,(line-number-at-pos))
-                   `(:type ,(vhdl-ts--node-identifier-name ts-node) ; Value plist
-                     :col ,(current-column)
-                     :parent ,(vhdl-ts--node-identifier-name parent))
-                   vhdl-ext-tags-inst-current-file)
-        (puthash `(,(vhdl-ts--node-identifier-name ts-node) ; Key plist
-                   :file ,file
-                   :line ,(line-number-at-pos))
-                 `(:type ,type ; Value plist
-                   :desc ,(vhdl-ext-tags-desc)
-                   :col ,(current-column)
-                   :parent ,(vhdl-ts--node-identifier-name parent))
-                 vhdl-ext-tags-defs-current-file)))))
+      (cond (is-instance
+             (puthash `(,(vhdl-ts--node-instance-name ts-node) ; Key plist
+                        :file ,file
+                        :line ,(line-number-at-pos))
+                      `(:type ,(vhdl-ts--node-identifier-name ts-node) ; Value plist
+                        :col ,(current-column)
+                        :parent ,(vhdl-ts--node-identifier-name parent))
+                      vhdl-ext-tags-inst-current-file))
+            ((or is-port is-declaration)
+             (let* ((port-identifier-list (treesit-search-subtree ts-node "\\_<identifier_list\\_>"))
+                    (port-identifier-nodes (mapcar #'car (cdr (treesit-induce-sparse-tree port-identifier-list vhdl-ts-identifier-re)))))
+               (dolist (id-node port-identifier-nodes)
+                 (puthash `(,(treesit-node-text id-node :no-prop) ; Key plist
+                            :file ,file
+                            :line ,(line-number-at-pos))
+                          `(:type ,type ; Value plist
+                            :desc ,(vhdl-ext-tags-desc)
+                            :col ,(current-column)
+                            :parent ,(vhdl-ts--node-identifier-name parent))
+                          vhdl-ext-tags-defs-current-file))))
+            (t
+             (puthash `(,(vhdl-ts--node-identifier-name ts-node) ; Key plist
+                        :file ,file
+                        :line ,(line-number-at-pos))
+                      `(:type ,type ; Value plist
+                        :desc ,(vhdl-ext-tags-desc)
+                        :col ,(current-column)
+                        :parent ,(vhdl-ts--node-identifier-name parent))
+                      vhdl-ext-tags-defs-current-file))))))
 
 (defun vhdl-ext-tags-table-push-refs-ts (file)
   "Push current FILE references using tree-sitter.
