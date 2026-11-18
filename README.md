@@ -64,7 +64,7 @@ $ guix install emacs-vhdl-ext
 ## Basic config ##
 
 The most basic configuration just requires choosing which features you
-want to load, setup the minor-mode and add it as a hook for `vhdl-mode`.
+want to load, setup the minor-mode and add it as a hook for `vhdl-mode`/`vhdl-ts-mode`.
 By default all features are enabled:
 
 ```elisp
@@ -91,14 +91,14 @@ By default all features are enabled:
         ports))
 (require 'vhdl-ext)
 (vhdl-ext-mode-setup)
-(add-hook 'vhdl-mode-hook #'vhdl-ext-mode)
+(add-hook 'vhdl-mode-hook #'vhdl-ext-mode) ; Add to `vhdl-ts-mode-hook` if using `vhdl-ts-mode`
 ```
 
 If installed and loaded via `use-package`:
 
 ```elisp
 (use-package vhdl-ext
-  :hook ((vhdl-mode . vhdl-ext-mode))
+  :hook ((vhdl-mode . vhdl-ext-mode)) ; Add to `vhdl-ts-mode-hook` if using `vhdl-ts-mode`
   :init
   ;; Can also be set through `M-x RET customize-group RET vhdl-ext':
   ;; Comment out/remove the ones you do not need
